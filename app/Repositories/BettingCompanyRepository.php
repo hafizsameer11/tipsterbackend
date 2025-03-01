@@ -50,6 +50,9 @@ class BettingCompanyRepository
         if (!$company) {
             throw new Exception('Betting company not found');
         }
+        $company->status = "deleted";
+        $company->save();
+        return $company;
         // $company->delete();
     }
 }

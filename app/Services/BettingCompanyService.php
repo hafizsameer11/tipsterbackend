@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Repositories\BettingCompanyRepository;
+use Exception;
 
 class BettingCompanyService
 {
@@ -15,26 +16,46 @@ class BettingCompanyService
 
     public function all()
     {
-        return $this->BettingCompanyRepository->all();
+        try {
+            return $this->BettingCompanyRepository->all();
+        } catch (Exception $e) {
+            throw new Exception($e->getMessage());
+        }
     }
 
     public function find($id)
     {
-        return $this->BettingCompanyRepository->find($id);
+        try {
+            return $this->BettingCompanyRepository->find($id);
+        } catch (Exception $e) {
+            throw new Exception($e->getMessage());
+        }
     }
 
     public function create(array $data)
     {
-        return $this->BettingCompanyRepository->create($data);
+        try {
+            return $this->BettingCompanyRepository->create($data);
+        } catch (Exception $e) {
+            throw new Exception('Betting Company not created ' . $e->getMessage());
+        }
     }
 
     public function update($id, array $data)
     {
-        return $this->BettingCompanyRepository->update($id, $data);
+        try {
+            return $this->BettingCompanyRepository->update($id, $data);
+        } catch (Exception $e) {
+            throw new Exception('Betting Company not updated ' . $e->getMessage());
+        }
     }
 
     public function delete($id)
     {
-        return $this->BettingCompanyRepository->delete($id);
+        try {
+            return $this->BettingCompanyRepository->delete($id);
+        } catch (Exception $e) {
+            throw new Exception('Betting Company not deleted ' . $e->getMessage());
+        }
     }
 }
