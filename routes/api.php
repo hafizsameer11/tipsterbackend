@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\BettingCompanyController;
+use App\Http\Controllers\RankingController;
+use App\Http\Controllers\TipController;
 use App\Http\Controllers\User\AuthController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
@@ -65,5 +67,16 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/create', [BettingCompanyController::class, 'create']);
         Route::put('/update/{id}', [BettingCompanyController::class, 'update']);
         Route::delete('/delete/{id}', [BettingCompanyController::class, 'delete']);
+    });
+    Route::prefix('tip')->group(function () {
+       Route::post('/create', [TipController::class, 'create']);
+       Route::get('/get-all-of-user', [TipController::class, 'getFreeTipofUser']);
+       Route::get('/get-all-free-running-tips', [TipController::class, 'getAllRunningTips']);
+       Route::get('/approve-tip/{id}', [TipController::class, 'approveTip']);
+       Route::post('/set-tip-result/{id}', [TipController::class, 'setTipResult']);
+    });
+    Route::prefix('ranking')->group(function () {
+        Route::get('/get-user-ranking',[RankingController::class, 'getUserRanking']);
+        Route::get('/get-top-30-rankings', [RankingController::class, 'getTop30Rankings']);
     });
 });
