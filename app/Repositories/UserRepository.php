@@ -33,7 +33,10 @@ class UserRepository
             $path = $data['profile_picture']->store('profile_picture', 'public');
             $data['profile_picture'] = $path;
         }
+        $data['otp'] = rand(1000, 9999);
+
         $user = User::create($data);
+        
         return $user;
     }
 

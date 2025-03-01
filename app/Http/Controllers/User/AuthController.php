@@ -54,11 +54,11 @@ class AuthController extends Controller
                 'user' => $user,
                 'request_headers' => request()->headers->all()
             ]);
+            $token= $user->createToken('auth_token')->plainTextToken;
 
-            $data = [
-                'user' => $user['user'],
-                'assets' => $user['virtual_accounts'],
-                'token' => $user['token']
+            $data=[
+                'user'=>$user,
+                'token'=>$token
             ];
 
             return ResponseHelper::success($data, 'User logged in successfully', 200);

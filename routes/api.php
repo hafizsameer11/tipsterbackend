@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\BettingCompanyController;
 use App\Http\Controllers\User\AuthController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
@@ -15,6 +16,7 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "api" middleware group. Make something great!
 |
 */
+
 Route::get('/optimize-app', function () {
     Artisan::call('optimize:clear');
     Artisan::call('cache:clear');
@@ -54,4 +56,14 @@ Route::prefix('auth')->group(function () {
     Route::post('/forget-password', [AuthController::class, 'forgotPassword']); // Forget password
     Route::post('/verify-forget-password-otp', [AuthController::class, 'verifyForgetPasswordOtp']); // Verify forget password OTP
     Route::post('/reset-password', [AuthController::class, 'resetPassword']); // Reset password
+});
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::prefix('betting-company')->group(function () {
+        Route::get('/get-all', [BettingCompanyController::class, 'getAll']);
+        Route::get('/get-single/{id}', [BettingCompanyController::class, 'getOne']);
+        Route::post('/create', [BettingCompanyController::class, 'create']);
+        Route::put('/update/{id}', [BettingCompanyController::class, 'update']);
+        Route::delete('/delete/{id}', [BettingCompanyController::class, 'delete']);
+    });
 });

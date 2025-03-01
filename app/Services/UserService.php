@@ -33,7 +33,9 @@ class UserService
     public function create(array $data)
     {
        try{
-        return $this->UserRepository->create($data);
+        $user= $this->UserRepository->create($data);
+        Mail::to($user->email)->send(new OtpMail($user->otp));
+        return $user;
        }catch(Exception $e){
            throw new Exception($e->getMessage());
        }
