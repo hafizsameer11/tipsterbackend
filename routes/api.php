@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\BankController;
 use App\Http\Controllers\BettingCompanyController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\RankingController;
@@ -104,6 +105,10 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/like/{postId}', [PostController::class, 'likePost']); // Like a post
         Route::post('/unlike/{postId}', [PostController::class, 'unlikePost']); // Unlike a post
         Route::post('/create-comment/{postId}', [PostController::class, 'addComment']); // Add a comment
+    });
+    Route::prefix('bank')->group(function () {
+        Route::post('/create', [BankController::class, 'create']);
+        Route::get('/get-for-user', [BankController::class, 'getforAuthUser']);
     });
 
     Route::post('/comments/{commentId}/approve', [PostController::class, 'approveComment']); // Approve a comment
