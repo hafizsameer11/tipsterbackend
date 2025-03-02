@@ -66,8 +66,8 @@ class PostController extends Controller
             $validatedData = $request->validated();
             $user = Auth::user();
             $validatedData['user_id'] = $user->id;
-            $this->postService->addComment($validatedData);
-            return ResponseHelper::success([], 'Comment added for review');
+        $comment=    $this->postService->addComment($validatedData);
+            return ResponseHelper::success($comment, 'Comment added for review');
         } catch (Exception $e) {
             return ResponseHelper::error($e->getMessage());
         }
