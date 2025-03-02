@@ -28,6 +28,7 @@ class AuthController extends Controller
     {
         try {
             $user = $this->userService->create($request->validated());
+            
             return ResponseHelper::success($user, 'User registered successfully', 201);
         } catch (\Exception $e) {
             return ResponseHelper::error($e->getMessage());

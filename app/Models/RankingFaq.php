@@ -11,5 +11,6 @@ class RankingFaq extends Model
     protected $fillable = [
         'question',
         'answer',
+        'type'
     ];
 }

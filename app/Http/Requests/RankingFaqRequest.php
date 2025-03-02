@@ -25,6 +25,7 @@ class RankingFaqRequest extends FormRequest
         return [
             'question' => 'required|string',
             'answer' => 'required|string',
+            'type' => 'nullable|string'
         ];
     }
     public function failedValidation(\Illuminate\Contracts\Validation\Validator $validator)
