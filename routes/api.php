@@ -61,7 +61,7 @@ Route::prefix('auth')->group(function () {
 
     Route::post('/forget-password', [AuthController::class, 'forgotPassword']);
     Route::post('/verify-forget-password-otp', [AuthController::class, 'verifyForgetPasswordOtp']);
-    Route::post('/reset-password', [AuthController::class, 'resetPassword']); 
+    Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 });
 
 Route::middleware('auth:sanctum')->group(function () {
@@ -83,8 +83,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/get-user-ranking', [RankingController::class, 'getUserRanking']);
         Route::get('/get-top-30-rankings', [RankingController::class, 'getTop30Rankings']);
     });
-    Route::prefix('rankingFaq')->group(function () {
-        Route::get('/get-all', [RankingFaqController::class, 'getAll']);
+    Route::prefix('Faq')->group(function () {
+        Route::get('/get-all/{type}', [RankingFaqController::class, 'getAllbyType']);
         Route::post('/create', [RankingFaqController::class, 'create']);
         Route::put('/update/{id}', [RankingFaqController::class, 'update']);
         Route::delete('/delete/{id}', [RankingFaqController::class, 'delete']);

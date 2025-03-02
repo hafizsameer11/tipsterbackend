@@ -11,6 +11,10 @@ class RankingFaqRepository
     {
         return RankingFaq::all();
     }
+    public function getAllbyType($type)
+    {
+        return RankingFaq::where('type', $type)->get();
+    }
 
     public function find($id)
     {

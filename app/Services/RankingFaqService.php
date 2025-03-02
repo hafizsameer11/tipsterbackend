@@ -22,6 +22,14 @@ class RankingFaqService
             throw new Exception($e->getMessage());
         }
     }
+    public function getAllbyType($type)
+    {
+        try {
+            return $this->RankingFaqRepository->getAllbyType($type);
+        } catch (Exception $e) {
+            throw new Exception($e->getMessage());
+        }
+    }
 
     public function find($id)
     {
