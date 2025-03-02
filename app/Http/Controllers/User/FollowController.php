@@ -20,8 +20,8 @@ class FollowController extends Controller
     public function followUser($followingId)
     {
         try {
-            $this->followService->followUser(auth()->id(), $followingId);
-            return ResponseHelper::success([], 'Followed successfully');
+           $follow= $this->followService->followUser(auth()->id(), $followingId);
+            return ResponseHelper::success($follow, 'Followed successfully');
         } catch (Exception $e) {
             return ResponseHelper::error($e->getMessage());
         }
