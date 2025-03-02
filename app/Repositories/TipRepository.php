@@ -28,38 +28,37 @@ class TipRepository
         if (!$user) {
             throw new Exception('User not found.');
         }
-        // Get all tips for the user, ordered by latest
+    
         $tips = Tip::where('user_id', $userId)
             ->orderBy('created_at', 'desc')
             ->get();
-
-        // Calculate win rate
+    
         $totalTips = $tips->count();
         $lostTips = $tips->where('result', 'loss')->count();
         $winRate = $totalTips > 0 ? round((($totalTips - $lostTips) / $totalTips) * 100, 2) : 0;
-
-        // Get last 5 tip results
-        $lastFiveResults = $tips->take(5)->pluck('result')->map(function ($result) {
+            $lastFiveResults = $tips->take(5)->pluck('result')->map(function ($result) {
             return strtoupper(substr($result, 0, 1)); // Extract first letter and convert to uppercase
         })->toArray();
-        
-
-        return [
-            'user' => [
-                'id' => $user->id,
-                'username' => $user->username,
-                'profile_picture' => $user->profile_picture ?? null,
-                'win_rate' => $winRate . '%',
-                'last_five' => $lastFiveResults,
-            ],
-            'tips' => $tips,
-        ];
+            $tipsWithUser = $tips->map(function ($tip) use ($user, $winRate, $lastFiveResults) {
+            return array_merge($tip->toArray(), [
+                'user' => [
+                    'id' => $user->id,
+                    'username' => $user->username,
+                    'profile_picture' => $user->profile_picture ?? null,
+                    'win_rate' => $winRate . '%',
+                    'last_five' => $lastFiveResults,
+                ],
+            ]);
+        });
+    
+        return $tipsWithUser;
     }
+    
 
     public function getAllRunningTips()
 {
     $tips = Tip::where('result', 'running')
-        ->with('user')
+        ->with('user') // Eager load user data
         ->where('status', 'approved')
         ->orderBy('created_at', 'desc')
         ->get();
@@ -73,22 +72,30 @@ class TipRepository
         $lostTips = $allTips->where('result', 'loss')->count();
         $winRate = $totalTips > 0 ? round((($totalTips - $lostTips) / $totalTips) * 100, 2) : 0;
 
-        return [
-            'user' => [
-                'id' => $user->id,
-                'username' => $user->username,
-                'profile_picture' => $user->profile_picture ?? null,
-                'win_rate' => $winRate . '%',
-                'last_five' => $allTips->take(5)->pluck('result')->map(function ($result) {
-                    return strtoupper(substr($result, 0, 1)); // Extract first letter and convert to uppercase
-                })->toArray(),
-            ],
-            'tips' => $userTips, // Only running tips
-        ];
+        // Get last 5 tip results
+        $lastFiveResults = $allTips->take(5)->pluck('result')->map(function ($result) {
+            return strtoupper(substr($result, 0, 1)); // Extract first letter and convert to uppercase
+        })->toArray();
+
+        // Attach user details to each tip
+        $tipsWithUser = $userTips->map(function ($tip) use ($user, $winRate, $lastFiveResults) {
+            return array_merge($tip->toArray(), [
+                'user' => [
+                    'id' => $user->id,
+                    'username' => $user->username,
+                    'profile_picture' => $user->profile_picture ?? null,
+                    'win_rate' => $winRate . '%',
+                    'last_five' => $lastFiveResults,
+                ],
+            ]);
+        });
+
+        return $tipsWithUser;
     });
 
-    return $groupedTips->values();
+    return $groupedTips->values()->flatten(1); // Flatten to avoid nested arrays
 }
+
 
 
     public function approveTip($tipId)

@@ -23,15 +23,13 @@ class PostRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'title' => 'required|string',
-            'content' => 'required|string',
-            'image_1' => 'nullable|image',
-            'image_2' => 'nullable|image',
-            'image_3' => 'nullable|image',
-            'image_4' => 'nullable|image'
+            'title' => 'nullable|string',
+            'content' => 'nullable|string',
+            'images' => 'nullable|array|max:4', // Allow up to 4 images
+            'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048' // Validate each image
         ];
     }
-    public function failedValidation(\Illuminate\Contracts\Validation\Validator $validator)
+        public function failedValidation(\Illuminate\Contracts\Validation\Validator $validator)
     {
         throw new HttpResponseException(
             response()->json([

@@ -2,8 +2,11 @@
 
 use App\Http\Controllers\BettingCompanyController;
 use App\Http\Controllers\RankingController;
+use App\Http\Controllers\RankingFaqController;
 use App\Http\Controllers\TipController;
 use App\Http\Controllers\User\AuthController;
+use App\Http\Controllers\User\FollowController;
+use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
@@ -69,14 +72,28 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/delete/{id}', [BettingCompanyController::class, 'delete']);
     });
     Route::prefix('tip')->group(function () {
-       Route::post('/create', [TipController::class, 'create']);
-       Route::get('/get-all-of-user', [TipController::class, 'getFreeTipofUser']);
-       Route::get('/get-all-free-running-tips', [TipController::class, 'getAllRunningTips']);
-       Route::get('/approve-tip/{id}', [TipController::class, 'approveTip']);
-       Route::post('/set-tip-result/{id}', [TipController::class, 'setTipResult']);
+        Route::post('/create', [TipController::class, 'create']);
+        Route::get('/get-all-of-user', [TipController::class, 'getFreeTipofUser']);
+        Route::get('/get-all-free-running-tips', [TipController::class, 'getAllRunningTips']);
+        Route::get('/approve-tip/{id}', [TipController::class, 'approveTip']);
+        Route::post('/set-tip-result/{id}', [TipController::class, 'setTipResult']);
     });
     Route::prefix('ranking')->group(function () {
-        Route::get('/get-user-ranking',[RankingController::class, 'getUserRanking']);
+        Route::get('/get-user-ranking', [RankingController::class, 'getUserRanking']);
         Route::get('/get-top-30-rankings', [RankingController::class, 'getTop30Rankings']);
     });
+    Route::prefix('rankingFaq')->group(function () {
+        Route::get('/get-all', [RankingFaqController::class, 'getAll']);
+        Route::post('/create', [RankingFaqController::class, 'create']);
+        Route::put('/update/{id}', [RankingFaqController::class, 'update']);
+        Route::delete('/delete/{id}', [RankingFaqController::class, 'delete']);
+    });
+    Route::prefix('user')->group(function () {
+        Route::get('/view-profile/{userId}', [UserController::class, 'viewProfile']);
+    });
+
+    Route::post('/follow/{userId}', [FollowController::class, 'followUser']);
+    Route::delete('/unfollow/{userId}', [FollowController::class, 'unfollowUser']);
+    Route::get('/followers/{userId}', [FollowController::class, 'getUserFollowers']);
+    Route::get('/following/{userId}', [FollowController::class, 'getUserFollowing']);
 });
