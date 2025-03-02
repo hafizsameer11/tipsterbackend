@@ -23,7 +23,7 @@ class CommentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'comment' => 'required|string',
+            'content' => 'required|string',
             'post_id' => 'required|exists:posts,id',
         ];
     }
