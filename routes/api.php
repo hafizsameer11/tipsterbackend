@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\BettingCompanyController;
+use App\Http\Controllers\PostController;
 use App\Http\Controllers\RankingController;
 use App\Http\Controllers\RankingFaqController;
 use App\Http\Controllers\TipController;
@@ -96,4 +97,16 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/unfollow/{userId}', [FollowController::class, 'unfollowUser']);
     Route::get('/followers/{userId}', [FollowController::class, 'getUserFollowers']);
     Route::get('/following/{userId}', [FollowController::class, 'getUserFollowing']);
+
+    Route::post('/posts/create', [PostController::class, 'createPost']); // Create a post
+    Route::get('/posts', [PostController::class, 'getAllPosts']); // Get all posts
+    Route::get('/users/{userId}/posts', [PostController::class, 'getPostForUser']); // Get user-specific posts
+
+    // Likes
+    Route::post('/posts/{postId}/like', [PostController::class, 'likePost']); // Like a post
+    Route::post('/posts/{postId}/unlike', [PostController::class, 'unlikePost']); // Unlike a post
+
+    // Comments
+    Route::post('/posts/{postId}/comment', [PostController::class, 'addComment']); // Add a comment
+    Route::post('/comments/{commentId}/approve', [PostController::class, 'approveComment']); // Approve a comment
 });

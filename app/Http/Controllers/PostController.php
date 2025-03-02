@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\ResponseHelper;
+use App\Http\Requests\CommentRequest;
 use App\Http\Requests\PostRequest;
 use App\Services\PostService;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class PostController extends Controller
 {
@@ -17,18 +19,18 @@ class PostController extends Controller
         $this->postService = $postService;
     }
     public function createPost(PostRequest $request)
-{
-    try {
-        $validatedData = $request->validated();
-        $validatedData['user_id'] = auth()->id();
+    {
+        try {
+            $validatedData = $request->validated();
+            $validatedData['user_id'] = auth()->id();
 
-        $post = $this->postService->createPost($validatedData);
-        return ResponseHelper::success($post, 'Post created successfully');
-    } catch (Exception $e) {
-        return ResponseHelper::error($e->getMessage());
+            $post = $this->postService->createPost($validatedData);
+            return ResponseHelper::success($post, 'Post created successfully');
+        } catch (Exception $e) {
+            return ResponseHelper::error($e->getMessage());
+        }
     }
-}
-public function getAllPosts()
+    public function getAllPosts()
     {
         try {
             $posts = $this->postService->getAllPosts();
@@ -58,16 +60,12 @@ public function getAllPosts()
         }
     }
 
-    public function addComment(Request $request, $postId)
+    public function addComment(CommentRequest $request)
     {
         try {
-            $validatedData = $request->validate([
-                'content' => 'required|string'
-            ]);
-
-            $validatedData['user_id'] = auth()->id();
-            $validatedData['post_id'] = $postId;
-
+            $validatedData = $request->validated();
+            $user = Auth::user();
+            $validatedData['user_id'] = $user->id;
             $this->postService->addComment($validatedData);
             return ResponseHelper::success([], 'Comment added for review');
         } catch (Exception $e) {
@@ -80,6 +78,16 @@ public function getAllPosts()
         try {
             $this->postService->approveComment($commentId);
             return ResponseHelper::success([], 'Comment approved');
+        } catch (Exception $e) {
+            return ResponseHelper::error($e->getMessage());
+        }
+    }
+    public function getPostForUser($userId)
+    {
+        try {
+
+            $post = $this->postService->getUserPosts($userId);
+            return ResponseHelper::success($post, 'Post fetched successfully');
         } catch (Exception $e) {
             return ResponseHelper::error($e->getMessage());
         }

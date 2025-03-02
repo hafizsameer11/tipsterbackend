@@ -5,7 +5,7 @@ namespace App\Http\Requests;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
-class PostRequest extends FormRequest
+class CommentRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -23,13 +23,11 @@ class PostRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'title' => 'nullable|string',
-            'content' => 'nullable|string',
-            'images' => 'nullable', // Allow up to 4 images
-            'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048' // Validate each image
+            'comment' => 'required|string',
+            'post_id' => 'required|exists:posts,id',
         ];
     }
-        public function failedValidation(\Illuminate\Contracts\Validation\Validator $validator)
+    public function failedValidation(\Illuminate\Contracts\Validation\Validator $validator)
     {
         throw new HttpResponseException(
             response()->json([
@@ -39,5 +37,4 @@ class PostRequest extends FormRequest
             ], 422)
         );
     }
-
 }

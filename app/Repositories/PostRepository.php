@@ -3,21 +3,43 @@
 namespace App\Repositories;
 
 use App\Models\Post;
+use Illuminate\Support\Facades\Log;
 
 class PostRepository
 {
     public function createPost($data)
     {
-        if (isset($data['images'])) {
-            $imagePaths = [];
+        Log::info('Received Post Data:', $data); // Log input data
+
+        $imagePaths = [];
+
+        if (!empty($data['images']) && is_array($data['images'])) {
             foreach ($data['images'] as $image) {
-                $imagePaths[] = $image->store('posts', 'public'); // Store images in the `storage/app/public/posts` folder
+                if ($image instanceof \Illuminate\Http\UploadedFile) {
+                    $imagePaths[] = $image->store('posts', 'public'); // Store each image in storage/app/public/posts
+                }
             }
-            $data['images'] = json_encode($imagePaths);
         }
 
-        return Post::create($data);
+        // Store images as JSON if images exist, else store an empty JSON array
+        $data['images'] = !empty($imagePaths) ? json_encode($imagePaths) : json_encode([]);
+
+        Log::info('Processed Images:', ['images' => $imagePaths]); // Log stored image paths
+
+        $post = Post::create($data);
+
+        // Convert stored JSON images back into separate image fields
+        $decodedImages = json_decode($post->images, true) ?? [];
+        $formattedImages = [];
+
+        foreach ($decodedImages as $index => $imagePath) {
+            $formattedImages['image_' . ($index + 1)] = $imagePath;
+        }
+
+        // Return formatted response
+        return array_merge($post->toArray(), $formattedImages);
     }
+
 
     public function getAllPosts()
     {
@@ -27,7 +49,15 @@ class PostRepository
         ->orderBy('created_at', 'desc')
         ->get()
         ->map(function ($post) {
-            return [
+            // Decode images JSON and structure them as separate fields
+            $decodedImages = json_decode($post->images, true) ?? [];
+            $formattedImages = [];
+
+            foreach ($decodedImages as $index => $imagePath) {
+                $formattedImages['image_' . ($index + 1)] = $imagePath;
+            }
+
+            return array_merge([
                 'id' => $post->id,
                 'user' => [
                     'id' => $post->user->id,
@@ -36,7 +66,6 @@ class PostRepository
                 ],
                 'timestamp' => $post->created_at->format('h:i A - m/d/Y'),
                 'content' => $post->content,
-                'images' => json_decode($post->images, true) ?? [], // Decode JSON images
                 'likes_count' => $post->likes->count(),
                 'comments_count' => $post->comments->count(),
                 'recent_comments' => $post->comments->map(function ($comment) {
@@ -50,9 +79,10 @@ class PostRepository
                         'content' => $comment->content,
                     ];
                 }),
-            ];
+            ], $formattedImages); // Merging image fields into the response
         });
     }
+
 
     public function likePost($userId, $postId)
     {
@@ -84,6 +114,45 @@ class PostRepository
     }
     public function getUserPosts($userId)
     {
-        return Post::where('user_id', $userId)->orderBy('created_at', 'desc')->get();
+        return Post::with(['user', 'likes', 'comments' => function ($query) {
+            $query->where('status', 'approved')->latest()->take(2); // Fetch only latest 2 approved comments
+        }])
+        ->where('user_id', $userId)
+        ->orderBy('created_at', 'desc')
+        ->get()
+        ->map(function ($post) {
+            // Decode JSON images and format them separately
+            $decodedImages = json_decode($post->images, true) ?? [];
+            $formattedImages = [];
+
+            foreach ($decodedImages as $index => $imagePath) {
+                $formattedImages['image_' . ($index + 1)] = $imagePath;
+            }
+
+            return array_merge([
+                'id' => $post->id,
+                'user' => [
+                    'id' => $post->user->id,
+                    'username' => $post->user->username,
+                    'profile_picture' => $post->user->profile_picture ?? null,
+                ],
+                'timestamp' => $post->created_at->format('h:i A - m/d/Y'),
+                'content' => $post->content,
+                'likes_count' => $post->likes->count(),
+                'comments_count' => $post->comments->count(),
+                'recent_comments' => $post->comments->map(function ($comment) {
+                    return [
+                        'id' => $comment->id,
+                        'user' => [
+                            'id' => $comment->user->id,
+                            'username' => $comment->user->username,
+                            'profile_picture' => $comment->user->profile_picture ?? null,
+                        ],
+                        'content' => $comment->content,
+                    ];
+                }),
+            ], $formattedImages); // Merging image fields into the response
+        });
     }
+
 }
