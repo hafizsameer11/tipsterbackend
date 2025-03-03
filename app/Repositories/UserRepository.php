@@ -2,6 +2,7 @@
 
 namespace App\Repositories;
 
+use App\Models\Post;
 use App\Models\Tip;
 use App\Models\User;
 use Carbon\Carbon;
@@ -102,11 +103,19 @@ class UserRepository
 
     public function find($id)
     {
-        $user = User::find($id);
+        $user = User::with('subscription')->find($id);
         if (!$user) {
             throw new Exception('User not found.');
         }
-        return $user;
+        $userTips = $this->tipRepository->getFreeTipofUser($user->id);
+        $userPosts = Post::where('user_id', $user->id)->orderBy('created_at', 'desc')->get();
+        $userStatistics = $this->viewprofile($user->id);
+        return [
+            'user' => $user,
+            'tips' => $userTips,
+            'posts' => $userPosts,
+            'statistics' => $userStatistics
+        ];
     }
     public function findByEmail($email)
     {
@@ -151,5 +160,76 @@ class UserRepository
         $user->password = Hash::make($newPassword);
         $user->save();
         return $user;
+    }
+    //admin part
+    public function getUserManagementData()
+    {
+        $today = Carbon::now();
+        $lastWeek = Carbon::now()->subWeek();
+
+        $totalUsers = User::count();
+        $totalUsersLastWeek = User::where('created_at', '<', $lastWeek)->count();
+        $totalUsersChange = $this->calculatePercentageChange($totalUsers, $totalUsersLastWeek);
+
+        $onlineUsers = User::where('is_active', true)->count();
+        $onlineUsersLastWeek = User::where('is_active', true)->where('updated_at', '<', $lastWeek)->count();
+        $onlineUsersChange = $this->calculatePercentageChange($onlineUsers, $onlineUsersLastWeek);
+
+        $subscribedUsers = User::where('vip_status', 'active')->count();
+        $subscribedUsersLastWeek = User::where('vip_status', 'active')->where('updated_at', '<', $lastWeek)->count();
+        $subscribedUsersChange = $this->calculatePercentageChange($subscribedUsers, $subscribedUsersLastWeek);
+        $users = User::with('subscription')->orderBy('created_at', 'desc')->get()->map(function ($user) {
+            return [
+                'id' => $user->id,
+                'username' => $user->username,
+                'email' => $user->email,
+                'profile_picture' => $user->profile_picture ?? null,
+                'is_active' => $user->is_active,
+                'vip_status' => $user->vip_status,
+                'subscription' => $user->subscription ? [
+                    'id' => $user->subscription->id,
+                    'package_id' => $user->subscription->package_id,
+                    'status' => $user->subscription->status,
+                    'renewal_date' => $user->subscription->renewal_date,
+                ] : null,
+                'created_at' => $user->created_at->format('Y-m-d H:i:s'),
+            ];
+        });
+
+        return [
+            'stats' => [
+                [
+                    'title' => 'Total Users',
+                    'value' => number_format($totalUsers),
+                    'change' => $totalUsersChange,
+                    'icon' => 'images.sidebarIcons.user',
+                    'color' => 'red',
+                ],
+                [
+                    'title' => 'Online Users',
+                    'value' => number_format($onlineUsers),
+                    'change' => $onlineUsersChange,
+                    'icon' => 'images.sidebarIcons.user',
+                    'color' => 'red',
+                ],
+                [
+                    'title' => 'Subscribed Users',
+                    'value' => number_format($subscribedUsers),
+                    'change' => $subscribedUsersChange,
+                    'icon' => 'images.sidebarIcons.user',
+                    'color' => 'red',
+                ],
+            ],
+            'users' => $users,
+        ];
+    }
+
+    // Helper function to calculate percentage change
+    private function calculatePercentageChange($current, $previous)
+    {
+        if ($previous == 0) {
+            return $current > 0 ? 100 : 0; // If no previous users, assume 100% increase if new ones exist
+        }
+        return round((($current - $previous) / $previous) * 100, 2);
     }
 }

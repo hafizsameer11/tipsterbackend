@@ -23,5 +23,15 @@ class UserController extends Controller
             return ResponseHelper::error($e->getMessage());
         }
     }
-    
+
+    //admin part
+    public function getUserManagementData()
+    {
+        try {
+            $data = $this->userService->getUserManagementData();
+            return ResponseHelper::success($data, 'User data fetched successfully');
+        } catch (Exception $e) {
+            return ResponseHelper::error($e->getMessage());
+        }
+    }
 }

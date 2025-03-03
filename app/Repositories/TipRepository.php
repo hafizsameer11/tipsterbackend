@@ -28,18 +28,18 @@ class TipRepository
         if (!$user) {
             throw new Exception('User not found.');
         }
-    
-        $tips = Tip::where('user_id', $userId)
+
+        $tips = Tip::where('user_id', $userId)->with('bettingCompany')
             ->orderBy('created_at', 'desc')
             ->get();
-    
+
         $totalTips = $tips->count();
         $lostTips = $tips->where('result', 'loss')->count();
         $winRate = $totalTips > 0 ? round((($totalTips - $lostTips) / $totalTips) * 100, 2) : 0;
-            $lastFiveResults = $tips->take(5)->pluck('result')->map(function ($result) {
+        $lastFiveResults = $tips->take(5)->pluck('result')->map(function ($result) {
             return strtoupper(substr($result, 0, 1)); // Extract first letter and convert to uppercase
         })->toArray();
-            $tipsWithUser = $tips->map(function ($tip) use ($user, $winRate, $lastFiveResults) {
+        $tipsWithUser = $tips->map(function ($tip) use ($user, $winRate, $lastFiveResults) {
             return array_merge($tip->toArray(), [
                 'user' => [
                     'id' => $user->id,
@@ -50,51 +50,51 @@ class TipRepository
                 ],
             ]);
         });
-    
+
         return $tipsWithUser;
     }
-    
+
 
     public function getAllRunningTips()
-{
-    $tips = Tip::where('result', 'running')
-        ->with('user') // Eager load user data
-        ->where('status', 'approved')
-        ->orderBy('created_at', 'desc')
-        ->get();
+    {
+        $tips = Tip::where('result', 'running')
+            ->with('user') // Eager load user data
+            ->where('status', 'approved')
+            ->orderBy('created_at', 'desc')
+            ->get();
 
-    $groupedTips = $tips->groupBy('user_id')->map(function ($userTips) {
-        $user = $userTips->first()->user;
+        $groupedTips = $tips->groupBy('user_id')->map(function ($userTips) {
+            $user = $userTips->first()->user;
 
-        // Fetch ALL tips of this user (not just running ones)
-        $allTips = Tip::where('user_id', $user->id)->orderBy('created_at', 'desc')->get();
-        $totalTips = $allTips->count();
-        $lostTips = $allTips->where('result', 'loss')->count();
-        $winRate = $totalTips > 0 ? round((($totalTips - $lostTips) / $totalTips) * 100, 2) : 0;
+            // Fetch ALL tips of this user (not just running ones)
+            $allTips = Tip::where('user_id', $user->id)->orderBy('created_at', 'desc')->get();
+            $totalTips = $allTips->count();
+            $lostTips = $allTips->where('result', 'loss')->count();
+            $winRate = $totalTips > 0 ? round((($totalTips - $lostTips) / $totalTips) * 100, 2) : 0;
 
-        // Get last 5 tip results
-        $lastFiveResults = $allTips->take(5)->pluck('result')->map(function ($result) {
-            return strtoupper(substr($result, 0, 1)); // Extract first letter and convert to uppercase
-        })->toArray();
+            // Get last 5 tip results
+            $lastFiveResults = $allTips->take(5)->pluck('result')->map(function ($result) {
+                return strtoupper(substr($result, 0, 1)); // Extract first letter and convert to uppercase
+            })->toArray();
 
-        // Attach user details to each tip
-        $tipsWithUser = $userTips->map(function ($tip) use ($user, $winRate, $lastFiveResults) {
-            return array_merge($tip->toArray(), [
-                'user' => [
-                    'id' => $user->id,
-                    'username' => $user->username,
-                    'profile_picture' => $user->profile_picture ?? null,
-                    'win_rate' => $winRate . '%',
-                    'last_five' => $lastFiveResults,
-                ],
-            ]);
+            // Attach user details to each tip
+            $tipsWithUser = $userTips->map(function ($tip) use ($user, $winRate, $lastFiveResults) {
+                return array_merge($tip->toArray(), [
+                    'user' => [
+                        'id' => $user->id,
+                        'username' => $user->username,
+                        'profile_picture' => $user->profile_picture ?? null,
+                        'win_rate' => $winRate . '%',
+                        'last_five' => $lastFiveResults,
+                    ],
+                ]);
+            });
+
+            return $tipsWithUser;
         });
 
-        return $tipsWithUser;
-    });
-
-    return $groupedTips->values()->flatten(1); // Flatten to avoid nested arrays
-}
+        return $groupedTips->values()->flatten(1); // Flatten to avoid nested arrays
+    }
 
 
 

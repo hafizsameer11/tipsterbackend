@@ -119,5 +119,6 @@ Route::middleware('auth:sanctum')->group(function () {
 
     //admin route
     Route::prefix('admin')->group(function () {
+        Route::get('/get-user-management-data', [UserController::class, 'getUserManagementData']);
     });
 });

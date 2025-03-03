@@ -31,11 +31,11 @@ class UserService
 
     public function find($id)
     {
-      try{
-        return $this->UserRepository->find($id);
-      }catch(Exception $e){
-        throw new Exception($e->getMessage());
-      }
+        try {
+            return $this->UserRepository->find($id);
+        } catch (Exception $e) {
+            throw new Exception($e->getMessage());
+        }
     }
 
     public function create(array $data)
@@ -127,6 +127,15 @@ class UserService
             return $this->UserRepository->viewprofile($userId);
         } catch (Exception $e) {
             throw new Exception($e->getMessage());
+        }
+    }
+    public function getUserManagementData()
+    {
+        try {
+            return $this->UserRepository->getUserManagementData();
+        } catch (Exception $e) {
+            Log::error('Error in getting user management data: ' . $e->getMessage());
+            throw new Exception('Error in getting user management data');
         }
     }
 }
