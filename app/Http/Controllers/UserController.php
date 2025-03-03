@@ -46,7 +46,7 @@ class UserController extends Controller
     public function updateProfile(Request $request, $userId)
     {
         try {
-            $data = $this->userService->update($request->all(), $userId);
+            $data = $this->userService->update($userId, $request->all());
             return ResponseHelper::success($data, 'User data updated successfully');
         } catch (Exception $e) {
             return ResponseHelper::error($e->getMessage());
