@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Helpers\NotificationHelper;
 use App\Mail\OtpMail;
 use App\Models\User;
 use App\Repositories\UserRepository;
@@ -81,6 +82,13 @@ class UserService
             if (!Hash::check($data['password'], $user->password)) {
                 throw new Exception('Invalid password.');
             }
+            NotificationHelper::sendNotification(
+                $user->id,
+                $user->id,
+                'login',
+                null,
+                "You have logged in successfully."
+            );
             return $user;
         } catch (Exception $e) {
             Log::error('Login error: ' . $e->getMessage());
@@ -115,7 +123,7 @@ class UserService
     public function update($id, array $data)
     {
         try {
-        
+
             $user = $this->UserRepository->update($id, $data);
             return $user;
         } catch (Exception $e) {
