@@ -4,6 +4,7 @@ use App\Http\Controllers\BankController;
 use App\Http\Controllers\BettingCompanyController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\MessageController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\RankingController;
 use App\Http\Controllers\RankingFaqController;
@@ -132,6 +133,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/send', [MessageController::class, 'sendMessage']); // Send a message
         Route::get('/{chatId}', [MessageController::class, 'getChatMessages']); // Get chat messages
     });
+    Route::get('/notifications/{userId}', [NotificationController::class, 'getUserNotifications']);
+    Route::post('/notifications/{notificationId}/read', [NotificationController::class, 'markAsRead']);
     //admin route
     Route::prefix('admin')->group(function () {
         Route::get('/get-user-management-data', [UserController::class, 'getUserManagementData']);

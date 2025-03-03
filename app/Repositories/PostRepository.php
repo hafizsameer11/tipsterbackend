@@ -2,7 +2,10 @@
 
 namespace App\Repositories;
 
+use App\Helpers\NotificationHelper;
+use App\Helpers\UserActivityHelper;
 use App\Models\Post;
+use App\Models\User;
 use Illuminate\Support\Facades\Log;
 
 class PostRepository
@@ -87,14 +90,39 @@ class PostRepository
     public function likePost($userId, $postId)
     {
         $post = Post::findOrFail($postId);
+
+        // Check if the user already liked the post
         if ($post->likes()->where('user_id', $userId)->exists()) {
-            $post = $this->unlikePost($userId, $postId);
-            return $post;
-        } else {
-            $post->likes()->attach($userId);
+            // Unlike the post
+            $post->likes()->detach($userId);
+
+            // Log Activity for unliking
+            UserActivityHelper::logActivity($userId, "Unliked a post (ID: {$post->id})");
+
             return $post;
         }
+
+        // Like the post
+        $post->likes()->attach($userId);
+
+        // Fetch username of the user who liked the post
+        $liker = User::findOrFail($userId);
+
+        // Send Notification
+        NotificationHelper::sendNotification(
+            $post->user_id,
+            $userId,
+            'like',
+            $post->id,
+            "{$liker->username} liked your post."
+        );
+
+        // Log Activity
+        UserActivityHelper::logActivity($userId, "Liked a post (ID: {$post->id})");
+
+        return $post;
     }
+
 
     public function unlikePost($userId, $postId)
     {

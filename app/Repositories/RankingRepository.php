@@ -74,7 +74,7 @@ class RankingRepository
             $rank++;
         }
 
-        return null; // Return null if user is not ranked
+        return null;
     }
 
     /**
