@@ -72,7 +72,7 @@ class User extends Authenticatable
     {
         return $this->hasMany(Like::class);
     }
-    public function subscriptions()
+    public function subscription()
     {
         return $this->hasMany(Subscription::class);
     }
