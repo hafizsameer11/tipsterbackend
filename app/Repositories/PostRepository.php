@@ -101,7 +101,10 @@ class PostRepository
             // Log Activity for unliking
             UserActivityHelper::logActivity($userId, "Unliked a post (ID: {$post->id})");
 
-            return $post;
+            return [
+                'likes_count' => $post->likes()->count(), // Updated like count
+                'is_liked' => false, // User has unliked the post
+            ];
         }
 
         // Like the post
@@ -122,8 +125,12 @@ class PostRepository
         // Log Activity
         UserActivityHelper::logActivity($userId, "Liked a post (ID: {$post->id})");
 
-        return $post;
+        return [
+            'likes_count' => $post->likes()->count(), // Updated like count
+            'is_liked' => true, // User has liked the post
+        ];
     }
+
 
 
     public function unlikePost($userId, $postId)

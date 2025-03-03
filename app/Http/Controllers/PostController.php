@@ -43,8 +43,8 @@ class PostController extends Controller
     public function likePost($postId)
     {
         try {
-            $this->postService->likePost(auth()->id(), $postId);
-            return ResponseHelper::success([], 'Post liked successfully');
+          $post=  $this->postService->likePost(auth()->id(), $postId);
+            return ResponseHelper::success($post, 'Post liked successfully');
         } catch (Exception $e) {
             return ResponseHelper::error($e->getMessage());
         }
