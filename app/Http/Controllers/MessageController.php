@@ -25,7 +25,7 @@ class MessageController extends Controller
         // Handle file attachment
         if ($request->hasFile('attachment')) {
             $filePath = $request->file('attachment')->store('chat_attachments', 'public');
-            $messageData['attachment'] = $filePath;
+            $messageData['attachment'] = asset('storage/' . $filePath);
         }
 
         $message = Message::create($messageData);
@@ -36,10 +36,11 @@ class MessageController extends Controller
         ]);
     }
 
-    // Get all messages for a chat
     public function getChatMessages($chatId)
     {
         $messages = Message::where('chat_id', $chatId)->orderBy('created_at', 'asc')->get();
+
         return response()->json($messages);
     }
+
 }
