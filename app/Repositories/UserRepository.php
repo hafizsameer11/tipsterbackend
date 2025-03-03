@@ -2,6 +2,7 @@
 
 namespace App\Repositories;
 
+use App\Models\Follow;
 use App\Models\Post;
 use App\Models\Tip;
 use App\Models\User;
@@ -49,6 +50,8 @@ class UserRepository
         $user = User::find($userId);
         $userFormatedtips = $this->tipRepository->getFreeTipofUser($userId);
         $graphicalData = $this->getUserMonthlyWinRateGraph($userId);
+        //check does current user following this user
+        $isFollowing=Follow::wheere('follower_id',auth()->id())->where('following_id',$userId)->exists();
         return [
             'user_id' => $userId,
             'user' => $user,
@@ -58,7 +61,8 @@ class UserRepository
             'average_odds' => $averageOdds,
             'total_predictions' => $totalPredictions,
             'tips' => $userFormatedtips,
-            'graphicalData' => $graphicalData
+            'graphicalData' => $graphicalData,
+            'isFollowing' => $isFollowing
         ];
     }
 

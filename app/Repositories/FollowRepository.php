@@ -13,19 +13,32 @@ class FollowRepository
             throw new \Exception('You cannot follow yourself.');
         }
 
-        $exists = Follow::where('follower_id', $followerId)
+        // Check if the follow record already exists
+        $existingFollow = Follow::where('follower_id', $followerId)
             ->where('following_id', $followingId)
-            ->exists();
+            ->first();
 
-        if ($exists) {
-            throw new \Exception('Already following this user.');
+        if ($existingFollow) {
+            // Unfollow (delete the record)
+            $existingFollow->delete();
+            return [
+                'message' => 'Unfollowed successfully',
+                'is_following' => false
+            ];
         }
 
-        return Follow::create([
+        // Follow (create new record)
+        Follow::create([
             'follower_id' => $followerId,
             'following_id' => $followingId
         ]);
+
+        return [
+            'message' => 'Followed successfully',
+            'is_following' => true
+        ];
     }
+
 
     public function unfollowUser($followerId, $followingId)
     {
