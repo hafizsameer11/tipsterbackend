@@ -51,7 +51,7 @@ class UserRepository
         $userFormatedtips = $this->tipRepository->getFreeTipofUser($userId);
         $graphicalData = $this->getUserMonthlyWinRateGraph($userId);
         //check does current user following this user
-        $isFollowing=Follow::wheere('follower_id',auth()->id())->where('following_id',$userId)->exists();
+        $isFollowing=Follow::where('follower_id',auth()->id())->where('following_id',$userId)->exists();
         return [
             'user_id' => $userId,
             'user' => $user,
