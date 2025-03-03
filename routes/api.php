@@ -133,7 +133,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/send', [MessageController::class, 'sendMessage']); // Send a message
         Route::get('/{chatId}', [MessageController::class, 'getChatMessages']); // Get chat messages
     });
-    Route::get('/notifications/{userId}', [NotificationController::class, 'getUserNotifications']);
+    Route::get('/notifications', [NotificationController::class, 'getUserNotifications']);
     Route::post('/notifications/{notificationId}/read', [NotificationController::class, 'markAsRead']);
     //admin route
     Route::prefix('admin')->group(function () {
