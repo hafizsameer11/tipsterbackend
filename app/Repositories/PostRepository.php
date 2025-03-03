@@ -71,6 +71,8 @@ class PostRepository
                     'content' => $post->content,
                     'likes_count' => $post->likes->count(),
                     'comments_count' => $post->comments->count(),
+                    'share_count' => $post->share_count,
+                    'view_count' => $post->view_count,
                     'recent_comments' => $post->comments->map(function ($comment) {
                         return [
                             'id' => $comment->id,

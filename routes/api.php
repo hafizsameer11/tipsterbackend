@@ -6,6 +6,7 @@ use App\Http\Controllers\ChatController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PostController;
+use App\Http\Controllers\PostShareController;
 use App\Http\Controllers\RankingController;
 use App\Http\Controllers\RankingFaqController;
 use App\Http\Controllers\SubscriptionController;
@@ -141,6 +142,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/unsubscribe', [UserSubscriptionController::class, 'unsubscribe']); // Unsubscribe from a user
     Route::get('/user/{userId}/subscriptions', [UserSubscriptionController::class, 'getUserSubscriptions']); // Get user's subscriptions
     Route::get('/user/{userId}/subscribers', [UserSubscriptionController::class, 'getSubscribers']); // Get user's subscribers
+
+    Route::post('/posts/share', [PostShareController::class, 'sharePost']); // Share a post
+    Route::get('/posts/{postId}/shares', [PostShareController::class, 'getShares']); // Get post shares
     Route::prefix('admin')->group(function () {
         Route::get('/get-user-management-data', [UserController::class, 'getUserManagementData']);
         Route::get('/user/{userId}', [UserController::class, 'userDetails']);

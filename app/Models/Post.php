@@ -14,7 +14,9 @@ class Post extends Model
         'has_image',
         'user_id',
         'images',
-        'status'
+        'status',
+        'share_count',
+        'view_count',
     ];
     public function user()
     {
@@ -27,5 +29,10 @@ class Post extends Model
     public function likes()
     {
         return $this->belongsToMany(User::class, 'likes');
+    }
+
+    public function shares()
+    {
+        return $this->hasMany(PostShare::class);
     }
 }
