@@ -29,7 +29,8 @@ class User extends Authenticatable
         'otp_verified',
         'is_active',
         'profile_picture',
-        'password'
+        'password',
+        'bio'
     ];
 
     /**

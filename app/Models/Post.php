@@ -17,6 +17,7 @@ class Post extends Model
         'status',
         'share_count',
         'view_count',
+        'type'
     ];
     public function user()
     {
