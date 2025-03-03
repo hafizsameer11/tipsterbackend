@@ -6,6 +6,7 @@ use App\Models\Follow;
 use App\Models\Post;
 use App\Models\Tip;
 use App\Models\User;
+use App\Models\UserSubscription;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\Hash;
@@ -52,6 +53,8 @@ class UserRepository
         $graphicalData = $this->getUserMonthlyWinRateGraph($userId);
         //check does current user following this user
         $isFollowing=Follow::where('follower_id',auth()->id())->where('following_id',$userId)->exists();
+        $follower_count = Follow::where('following_id', $userId)->count();
+        $subscriber=UserSubscription::where('subscribed_to_id', $userId)->where('subscriber_id',auth()->id())->exists();
         return [
             'user_id' => $userId,
             'user' => $user,
@@ -62,7 +65,9 @@ class UserRepository
             'total_predictions' => $totalPredictions,
             'tips' => $userFormatedtips,
             'graphicalData' => $graphicalData,
-            'isFollowing' => $isFollowing
+            'isFollowing' => $isFollowing,
+            'follower_count' => $follower_count,
+            'subscriber' => $subscriber
         ];
     }
 
