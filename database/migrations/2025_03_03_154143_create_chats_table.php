@@ -11,10 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('user_activities', function (Blueprint $table) {
+        Schema::create('chats', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('user_id');
-            $table->text('activity');
+            $table->unsignedBigInteger('user_id'); // The user involved in the chat
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->enum('status', ['open', 'closed'])->default('open'); // Chat status
             $table->timestamps();
         });
     }
@@ -24,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('user_activities');
+        Schema::dropIfExists('chats');
     }
 };

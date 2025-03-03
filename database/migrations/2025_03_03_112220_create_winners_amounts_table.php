@@ -11,10 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('user_activities', function (Blueprint $table) {
+        Schema::create('winners_amounts', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('user_id');
-            $table->text('activity');
+            $table->string('amount')->nullable();
+            $table->string('currency')->default('NGN');
+            $table->string('rank')->nullable();
             $table->timestamps();
         });
     }
@@ -24,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('user_activities');
+        Schema::dropIfExists('winners_amounts');
     }
 };

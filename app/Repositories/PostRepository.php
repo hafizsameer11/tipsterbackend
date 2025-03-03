@@ -46,49 +46,54 @@ class PostRepository
         return Post::with(['user', 'likes', 'comments' => function ($query) {
             $query->where('status', 'approved')->latest()->take(2); // Fetch latest 2 approved comments
         }])
-        ->orderBy('created_at', 'desc')
-        ->get()
-        ->map(function ($post) {
-            // Decode images JSON and structure them as separate fields
-            $decodedImages = json_decode($post->images, true) ?? [];
-            $formattedImages = [];
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(function ($post) {
+                // Decode images JSON and structure them as separate fields
+                $decodedImages = json_decode($post->images, true) ?? [];
+                $formattedImages = [];
 
-            foreach ($decodedImages as $index => $imagePath) {
-                $formattedImages['image_' . ($index + 1)] = $imagePath;
-            }
+                foreach ($decodedImages as $index => $imagePath) {
+                    $formattedImages['image_' . ($index + 1)] = $imagePath;
+                }
 
-            return array_merge([
-                'id' => $post->id,
-                'user' => [
-                    'id' => $post->user->id,
-                    'username' => $post->user->username,
-                    'profile_picture' => $post->user->profile_picture ?? null,
-                ],
-                'timestamp' => $post->created_at->format('h:i A - m/d/Y'),
-                'content' => $post->content,
-                'likes_count' => $post->likes->count(),
-                'comments_count' => $post->comments->count(),
-                'recent_comments' => $post->comments->map(function ($comment) {
-                    return [
-                        'id' => $comment->id,
-                        'user' => [
-                            'id' => $comment->user->id,
-                            'username' => $comment->user->username,
-                            'profile_picture' => $comment->user->profile_picture ?? null,
-                        ],
-                        'content' => $comment->content,
-                    ];
-                }),
-            ], $formattedImages); // Merging image fields into the response
-        });
+                return array_merge([
+                    'id' => $post->id,
+                    'user' => [
+                        'id' => $post->user->id,
+                        'username' => $post->user->username,
+                        'profile_picture' => $post->user->profile_picture ?? null,
+                    ],
+                    'timestamp' => $post->created_at->format('h:i A - m/d/Y'),
+                    'content' => $post->content,
+                    'likes_count' => $post->likes->count(),
+                    'comments_count' => $post->comments->count(),
+                    'recent_comments' => $post->comments->map(function ($comment) {
+                        return [
+                            'id' => $comment->id,
+                            'user' => [
+                                'id' => $comment->user->id,
+                                'username' => $comment->user->username,
+                                'profile_picture' => $comment->user->profile_picture ?? null,
+                            ],
+                            'content' => $comment->content,
+                        ];
+                    }),
+                ], $formattedImages); // Merging image fields into the response
+            });
     }
 
 
     public function likePost($userId, $postId)
     {
         $post = Post::findOrFail($postId);
-        $post->likes()->attach($userId);
-        return $post;
+        if ($post->likes()->where('user_id', $userId)->exists()) {
+            $post = $this->unlikePost($userId, $postId);
+            return $post;
+        } else {
+            $post->likes()->attach($userId);
+            return $post;
+        }
     }
 
     public function unlikePost($userId, $postId)
@@ -117,42 +122,53 @@ class PostRepository
         return Post::with(['user', 'likes', 'comments' => function ($query) {
             $query->where('status', 'approved')->latest()->take(2); // Fetch only latest 2 approved comments
         }])
-        ->where('user_id', $userId)
-        ->orderBy('created_at', 'desc')
-        ->get()
-        ->map(function ($post) {
-            // Decode JSON images and format them separately
-            $decodedImages = json_decode($post->images, true) ?? [];
-            $formattedImages = [];
+            ->where('user_id', $userId)
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(function ($post) {
+                // Decode JSON images and format them separately
+                $decodedImages = json_decode($post->images, true) ?? [];
+                $formattedImages = [];
 
-            foreach ($decodedImages as $index => $imagePath) {
-                $formattedImages['image_' . ($index + 1)] = $imagePath;
-            }
+                foreach ($decodedImages as $index => $imagePath) {
+                    $formattedImages['image_' . ($index + 1)] = $imagePath;
+                }
 
-            return array_merge([
-                'id' => $post->id,
-                'user' => [
-                    'id' => $post->user->id,
-                    'username' => $post->user->username,
-                    'profile_picture' => $post->user->profile_picture ?? null,
-                ],
-                'timestamp' => $post->created_at->format('h:i A - m/d/Y'),
-                'content' => $post->content,
-                'likes_count' => $post->likes->count(),
-                'comments_count' => $post->comments->count(),
-                'recent_comments' => $post->comments->map(function ($comment) {
-                    return [
-                        'id' => $comment->id,
-                        'user' => [
-                            'id' => $comment->user->id,
-                            'username' => $comment->user->username,
-                            'profile_picture' => $comment->user->profile_picture ?? null,
-                        ],
-                        'content' => $comment->content,
-                    ];
-                }),
-            ], $formattedImages); // Merging image fields into the response
-        });
+                return array_merge([
+                    'id' => $post->id,
+                    'user' => [
+                        'id' => $post->user->id,
+                        'username' => $post->user->username,
+                        'profile_picture' => $post->user->profile_picture ?? null,
+                    ],
+                    'timestamp' => $post->created_at->format('h:i A - m/d/Y'),
+                    'content' => $post->content,
+                    'likes_count' => $post->likes->count(),
+                    'comments_count' => $post->comments->count(),
+                    'recent_comments' => $post->comments->map(function ($comment) {
+                        return [
+                            'id' => $comment->id,
+                            'user' => [
+                                'id' => $comment->user->id,
+                                'username' => $comment->user->username,
+                                'profile_picture' => $comment->user->profile_picture ?? null,
+                            ],
+                            'content' => $comment->content,
+                        ];
+                    }),
+                ], $formattedImages); // Merging image fields into the response
+            });
     }
-
+    public function getPostDetail($id)
+    {
+        return Post::with(['user', 'likes', 'comments' => function ($query) {
+            $query->where('status', 'approved')->latest()->take(2); // Fetch only latest 2 approved comments
+        }])
+            ->where('id', $id)
+            ->first();
+    }
+    public function approvePost($postId)
+    {
+        return Post::where('id', $postId)->update(['status' => 'approved']);
+    }
 }

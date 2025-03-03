@@ -122,7 +122,13 @@ class TipRepository
     }
     public function update($id, array $data)
     {
-        // Add logic to update data
+        $tip = Tip::findOrFail($id);
+        if (!$tip) {
+            throw new Exception('Tip not found.');
+        }
+        $tip->update($data);
+
+        return $tip;
     }
 
     public function delete($id)

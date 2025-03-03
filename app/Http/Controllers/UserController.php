@@ -43,4 +43,13 @@ class UserController extends Controller
             return ResponseHelper::error($e->getMessage());
         }
     }
+    public function updateProfile(Request $request, $userId)
+    {
+        try {
+            $data = $this->userService->update($request->all(), $userId);
+            return ResponseHelper::success($data, 'User data updated successfully');
+        } catch (Exception $e) {
+            return ResponseHelper::error($e->getMessage());
+        }
+    }
 }

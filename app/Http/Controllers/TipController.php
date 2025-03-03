@@ -62,4 +62,14 @@ class TipController extends Controller
             return ResponseHelper::error($e->getMessage(), 400);
         }
     }
+    public function updateTip(Request $request, $tipId){
+        try{
+            $status=$request->status;
+            $result=$request->result;
+            $tip=$this->tipService->updateTip($tipId,$status,$result);
+            return ResponseHelper::success($tip, 'Tip updated successfully', 200);
+        }catch(\Exception $e){
+            return ResponseHelper::error($e->getMessage(), 400);
+        }
+    }
 }

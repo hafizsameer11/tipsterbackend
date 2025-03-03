@@ -4,10 +4,37 @@ namespace App\Repositories;
 
 use App\Models\Tip;
 use App\Models\User;
+use App\Models\WinnersAmount;
 use Carbon\Carbon;
 
 class RankingRepository
 {
+    public function createWinnersAmount($rank, $amount)
+    {
+        return WinnersAmount::create([
+            'rank' => $rank,
+            'amount' => $amount,
+        ]);
+    }
+    public function getWinnersAmount()
+    {
+        return WinnersAmount::all();
+    }
+    public function updateWinnersAmounts($winnersData)
+    {
+        foreach ($winnersData as $data) {
+            WinnersAmount::updateOrCreate(
+                ['rank' => $data['rank']], // Find by rank
+                ['amount' => $data['amount']] // Update or create
+            );
+        }
+        return WinnersAmount::all(); // Return updated records
+    }
+
+    public function getWinnersAmountByRank($rank)
+    {
+        return WinnersAmount::where('rank', '=', $rank)->first();
+    }
     public function getUserRanking($userId)
     {
         $now = Carbon::now();

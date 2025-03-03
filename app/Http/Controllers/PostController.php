@@ -66,7 +66,7 @@ class PostController extends Controller
             $validatedData = $request->validated();
             $user = Auth::user();
             $validatedData['user_id'] = $user->id;
-        $comment=    $this->postService->addComment($validatedData);
+            $comment =    $this->postService->addComment($validatedData);
             return ResponseHelper::success($comment, 'Comment added for review');
         } catch (Exception $e) {
             return ResponseHelper::error($e->getMessage());
@@ -88,6 +88,24 @@ class PostController extends Controller
 
             $post = $this->postService->getUserPosts($userId);
             return ResponseHelper::success($post, 'Post fetched successfully');
+        } catch (Exception $e) {
+            return ResponseHelper::error($e->getMessage());
+        }
+    }
+    public function getPostDetail($id)
+    {
+        try {
+            $post = $this->postService->getPostDetails($id);
+            return ResponseHelper::success($post, 'Post fetched successfully');
+        } catch (Exception $e) {
+            return ResponseHelper::error($e->getMessage());
+        }
+    }
+    public function approvePost($postId)
+    {
+        try {
+            $post =   $this->postService->approvePost($postId);
+            return ResponseHelper::success($post, 'Post approved');
         } catch (Exception $e) {
             return ResponseHelper::error($e->getMessage());
         }

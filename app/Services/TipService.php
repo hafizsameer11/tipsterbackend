@@ -65,9 +65,13 @@ class TipService
         }
     }
 
-    public function update($id, array $data)
+    public function updateTip($tipId, $status, $result)
     {
-        return $this->TipRepository->update($id, $data);
+        try {
+            return $this->TipRepository->update($tipId, ['status' => $status, 'result' => $result]);
+        } catch (Exception $e) {
+            throw new Exception($e->getMessage());
+        }
     }
 
     public function delete($id)

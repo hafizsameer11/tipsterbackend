@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\BankController;
 use App\Http\Controllers\BettingCompanyController;
+use App\Http\Controllers\ChatController;
+use App\Http\Controllers\MessageController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\RankingController;
 use App\Http\Controllers\RankingFaqController;
@@ -117,9 +119,30 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/subscriptions/finish', [SubscriptionController::class, 'finishSubscription']);
     Route::post('/comments/{commentId}/approve', [PostController::class, 'approveComment']); // Approve a comment
 
+
+    Route::post('/user/update-profile/{userId}', [UserController::class, 'updateProfile']);
+
+    Route::prefix('chat')->group(function () {
+        Route::post('/start', [ChatController::class, 'createChat']); // Start a chat
+        Route::get('/{userId}', [ChatController::class, 'getUserChats']); // Get user chats
+        Route::post('/close/{chatId}', [ChatController::class, 'closeChat']); // Close a chat
+    });
+
+    Route::prefix('message')->group(function () {
+        Route::post('/send', [MessageController::class, 'sendMessage']); // Send a message
+        Route::get('/{chatId}', [MessageController::class, 'getChatMessages']); // Get chat messages
+    });
     //admin route
     Route::prefix('admin')->group(function () {
         Route::get('/get-user-management-data', [UserController::class, 'getUserManagementData']);
         Route::get('/user/{userId}', [UserController::class, 'userDetails']);
+        Route::get('/get-post-detail/{id}', [PostController::class, 'getPostDetail']);
+        Route::post('/tip/update/{tipId}', [TipController::class, 'updateTip']); //only status and result
+
+        //rank management
+        Route::get('rank/get-top-30-rankings', [RankingController::class, 'getTop30Rankings']);
+        Route::post('rank/update-winner-amount', [RankingController::class, 'updateWinnersAmounts']);
+        Route::get('rank/get-winners-amount', [RankingController::class, 'getWinnersAmount']);
+        Route::get('rank/get-winners-amount-by-rank/{rank}', [RankingController::class, 'getWinnersAmountByRank']);
     });
 });

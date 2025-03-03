@@ -143,7 +143,19 @@ class UserRepository
 
     public function update($id, array $data)
     {
-        // Add logic to update data
+        $user = User::find($id);
+        if (!$user) {
+            throw new Exception('User not found.');
+        }
+        if (isset($data['password']) && $data['password']) {
+            $data['password'] = bcrypt($data['password']);
+        }
+        if (isset($data['profile_picture']) && $data['profile_picture']) {
+            $path = $data['profile_picture']->store('profile_picture', 'public');
+            $data['profile_picture'] = $path;
+        }
+        $user->update($data);
+        return $user;
     }
 
     public function delete($id)

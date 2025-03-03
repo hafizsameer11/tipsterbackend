@@ -114,7 +114,14 @@ class UserService
 
     public function update($id, array $data)
     {
-        return $this->UserRepository->update($id, $data);
+        try {
+        
+            $user = $this->UserRepository->update($id, $data);
+            return $user;
+        } catch (Exception $e) {
+            Log::error('Update user error: ' . $e->getMessage());
+            throw new Exception('Update user failed. ' . $e->getMessage());
+        }
     }
 
     public function delete($id)
@@ -135,7 +142,7 @@ class UserService
             return $this->UserRepository->getUserManagementData();
         } catch (Exception $e) {
             Log::error('Error in getting user management data: ' . $e->getMessage());
-            throw new Exception('Error in getting user management data '. $e->getMessage());
+            throw new Exception('Error in getting user management data ' . $e->getMessage());
         }
     }
 }

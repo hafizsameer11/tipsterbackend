@@ -13,6 +13,38 @@ class RankingService
     {
         $this->RankingRepository = $RankingRepository;
     }
+    public function createWinnersAmount($rank, $amount)
+    {
+        try {
+            return $this->RankingRepository->createWinnersAmount($rank, $amount);
+        } catch (Exception $e) {
+            throw new Exception($e->getMessage());
+        }
+    }
+    public function getWinnersAmount()
+    {
+        try {
+            return $this->RankingRepository->getWinnersAmount();
+        } catch (Exception $e) {
+            throw new Exception($e->getMessage());
+        }
+    }
+    public function getWinnersAmountByRank($rank)
+    {
+        try {
+            return $this->RankingRepository->getWinnersAmountByRank($rank);
+        } catch (Exception $e) {
+            throw new Exception($e->getMessage());
+        }
+    }
+    public function updateWinnersAmounts($winnersData)
+    {
+        try {
+            return $this->RankingRepository->updateWinnersAmounts($winnersData);
+        } catch (Exception $e) {
+            throw new Exception($e->getMessage());
+        }
+    }
 
     public function getTop30Rankings()
     {

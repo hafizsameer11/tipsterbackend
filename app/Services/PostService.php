@@ -49,4 +49,20 @@ class PostService
     {
         return $this->postRepository->getUserPosts($userId);
     }
+    public function getPostDetails($id)
+    {
+        try {
+            return $this->postRepository->getPostDetail($id);
+        } catch (\Exception $e) {
+            throw new \Exception("Post Fetching Failed " . $e->getMessage());
+        }
+    }
+    public function approvePost($postId)
+    {
+        try {
+            return $this->postRepository->approvePost($postId);
+        } catch (\Exception $e) {
+            throw new \Exception("Post Fetching Failed " . $e->getMessage());
+        }
+    }
 }
