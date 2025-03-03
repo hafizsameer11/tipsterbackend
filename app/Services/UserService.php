@@ -135,7 +135,7 @@ class UserService
             return $this->UserRepository->getUserManagementData();
         } catch (Exception $e) {
             Log::error('Error in getting user management data: ' . $e->getMessage());
-            throw new Exception('Error in getting user management data');
+            throw new Exception('Error in getting user management data '. $e->getMessage());
         }
     }
 }
