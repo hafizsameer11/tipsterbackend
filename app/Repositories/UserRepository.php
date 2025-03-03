@@ -186,12 +186,6 @@ class UserRepository
                 'profile_picture' => $user->profile_picture ?? null,
                 'is_active' => $user->is_active,
                 'vip_status' => $user->vip_status,
-                'subscription' => $user->subscription ? [
-                    'id' => $user->subscription->id,
-                    'package_id' => $user->subscription->package_id,
-                    'status' => $user->subscription->status,
-                    'renewal_date' => $user->subscription->renewal_date,
-                ] : null,
                 'created_at' => $user->created_at->format('Y-m-d H:i:s'),
             ];
         });
