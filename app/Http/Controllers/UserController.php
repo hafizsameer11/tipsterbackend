@@ -34,4 +34,13 @@ class UserController extends Controller
             return ResponseHelper::error($e->getMessage());
         }
     }
+    public function userDetails($userId)
+    {
+        try {
+            $data = $this->userService->find($userId);
+            return ResponseHelper::success($data, 'User data fetched successfully');
+        } catch (Exception $e) {
+            return ResponseHelper::error($e->getMessage());
+        }
+    }
 }
