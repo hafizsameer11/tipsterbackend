@@ -13,6 +13,7 @@ use App\Http\Controllers\TipController;
 use App\Http\Controllers\User\AuthController;
 use App\Http\Controllers\User\FollowController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\UserSubscriptionController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
@@ -136,6 +137,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/notifications', [NotificationController::class, 'getUserNotifications']);
     Route::post('/notifications/{notificationId}/read', [NotificationController::class, 'markAsRead']);
     //admin route
+    Route::post('/subscribe', [UserSubscriptionController::class, 'subscribe']); // Subscribe to a user
+    Route::post('/unsubscribe', [UserSubscriptionController::class, 'unsubscribe']); // Unsubscribe from a user
+    Route::get('/user/{userId}/subscriptions', [UserSubscriptionController::class, 'getUserSubscriptions']); // Get user's subscriptions
+    Route::get('/user/{userId}/subscribers', [UserSubscriptionController::class, 'getSubscribers']); // Get user's subscribers
     Route::prefix('admin')->group(function () {
         Route::get('/get-user-management-data', [UserController::class, 'getUserManagementData']);
         Route::get('/user/{userId}', [UserController::class, 'userDetails']);
