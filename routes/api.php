@@ -5,6 +5,7 @@ use App\Http\Controllers\BettingCompanyController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\RankingController;
 use App\Http\Controllers\RankingFaqController;
+use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\TipController;
 use App\Http\Controllers\User\AuthController;
 use App\Http\Controllers\User\FollowController;
@@ -110,6 +111,13 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/create', [BankController::class, 'create']);
         Route::get('/get-for-user', [BankController::class, 'getforAuthUser']);
     });
-
+    Route::post('/create-package', [SubscriptionController::class, 'createPackage']);
+    Route::get('/packages', [SubscriptionController::class, 'getAllPackage']);
+    Route::post('/subscriptions', [SubscriptionController::class, 'createSubscription']);
+    Route::post('/subscriptions/finish', [SubscriptionController::class, 'finishSubscription']);
     Route::post('/comments/{commentId}/approve', [PostController::class, 'approveComment']); // Approve a comment
+
+    //admin route
+    Route::prefix('admin')->group(function () {
+    });
 });

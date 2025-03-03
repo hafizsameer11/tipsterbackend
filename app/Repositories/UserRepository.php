@@ -61,48 +61,52 @@ class UserRepository
         ];
     }
 
-public function getUserMonthlyWinRateGraph($userId)
-{
-    $now = Carbon::now();
-    $oneYearAgo = $now->subMonths(11)->startOfMonth(); // Get start of 12th month
+    public function getUserMonthlyWinRateGraph($userId)
+    {
+        $now = Carbon::now();
+        $oneYearAgo = $now->subMonths(11)->startOfMonth(); // Get start of 12th month
 
-    // Prepare data structure
-    $winRateData = [];
+        // Prepare data structure
+        $winRateData = [];
 
-    for ($i = 0; $i < 12; $i++) {
-        $startOfMonth = $oneYearAgo->copy()->addMonths($i)->startOfMonth();
-        $endOfMonth = $startOfMonth->copy()->endOfMonth();
-        $monthLabel = $startOfMonth->format('M'); // Example: Jan, Feb
+        for ($i = 0; $i < 12; $i++) {
+            $startOfMonth = $oneYearAgo->copy()->addMonths($i)->startOfMonth();
+            $endOfMonth = $startOfMonth->copy()->endOfMonth();
+            $monthLabel = $startOfMonth->format('M'); // Example: Jan, Feb
 
-        // Get all tips within this month
-        $monthlyTips = Tip::where('user_id', $userId)
-            ->whereBetween('created_at', [$startOfMonth, $endOfMonth])
-            ->get();
+            // Get all tips within this month
+            $monthlyTips = Tip::where('user_id', $userId)
+                ->whereBetween('created_at', [$startOfMonth, $endOfMonth])
+                ->get();
 
-        // Count wins & total predictions
-        $totalPredictions = $monthlyTips->count();
-        $totalWins = $monthlyTips->where('result', 'win')->count();
+            // Count wins & total predictions
+            $totalPredictions = $monthlyTips->count();
+            $totalWins = $monthlyTips->where('result', 'win')->count();
 
-        // Calculate monthly win rate
-        $winRate = $totalPredictions > 0 ? round(($totalWins / $totalPredictions) * 100, 2) : 0;
+            // Calculate monthly win rate
+            $winRate = $totalPredictions > 0 ? round(($totalWins / $totalPredictions) * 100, 2) : 0;
 
-        // Store in array
-        $winRateData[] = [
-            'month' => $monthLabel,
-            'win_rate' => $winRate,
-        ];
+            // Store in array
+            $winRateData[] = [
+                'month' => $monthLabel,
+                'win_rate' => $winRate,
+            ];
+        }
+
+        return collect($winRateData);
     }
-
-    return collect($winRateData);
-}
     public function all()
     {
-        // Add logic to fetch all data
+        return User::all();
     }
 
     public function find($id)
     {
-        // Add logic to find data by ID
+        $user = User::find($id);
+        if (!$user) {
+            throw new Exception('User not found.');
+        }
+        return $user;
     }
     public function findByEmail($email)
     {
@@ -137,12 +141,12 @@ public function getUserMonthlyWinRateGraph($userId)
     {
         // Add logic to delete data
     }
-    public function changePassword(string $oldPassword, string $newPassword,$userId): ?User
+    public function changePassword(string $oldPassword, string $newPassword, $userId): ?User
     {
         $user = User::find($userId);
 
         if (!Hash::check($oldPassword, $user->password)) {
-           throw new Exception('Invalid old password');
+            throw new Exception('Invalid old password');
         }
         $user->password = Hash::make($newPassword);
         $user->save();

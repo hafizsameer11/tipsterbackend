@@ -22,23 +22,31 @@ class UserService
 
     public function all()
     {
-        return $this->UserRepository->all();
+        try {
+            return $this->UserRepository->all();
+        } catch (Exception $e) {
+            throw new Exception($e->getMessage());
+        }
     }
 
     public function find($id)
     {
+      try{
         return $this->UserRepository->find($id);
+      }catch(Exception $e){
+        throw new Exception($e->getMessage());
+      }
     }
 
     public function create(array $data)
     {
-       try{
-        $user= $this->UserRepository->create($data);
-        Mail::to($user->email)->send(new OtpMail($user->otp));
-        return $user;
-       }catch(Exception $e){
-           throw new Exception($e->getMessage());
-       }
+        try {
+            $user = $this->UserRepository->create($data);
+            Mail::to($user->email)->send(new OtpMail($user->otp));
+            return $user;
+        } catch (Exception $e) {
+            throw new Exception($e->getMessage());
+        }
     }
     public function verifyOtp(array $data): ?User
     {
@@ -73,8 +81,7 @@ class UserService
             if (!Hash::check($data['password'], $user->password)) {
                 throw new Exception('Invalid password.');
             }
-          return $user;
-
+            return $user;
         } catch (Exception $e) {
             Log::error('Login error: ' . $e->getMessage());
             throw new Exception('Login failed ' . $e->getMessage());
@@ -114,10 +121,11 @@ class UserService
     {
         return $this->UserRepository->delete($id);
     }
-    public function viewProfile($userId){
-        try{
+    public function viewProfile($userId)
+    {
+        try {
             return $this->UserRepository->viewprofile($userId);
-        }catch(Exception $e){
+        } catch (Exception $e) {
             throw new Exception($e->getMessage());
         }
     }
