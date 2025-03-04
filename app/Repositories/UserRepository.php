@@ -210,6 +210,7 @@ class UserRepository
                 'profile_picture' => $user->profile_picture ?? null,
                 'is_active' => $user->is_active,
                 'vip_status' => $user->vip_status,
+                'phone' => $user->phone,
                 'created_at' => $user->created_at->format('Y-m-d H:i:s'),
             ];
         });
