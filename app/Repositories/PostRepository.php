@@ -61,7 +61,7 @@ class PostRepository
                 $formattedImages = [];
 
                 foreach ($decodedImages as $index => $imagePath) {
-                    $formattedImages['image_' . ($index + 1)] = $imagePath;
+                    $formattedImages['image_' . ($index + 1)] = asset('storage/' . $imagePath) ?? null;
                 }
 
                 return array_merge([
@@ -84,7 +84,7 @@ class PostRepository
                             'user' => [
                                 'id' => $comment->user->id,
                                 'username' => $comment->user->username,
-                                'profile_picture' => $comment->user->profile_picture ?? null,
+                                'profile_picture' => asset('storage/' . $comment->user->profile_picture) ?? null,
                             ],
                             'content' => $comment->content,
                         ];
