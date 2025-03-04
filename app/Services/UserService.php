@@ -52,7 +52,7 @@ class UserService
     public function verifyOtp(array $data): ?User
     {
         try {
-            $user = $this->UserRepository->findByEmail($data['email']);
+            $user = User::where('email', $data['email'])->first();
             if (!$user) {
                 throw new Exception('User not found.');
             }
