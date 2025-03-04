@@ -69,6 +69,7 @@ class PostRepository
                     ],
                     'timestamp' => $post->created_at->format('h:i A - m/d/Y'),
                     'content' => $post->content,
+                    'type' => $post->type,
                     'likes_count' => $post->likes->count(),
                     'comments_count' => $post->comments->count(),
                     'share_count' => $post->share_count,
@@ -182,6 +183,8 @@ class PostRepository
                     'content' => $post->content,
                     'likes_count' => $post->likes->count(),
                     'comments_count' => $post->comments->count(),
+                    'type' => $post->type,
+
                     'recent_comments' => $post->comments->map(function ($comment) {
                         return [
                             'id' => $comment->id,
