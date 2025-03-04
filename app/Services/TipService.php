@@ -56,6 +56,13 @@ class TipService
             throw new Exception($e->getMessage());
         }
     }
+    public function getAllTips(){
+        try{
+        return $this->TipRepository->getAllTips();
+        }catch(Exception $e){
+            throw new Exception($e->getMessage());
+        }
+    }
     public function setTipResult($tipId, $result)
     {
         try {

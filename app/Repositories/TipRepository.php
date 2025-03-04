@@ -53,7 +53,11 @@ class TipRepository
 
         return $tipsWithUser;
     }
-
+    public function getAllTips()
+    {
+        $tips = Tip::with('bettingCompany', 'user')->orderBy('created_at', 'desc')->get();
+        return $tips;
+    }
 
     public function getAllRunningTips()
     {

@@ -72,4 +72,13 @@ class TipController extends Controller
             return ResponseHelper::error($e->getMessage(), 400);
         }
     }
+    public function getAllTips(){
+        try{
+            $tips=$this->tipService->getAllTips();
+            return ResponseHelper::success($tips, 'Tips fetched successfully', 200);
+        }catch(\Exception $e){
+            return ResponseHelper::error($e->getMessage(), 400);
+        }
+
+    }
 }

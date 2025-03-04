@@ -6,6 +6,7 @@ use App\Models\Follow;
 use App\Models\Post;
 use App\Models\Tip;
 use App\Models\User;
+use App\Models\UserActivity;
 use App\Models\UserSubscription;
 use Carbon\Carbon;
 use Exception;
@@ -52,9 +53,9 @@ class UserRepository
         $userFormatedtips = $this->tipRepository->getFreeTipofUser($userId);
         $graphicalData = $this->getUserMonthlyWinRateGraph($userId);
         //check does current user following this user
-        $isFollowing=Follow::where('follower_id',auth()->id())->where('following_id',$userId)->exists();
+        $isFollowing = Follow::where('follower_id', auth()->id())->where('following_id', $userId)->exists();
         $follower_count = Follow::where('following_id', $userId)->count();
-        $subscriber=UserSubscription::where('subscribed_to_id', $userId)->where('subscriber_id',auth()->id())->exists();
+        $subscriber = UserSubscription::where('subscribed_to_id', $userId)->where('subscriber_id', auth()->id())->exists();
         return [
             'user_id' => $userId,
             'user' => $user,
@@ -119,11 +120,13 @@ class UserRepository
         $userTips = $this->tipRepository->getFreeTipofUser($user->id);
         $userPosts = Post::where('user_id', $user->id)->orderBy('created_at', 'desc')->get();
         $userStatistics = $this->viewprofile($user->id);
+        $userActivity = UserActivity::where('user_id', $user->id)->orderBy('created_at', 'desc')->get();
         return [
             'user' => $user,
             'tips' => $userTips,
             'posts' => $userPosts,
-            'statistics' => $userStatistics
+            'statistics' => $userStatistics,
+            'userActivity' => $userActivity
         ];
     }
     public function findByEmail($email)
