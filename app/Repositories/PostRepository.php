@@ -69,7 +69,7 @@ class PostRepository
                     'user' => [
                         'id' => $post->user->id,
                         'username' => $post->user->username,
-                        'profile_picture' => $post->user->profile_picture ?? null,
+                        'profile_picture' => asset('storage/' . $post->user->profile_picture ?? '') ?? null,
                     ],
                     'timestamp' => $post->created_at->format('h:i A - m/d/Y'),
                     'content' => $post->content,
