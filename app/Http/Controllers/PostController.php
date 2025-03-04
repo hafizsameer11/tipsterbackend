@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Helpers\ResponseHelper;
 use App\Http\Requests\CommentRequest;
 use App\Http\Requests\PostRequest;
+use App\Models\Post;
 use App\Services\PostService;
 use Exception;
 use Illuminate\Http\Request;
@@ -109,5 +110,17 @@ class PostController extends Controller
         } catch (Exception $e) {
             return ResponseHelper::error($e->getMessage());
         }
+    }
+public function deletePost($id)
+    {
+        $post = Post::find($id);
+
+        if (!$post) {
+            return response()->json(['message' => 'Post not found'], 404);
+        }
+
+        $post->delete(); // Soft delete
+
+        return response()->json(['message' => 'Post deleted successfully']);
     }
 }

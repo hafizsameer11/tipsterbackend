@@ -25,34 +25,21 @@ class UserRepository
     {
         $now = Carbon::now();
         $thirtyDaysAgo = $now->subDays(30)->toDateString();
-
-        // Fetch user's tips from the last 30 days
         $userTips = Tip::where('user_id', $userId)
             ->where('created_at', '>=', $thirtyDaysAgo)
             ->orderBy('created_at', 'desc')
             ->get();
-
-        // Total Predictions (total tips in the last 30 days)
         $totalPredictions = $userTips->count();
-
-        // Total Wins (only 'win' results)
         $totalWins = $userTips->where('result', 'won')->count();
-
-        // Win Rate Calculation (if there are predictions)
         $winRate = $totalPredictions > 0 ? round(($totalWins / $totalPredictions) * 100, 2) : 0;
-
-        // Last 5 Wins (recent results)
         $lastFiveResults = $userTips->take(5)->pluck('result')->map(function ($result) {
             return strtoupper(substr($result, 0, 1)); // Convert result to first letter (W/L)
         })->toArray();
-
-        // Average Odds (only from winning tips)
         $totalOdds = $userTips->where('result', 'won')->sum('ods');
         $averageOdds = $totalWins > 0 ? round($totalOdds / $totalWins, 2) : 0;
         $user = User::find($userId);
         $userFormatedtips = $this->tipRepository->getFreeTipofUser($userId);
         $graphicalData = $this->getUserMonthlyWinRateGraph($userId);
-        //check does current user following this user
         $isFollowing = Follow::where('follower_id', auth()->id())->where('following_id', $userId)->exists();
         $follower_count = Follow::where('following_id', $userId)->count();
         $subscriber = UserSubscription::where('subscribed_to_id', $userId)->where('subscriber_id', auth()->id())->exists();

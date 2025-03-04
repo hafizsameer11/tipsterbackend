@@ -111,6 +111,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/like/{postId}', [PostController::class, 'likePost']); // Like a post
         Route::post('/unlike/{postId}', [PostController::class, 'unlikePost']); // Unlike a post
         Route::post('/create-comment/{postId}', [PostController::class, 'addComment']); // Add a comment
+        Route::get('/delete-post/{postId}', [PostController::class, 'deletePost']); // Get comments for a post});
     });
     Route::prefix('bank')->group(function () {
         Route::post('/create', [BankController::class, 'create']);
