@@ -38,7 +38,7 @@ class MessageController extends Controller
 
     public function getChatMessages($chatId)
     {
-        $messages = Message::where('chat_id', $chatId)->orderBy('created_at', 'asc')->get();
+        $messages = Message::where('chat_id', $chatId)->orderBy('created_at', 'desc')->get();
 
         return response()->json($messages);
     }
