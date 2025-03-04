@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Chat;
 use App\Models\Message;
 use Illuminate\Http\Request;
 
@@ -38,7 +39,8 @@ class MessageController extends Controller
 
     public function getChatMessages($chatId)
     {
-        $messages = Message::where('chat_id', $chatId)->orderBy('created_at', 'desc')->get();
+        $chat=Chat::where('user_id', $chatId)->first();
+        $messages = Message::where('chat_id', $chat->id)->orderBy('created_at', 'desc')->get();
 
         return response()->json($messages);
     }
