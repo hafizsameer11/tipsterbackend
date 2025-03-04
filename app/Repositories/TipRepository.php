@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Models\Tip;
 use App\Models\User;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\Auth;
 
@@ -55,11 +56,56 @@ class TipRepository
     }
     public function getAllTips()
     {
-        $tips = Tip::with('bettingCompany', 'user')->orderBy('created_at', 'desc')->get();
-        
-        return $tips;
-    }
+        $lastWeek = Carbon::now()->subWeek();
 
+        $tips = Tip::with('bettingCompany', 'user')->orderBy('created_at', 'desc')->get();
+        $totalUsers = User::count();
+        $totalUsersLastWeek = User::whereDate('created_at', '<', $lastWeek)->count();
+        //tipsters are the users having at least one tip
+        $tipsters = User::whereHas('tips')->count();
+        $tipstersLastWeek = User::whereHas('tips')->whereDate('created_at', '<', $lastWeek)->count();
+        $totalTips = $tips->count();
+        $totalTipsLastWeek = Tip::whereDate('created_at', '<', $lastWeek)->count();
+
+        $totalUsersChange = $this->calculatePercentageChange($totalUsers, $totalUsersLastWeek);
+        $tipstersChange = $this->calculatePercentageChange($tipsters, $tipstersLastWeek);
+        $totalTipsChange = $this->calculatePercentageChange($totalTips, $totalTipsLastWeek);
+
+        return [
+            'stats' => [
+                [
+                    'title' => 'Total Users',
+                    'value' => number_format($totalUsers),
+                    'change' => $totalUsersChange,
+                    'icon' => 'images.sidebarIcons.user',
+                    'color' => 'red',
+                ],
+                [
+                    'title' => 'Total Tipsters',
+                    'value' => number_format($tipsters),
+                    'change' => $tipstersChange,
+                    'icon' => 'images.sidebarIcons.user',
+                    'color' => 'red',
+                ],
+                [
+                    'title' => 'Total Tips',
+                    'value' => number_format($totalTips),
+                    'change' => $totalTipsChange,
+                    'icon' => 'images.sidebarIcons.user',
+                    'color' => 'red',
+                ],
+            
+            ],
+            'tips'=>$tips
+        ];
+    }
+    private function calculatePercentageChange($current, $previous)
+    {
+        if ($previous == 0) {
+            return $current > 0 ? 100 : 0; // If no previous users, assume 100% increase if new ones exist
+        }
+        return round((($current - $previous) / $previous) * 100, 2);
+    }
     public function getAllRunningTips()
     {
         $tips = Tip::where('result', 'running')
