@@ -122,6 +122,10 @@ class UserRepository
         if (!$user) {
             throw new Exception('User not found.');
         }
+        //calculate user running tips
+        $userTips=Tip::where('user_id', $user->id)->where('result', 'running')->count();
+
+        $user['running_tips']=$userTips;
         return $user;
     }
 
