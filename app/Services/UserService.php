@@ -89,6 +89,8 @@ class UserService
                 null,
                 "You have logged in successfully."
             );
+            $user->profile_picture = asset('storage/' . $user->profile_picture);
+
             return $user;
         } catch (Exception $e) {
             Log::error('Login error: ' . $e->getMessage());
