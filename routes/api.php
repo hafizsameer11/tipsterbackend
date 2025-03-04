@@ -151,11 +151,13 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/user/{userId}', [UserController::class, 'userDetails']);
         Route::get('/get-post-detail/{id}', [PostController::class, 'getPostDetail']);
         Route::post('/tip/update/{tipId}', [TipController::class, 'updateTip']); //only status and result
-        Route::get('/tip/get-all',[TipController::class,'getAllTips']);
+        Route::get('/tip/get-all', [TipController::class, 'getAllTips']);
         //rank management
         Route::get('rank/get-top-30-rankings', [RankingController::class, 'getTop30Rankings']);
         Route::post('rank/update-winner-amount', [RankingController::class, 'updateWinnersAmounts']);
         Route::get('rank/get-winners-amount', [RankingController::class, 'getWinnersAmount']);
         Route::get('rank/get-winners-amount-by-rank/{rank}', [RankingController::class, 'getWinnersAmountByRank']);
+        Route::post('admin/notifications/create', [NotificationController::class, 'createNotificationForUsers']);
+        Route::get('admin/notifications/get', [NotificationController::class, 'getAdminNotifications']);
     });
 });
