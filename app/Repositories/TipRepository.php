@@ -56,6 +56,31 @@ class TipRepository
     public function getAllTips()
     {
         $tips = Tip::with('bettingCompany', 'user')->orderBy('created_at', 'desc')->get();
+        $formattedTips = $tips->map(function ($tip) {
+            // Fetch all tips of the user
+            $userTotalTips = Tip::where('user_id', $tip->user_id)->count();
+            $userWonTips = Tip::where('user_id', $tip->user_id)->where('status', 'won')->count();
+
+            // Calculate win rate percentage
+            $winRate = $userTotalTips > 0 ? round(($userWonTips / $userTotalTips) * 100) : 0;
+
+            return [
+                "img" => asset('/storage/' . $tip->user->profile_picture), // Full URL of profile image
+                "name" => $tip->user->username,
+                "Walletimg" => asset('/storage/' .  $tip->bettingCompany->logo), // Full URL of betting company logo
+                "WalletName" => "Bitcoin Wallet", // Modify if needed
+                "odds" => $tip->ods,
+                "code" => $tip->codes,
+                "winRate" => (string) $winRate, // Convert to string as required
+                "date" => $tip->match_date, // Ensure correct date format
+                "status" => ucfirst($tip->status), // Capitalizing first letter
+                "approval" => $tip->status === "approved",
+                "id" => $tip->id, // Formatting ID
+                "category" => $tip->betting_category,
+                "bettingCompany" => $tip->bettingCompany->title,
+                "bettingCompanyImage" => asset('/storage/' . $tip->bettingCompany->logo),
+            ];
+        });
         return $tips;
     }
 
