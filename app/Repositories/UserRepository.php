@@ -38,6 +38,8 @@ class UserRepository
         $totalOdds = $userTips->where('result', 'won')->sum('ods');
         $averageOdds = $totalWins > 0 ? round($totalOdds / $totalWins, 2) : 0;
         $user = User::find($userId);
+        //add asset to profile picture
+        $user->profile_picture = asset('storage/' . $user->profile_picture);
         $userFormatedtips = $this->tipRepository->getFreeTipofUser($userId);
         $graphicalData = $this->getUserMonthlyWinRateGraph($userId);
         $isFollowing = Follow::where('follower_id', auth()->id())->where('following_id', $userId)->exists();
@@ -123,9 +125,9 @@ class UserRepository
             throw new Exception('User not found.');
         }
         //calculate user running tips
-        $userTips=Tip::where('user_id', $user->id)->where('result', 'running')->count();
+        $userTips = Tip::where('user_id', $user->id)->where('result', 'running')->count();
 
-        $user['running_tips']=$userTips;
+        $user['running_tips'] = $userTips;
         return $user;
     }
 
