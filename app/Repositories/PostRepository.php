@@ -99,7 +99,7 @@ class PostRepository
             $query->where('status', 'pending')->latest()->take(2); // Fetch latest 2 approved comments
         }])
             ->orderBy('created_at', 'desc')
-            ->where('status', 'pending')
+            ->where('status', 'under_review')
             ->get()
             ->map(function ($post) {
                 // Decode images JSON and structure them as separate fields
