@@ -65,4 +65,8 @@ class PostService
             throw new \Exception("Post Fetching Failed " . $e->getMessage());
         }
     }
+    public function getPostManagemtnData()
+    {
+        return $this->postRepository->getPostManagemtnData();
+    } 
 }

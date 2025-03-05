@@ -123,4 +123,13 @@ public function deletePost($id)
 
         return response()->json(['message' => 'Post deleted successfully']);
     }
+    public function getPostManagemtnData()
+    {
+        try {
+            $post = $this->postService->getPostManagemtnData();
+            return ResponseHelper::success($post, 'Post fetched successfully');
+        } catch (Exception $e) {
+            return ResponseHelper::error($e->getMessage());
+        }
+    }
 }

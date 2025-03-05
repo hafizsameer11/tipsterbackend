@@ -159,5 +159,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('rank/get-winners-amount-by-rank/{rank}', [RankingController::class, 'getWinnersAmountByRank']);
         Route::post('admin/notifications/create', [NotificationController::class, 'createNotificationForUsers']);
         Route::get('admin/notifications/get', [NotificationController::class, 'getAdminNotifications']);
+
+        Route::get('admin/get-post-management-data', [PostController::class, 'getPostManagemtnData']);
     });
 });

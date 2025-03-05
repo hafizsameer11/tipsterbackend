@@ -320,7 +320,8 @@ class PostRepository
                     'change' => $this->calculatePercentageChange($adminPost, $adminPostLastWeek),
                     'icon' => 'images.sidebarIcons.post',
                     'color' => 'red',
-                ]
+                ],
+                'posts' => $posts
             ]
         ];
         //first have to calculate the admin post  total post total likes total shares total comments totoal views
