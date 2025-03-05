@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Repositories\PostRepository;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class PostService
 {
@@ -16,7 +17,13 @@ class PostService
 
     public function createPost($data)
     {
-        return $this->postRepository->createPost($data);
+       try{
+        $post =   $this->postRepository->createPost($data);
+        return $post;
+       }catch(\Exception $e){
+           Log::error('Error creating post: ' . $e->getMessage());
+           throw new \Exception('Error creating post: ' . $e->getMessage());
+       }
     }
 
     public function getAllPosts()
