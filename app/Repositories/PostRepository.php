@@ -93,13 +93,13 @@ class PostRepository
             });
     }
 
-    public function getAllPendingPosts()
+    public function getAllPostOnStatus($status)
     {
         return Post::with(['user', 'likes', 'comments' => function ($query) {
             $query->where('status', 'pending')->latest()->take(2); // Fetch latest 2 approved comments
         }])
             ->orderBy('created_at', 'desc')
-            ->where('status', 'under_review')
+            ->where('status', $status)
             ->get()
             ->map(function ($post) {
                 // Decode images JSON and structure them as separate fields
@@ -276,7 +276,8 @@ class PostRepository
         $totalCommentsLastWeek = Comment::where('created_at', '<', $lastWeek)->count();
         $viewCount = Post::sum('view_count');
         $viewCountLastWeek = Post::where('created_at', '<', $lastWeek)->sum('view_count');
-        $posts = $this->getAllPendingPosts();
+        $posts = $this->getAllPostOnStatus('under_review');
+        $approvedPosts = $this->getAllPostOnStatus('approved');
         return [
             'stats' => [
                 [
@@ -321,7 +322,8 @@ class PostRepository
                     'icon' => 'images.sidebarIcons.post',
                     'color' => 'red',
                 ],
-                'posts' => $posts
+                'pendingPosts' => $posts,
+                'approvedPost' => $approvedPosts
             ]
         ];
         //first have to calculate the admin post  total post total likes total shares total comments totoal views
