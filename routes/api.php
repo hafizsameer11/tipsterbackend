@@ -110,7 +110,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/user-post/{userId}', [PostController::class, 'getPostForUser']); // Get user-specific posts
         Route::get('/like/{postId}', [PostController::class, 'likePost']); // Like a post
         Route::post('/unlike/{postId}', [PostController::class, 'unlikePost']); // Unlike a post
-        Route::post('/create-comment/{postId}', [PostController::class, 'addComment']); // Add a comment
+        Route::post('/create-comment', [PostController::class, 'addComment']); // Add a comment
         Route::get('/delete-post/{postId}', [PostController::class, 'deletePost']); // Get comments for a post});
         Route::get('approvePost/{postId}', [PostController::class, 'approvePost']);
     });
