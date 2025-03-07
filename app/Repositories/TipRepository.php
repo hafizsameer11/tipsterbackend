@@ -121,13 +121,9 @@ class TipRepository
             $totalTips = $allTips->count();
             $lostTips = $allTips->where('result', 'loss')->count();
             $winRate = $totalTips > 0 ? round((($totalTips - $lostTips) / $totalTips) * 100, 2) : 0;
-
-            // Get last 5 tip results
             $lastFiveResults = $allTips->take(5)->pluck('result')->map(function ($result) {
                 return strtoupper(substr($result, 0, 1)); // Extract first letter and convert to uppercase
             })->toArray();
-
-            // Attach user details to each tip
             $tipsWithUser = $userTips->map(function ($tip) use ($user, $winRate, $lastFiveResults) {
                 return array_merge($tip->toArray(), [
                     'user' => [
