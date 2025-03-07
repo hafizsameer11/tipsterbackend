@@ -44,7 +44,8 @@ class ResetPasswordService
     }
     public function resetPassword(string $email, string $password)
     {
-        $user = $this->userRepository->findByEmail($email);
+        $consent = true;
+        $user = $this->userRepository->findByEmail($email, $consent);
         if (!$user) {
             throw new Exception('User not found');
         }

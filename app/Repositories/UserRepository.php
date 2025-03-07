@@ -118,19 +118,21 @@ class UserRepository
             'userActivity' => $userActivity
         ];
     }
-    public function findByEmail($email)
+    public function findByEmail($email, $consent = false)
     {
         $user = User::where('email', $email)->first();
         if (!$user) {
             throw new Exception('User not found.');
         }
         //calculate user running tips
-        $userTips = Tip::where('user_id', $user->id)->where('result', 'running')->count();
-        if ($userTips > 0) {
-
-            $user['running_tips'] = $userTips;
+        //skip user tips part if consent is true
+        if (!$consent) {
+            $userTips = Tip::where('user_id', $user->id)->where('result', 'running')->count();
+            if ($userTips > 0) {
+                $user['running_tips'] = $userTips;
+            }
         }
-        $user['running_tips'] = [];
+
         return $user;
     }
 
