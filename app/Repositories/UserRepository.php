@@ -126,8 +126,11 @@ class UserRepository
         }
         //calculate user running tips
         $userTips = Tip::where('user_id', $user->id)->where('result', 'running')->count();
+        if ($userTips > 0) {
 
-        $user['running_tips'] = $userTips;
+            $user['running_tips'] = $userTips;
+        }
+        $user['running_tips'] = [];
         return $user;
     }
 
