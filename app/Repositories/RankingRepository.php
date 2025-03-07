@@ -83,50 +83,58 @@ class RankingRepository
      * Get top 30 users based on weekly rankings
      */
     public function getTop30Rankings()
-    {
-        $now = Carbon::now();
-        $startOfWeek = $now->startOfWeek()->toDateString();
-        $currentTime = $now->toDateTimeString();
+{
+    $now = Carbon::now();
+    $startOfWeek = $now->startOfWeek()->toDateString();
+    $currentTime = $now->toDateTimeString();
 
-        // Fetch all users and calculate their weekly points dynamically
-        $allUsers = User::all();
-        $rankings = [];
+    // Fetch all users with their tips in the required time frame
+    $allUsers = User::all();
+    $rankings = [];
 
-        foreach ($allUsers as $user) {
-            $userTips = Tip::where('user_id', $user->id)
-                ->whereBetween('created_at', [$startOfWeek, $currentTime])
-                ->get();
+    foreach ($allUsers as $user) {
+        // Fetch tips for the current user in the weekly range
+        $userTips = Tip::where('user_id', $user->id)
+            ->whereBetween('created_at', [$startOfWeek, $currentTime])
+            ->get();
 
-            $totalPoints = $userTips->where('result', 'won')->sum('ods');
-            $totalTips = $userTips->count();
-            $lostTips = $userTips->where('result', 'loss')->count();
-            $winRate = $totalTips > 0 ? round((($totalTips - $lostTips) / $totalTips) * 100, 2) : 0;
-            $lastFiveResults = $userTips->sortByDesc('created_at')->take(5)->pluck('result')->map(function ($result) {
-                return strtoupper(substr($result, 0, 1)); // Extract first letter and convert to uppercase
-            })->toArray();
+        // Calculate total points (only won bets count)
+        $totalPoints = $userTips->where('result', 'won')->sum('ods');
 
-            if ($totalPoints > 0) {
-                $rankings[$user->id] = [
-                    'user_id' => $user->id,
-                    'username' => $user->username,
-                    'profile_picture' => $user->profile_picture ?? null,
-                    'points' => $totalPoints,
-                    'win_rate' => $winRate . '%',
-                    'last_five' => $lastFiveResults
-                ];
-            }
+        // Calculate win rate
+        $totalTips = $userTips->count();
+        $lostTips = $userTips->where('result', 'loss')->count();
+        $winRate = $totalTips > 0 ? round((($totalTips - $lostTips) / $totalTips) * 100, 2) : 0;
+
+        // Fetch last five results
+        $lastFiveResults = $userTips->sortByDesc('created_at')->take(5)->pluck('result')->map(function ($result) {
+            return strtoupper(substr($result, 0, 1)); // First letter in uppercase (W, L, etc.)
+        })->toArray();
+
+        // Add user to rankings only if they have points
+        if ($totalPoints > 0) {
+            $rankings[] = [
+                'user_id' => $user->id,
+                'username' => $user->username,
+                'profile_picture' => $user->profile_picture ?? null,
+                'points' => $totalPoints,
+                'win_rate' => $winRate . '%',
+                'last_five' => $lastFiveResults
+            ];
         }
-
-        // Sort rankings by total points in descending order
-        usort($rankings, function ($a, $b) {
-            return $b['points'] <=> $a['points'];
-        });
-
-        // Assign ranks
-        foreach ($rankings as $index => &$user) {
-            $user['rank'] = $index + 1;
-        }
-
-        return collect(array_slice($rankings, 0, 30)); // Return top 30 as a collection
     }
+
+    // Sort rankings based on points in descending order
+    usort($rankings, function ($a, $b) {
+        return $b['points'] <=> $a['points'];
+    });
+
+    // Assign ranks after sorting
+    foreach ($rankings as $index => &$user) {
+        $user['rank'] = $index + 1;
+    }
+
+    return collect(array_slice($rankings, 0, 30)); // Return top 30 as a collection
+}
+
 }
