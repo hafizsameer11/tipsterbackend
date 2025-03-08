@@ -60,29 +60,44 @@ class RankingRepository
         // Sort users by highest points
         arsort($rankings);
 
+        // If user has no tips, return default ranking
+        if (!array_key_exists($userId, $rankings)) {
+            $user = User::find($userId);
+            return [
+                'user_id' => $userId,
+                'rank' => 0,
+                'points' => 0,
+                'week_start' => $startOfWeek,
+                'status' => 'live',
+                'username' => $user ? $user->username : 'Unknown',
+                'profile_picture' => $user ? $user->profile_picture : null,
+                'win_rate' => '0%',
+            ];
+        }
+
         // Assign ranks dynamically
         $rank = 1;
         foreach ($rankings as $id => $points) {
-            // $tips
-            $user = User::find($userId);
-
-            // Fetch user's tips to calculate win rate
-            $tips = Tip::where('user_id', $userId)
-                ->whereBetween('created_at', [$startOfWeek, $currentTime])
-                ->get();
-
-            $totalTips = $tips->count();
-            $lostTips = $tips->where('result', 'loss')->count();
-            $winRate = $totalTips > 0 ? round((($totalTips - $lostTips) / $totalTips) * 100, 2) : 0;
             if ($id == $userId) {
+                $user = User::find($userId);
+
+                // Fetch user's tips to calculate win rate
+                $tips = Tip::where('user_id', $userId)
+                    ->whereBetween('created_at', [$startOfWeek, $currentTime])
+                    ->get();
+
+                $totalTips = $tips->count();
+                $lostTips = $tips->where('result', 'loss')->count();
+                $winRate = $totalTips > 0 ? round((($totalTips - $lostTips) / $totalTips) * 100, 2) : 0;
+
                 return [
                     'user_id' => $userId,
                     'rank' => $rank,
                     'points' => $points,
                     'week_start' => $startOfWeek,
                     'status' => 'live',
-                    'username' => User::find($userId)->username,
-                    'profile_picture' => User::find($userId)->profile_picture,
+                    'username' => $user->username,
+                    'profile_picture' => $user->profile_picture,
                     'win_rate' => $winRate . '%',
                 ];
             }
@@ -91,6 +106,7 @@ class RankingRepository
 
         return null;
     }
+
 
     /**
      * Get top 30 users based on weekly rankings
