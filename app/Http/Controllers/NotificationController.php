@@ -33,7 +33,7 @@ class NotificationController extends Controller
 
     public function createNotificationForUsers(Request $request)
     {
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'user_ids' => 'required|array', // Accept multiple user IDs
             'user_ids.*' => 'exists:users,id', // Validate each user ID
             'heading' => 'required|string|max:255', // Heading from admin
@@ -41,9 +41,18 @@ class NotificationController extends Controller
             'attachment' => 'nullable|file|mimes:jpg,png,pdf,doc,docx|max:2048', // Handle attachments
         ]);
 
+        // Check if validation fails
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Validation failed',
+                'errors' => $validator->errors() // Send validation error messages
+            ], 422);
+        }
+
+
         $notifications = [];
 
-        // Handle file upload if attachment is provided
         $attachmentPath = null;
         if ($request->hasFile('attachment')) {
             $attachmentPath = $request->file('attachment')->store('notifications', 'public');
@@ -73,7 +82,7 @@ class NotificationController extends Controller
             'data' => $notifications
         ], 201);
     }
-    public function  getAdminNotifications  ()
+    public function  getAdminNotifications()
     {
         $user = Auth::user();
         $userId = $user->id;
