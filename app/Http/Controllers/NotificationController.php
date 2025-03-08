@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Helpers\ResponseHelper;
 use App\Models\Notification;
+use App\Models\UserActivity;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -92,5 +93,10 @@ class NotificationController extends Controller
             ->get();
 
         return ResponseHelper::success($notifications, 'Notifications retrieved successfully');
+    }
+    public function getAllUserActivity()
+    {
+        $activities = UserActivity::all();
+        return ResponseHelper::success($activities, 'Activities retrieved successfully');
     }
 }

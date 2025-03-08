@@ -164,5 +164,6 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('notifications/get', [NotificationController::class, 'getAdminNotifications']);
 
         Route::get('get-post-management-data', [PostController::class, 'getPostManagemtnData']);
+        Route::get('get-app-actiity',[NotificationController::class,'getAllUserActivity']);
     });
 });
