@@ -69,6 +69,16 @@ class RankingController extends Controller
         }
         // return $this->rankingService->getTop30Rankings();
     }
+    public function getTop10Rankings()
+    {
+        try {
+            $rankings = $this->rankingService->getTop10Rankings();
+            return ResponseHelper::success($rankings, 'Rankings fetched successfully');
+        } catch (\Exception $e) {
+            return ResponseHelper::error($e->getMessage(), 400);
+        }
+        // return $this->rankingService->getTop30Rankings();
+    }
 
     public function getUserRanking()
     {

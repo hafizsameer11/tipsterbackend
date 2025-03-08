@@ -143,4 +143,67 @@ class RankingRepository
 
         return collect(array_slice($rankedUsers, 0, 30)); // Return as a collection
     }
+    public function getTop10Rankings()
+    {
+        $now = Carbon::now();
+        $startOfWeek = Carbon::now()->startOfWeek()->toDateString();
+        $currentTime = $now->toDateTimeString();
+
+        // Fetch all users
+        $allUsers = User::with('bankAccount')->get();
+        $rankings = [];
+
+        foreach ($allUsers as $user) {
+            // Calculate total points (won tips sum)
+            $totalPoints = Tip::where('user_id', $user->id)
+                ->whereBetween('created_at', [$startOfWeek, $currentTime])
+                ->where('result', 'won')
+                ->sum('ods');
+
+            if ($totalPoints > 0) {
+                $rankings[$user->id] = $totalPoints;
+            }
+        }
+
+        // Sort rankings in descending order
+        arsort($rankings);
+        $rankedUsers = [];
+        $rank = 1;
+
+        // Fetch Winner Amounts and map by rank
+        $winnerAmounts = WinnersAmount::all()->keyBy('rank');
+
+        foreach ($rankings as $userId => $points) {
+            $user = User::with('bankAccount')->find($userId);
+
+            // Fetch user's tips to calculate win rate
+            $tips = Tip::where('user_id', $userId)
+                ->whereBetween('created_at', [$startOfWeek, $currentTime])
+                ->get();
+
+            $totalTips = $tips->count();
+            $lostTips = $tips->where('result', 'loss')->count();
+            $winRate = $totalTips > 0 ? round((($totalTips - $lostTips) / $totalTips) * 100, 2) : 0;
+
+            // Get Win Amount from WinnersAmount Model using rank
+            $winAmount = $winnerAmounts[$rank] ?? null;
+
+            $rankedUsers[] = [
+                'user_id' => $userId,
+                'username' => $user->username,
+                'profile_picture' => $user->profile_picture ?? null,
+                'rank' => $rank,
+                'points' => $points,
+                'win_rate' => $winRate . '%',
+                'win_amount' => $winAmount ? $winAmount->amount : null, // Fetch amount
+                'currency' => $winAmount ? $winAmount->currency : null, // Fetch currency
+                'bank_account' => $user->bankAccount // Load bankAccount relation
+            ];
+
+            $rank++;
+        }
+
+        return collect(array_slice($rankedUsers, 0, 10)); // Return top 10
+    }
+
 }

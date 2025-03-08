@@ -81,4 +81,8 @@ class User extends Authenticatable
     {
         return $this->hasMany(Tip::class);
     }
+    public function bankAccount()
+    {
+        return $this->hasOne(BankDetail::class);
+    }
 }

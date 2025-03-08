@@ -54,6 +54,14 @@ class RankingService
             throw new Exception($e->getMessage());
         }
     }
+    public function getTop10Rankings()
+    {
+        try {
+            return $this->RankingRepository->getTop10Rankings();
+        } catch (Exception $e) {
+            throw new Exception($e->getMessage());
+        }
+    }
     public function getUserRanking($userId)
     {
         try {
