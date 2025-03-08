@@ -62,6 +62,17 @@ class RankingRepository
         // Assign ranks dynamically
         $rank = 1;
         foreach ($rankings as $id => $points) {
+            // $tips
+            $user = User::find($userId);
+
+            // Fetch user's tips to calculate win rate
+            $tips = Tip::where('user_id', $userId)
+                ->whereBetween('created_at', [$startOfWeek, $currentTime])
+                ->get();
+
+            $totalTips = $tips->count();
+            $lostTips = $tips->where('result', 'loss')->count();
+            $winRate = $totalTips > 0 ? round((($totalTips - $lostTips) / $totalTips) * 100, 2) : 0;
             if ($id == $userId) {
                 return [
                     'user_id' => $userId,
@@ -70,7 +81,8 @@ class RankingRepository
                     'week_start' => $startOfWeek,
                     'status' => 'live',
                     'username' => User::find($userId)->username,
-                    'profile_picture' => User::find($userId)->profile_picture
+                    'profile_picture' => User::find($userId)->profile_picture,
+                    'win_rate' => $winRate . '%',
                 ];
             }
             $rank++;
@@ -83,53 +95,52 @@ class RankingRepository
      * Get top 30 users based on weekly rankings
      */
     public function getTop30Rankings()
-{
-    $now = Carbon::now();
-    $startOfWeek = Carbon::now()->startOfWeek()->toDateString();
-    $currentTime = $now->toDateTimeString();
+    {
+        $now = Carbon::now();
+        $startOfWeek = Carbon::now()->startOfWeek()->toDateString();
+        $currentTime = $now->toDateTimeString();
 
-    // Fetch all users and calculate their weekly points dynamically
-    $allUsers = User::all();
-    $rankings = [];
+        // Fetch all users and calculate their weekly points dynamically
+        $allUsers = User::all();
+        $rankings = [];
 
-    foreach ($allUsers as $user) {
-        $totalPoints = Tip::where('user_id', $user->id)
-            ->whereBetween('created_at', [$startOfWeek, $currentTime])
-            ->where('result', 'won')
-            ->sum('ods');
+        foreach ($allUsers as $user) {
+            $totalPoints = Tip::where('user_id', $user->id)
+                ->whereBetween('created_at', [$startOfWeek, $currentTime])
+                ->where('result', 'won')
+                ->sum('ods');
 
-        if ($totalPoints > 0) {
-            $rankings[$user->id] = $totalPoints;
+            if ($totalPoints > 0) {
+                $rankings[$user->id] = $totalPoints;
+            }
         }
+
+        arsort($rankings);
+        $rankedUsers = [];
+        $rank = 1;
+
+        foreach ($rankings as $userId => $points) {
+            $user = User::find($userId);
+
+            // Fetch user's tips to calculate win rate
+            $tips = Tip::where('user_id', $userId)
+                ->whereBetween('created_at', [$startOfWeek, $currentTime])
+                ->get();
+
+            $totalTips = $tips->count();
+            $lostTips = $tips->where('result', 'loss')->count();
+            $winRate = $totalTips > 0 ? round((($totalTips - $lostTips) / $totalTips) * 100, 2) : 0;
+
+            $rankedUsers[] = [
+                'user_id' => $userId,
+                'username' => $user->username,
+                'profile_picture' => $user->profile_picture ?? null,
+                'rank' => $rank++,
+                'points' => $points,
+                'win_rate' => $winRate . '%' // Adding win rate
+            ];
+        }
+
+        return collect(array_slice($rankedUsers, 0, 30)); // Return as a collection
     }
-
-    arsort($rankings);
-    $rankedUsers = [];
-    $rank = 1;
-
-    foreach ($rankings as $userId => $points) {
-        $user = User::find($userId);
-
-        // Fetch user's tips to calculate win rate
-        $tips = Tip::where('user_id', $userId)
-            ->whereBetween('created_at', [$startOfWeek, $currentTime])
-            ->get();
-
-        $totalTips = $tips->count();
-        $lostTips = $tips->where('result', 'loss')->count();
-        $winRate = $totalTips > 0 ? round((($totalTips - $lostTips) / $totalTips) * 100, 2) : 0;
-
-        $rankedUsers[] = [
-            'user_id' => $userId,
-            'username' => $user->username,
-            'profile_picture' => $user->profile_picture ?? null,
-            'rank' => $rank++,
-            'points' => $points,
-            'win_rate' => $winRate . '%' // Adding win rate
-        ];
-    }
-
-    return collect(array_slice($rankedUsers, 0, 30)); // Return as a collection
-}
-
 }
