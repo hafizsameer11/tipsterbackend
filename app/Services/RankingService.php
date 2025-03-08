@@ -70,4 +70,12 @@ class RankingService
             throw new Exception($e->getMessage());
         }
     }
+    public function payRankingPayment($userId, $amount, $rank)
+    {
+        try {
+            return $this->RankingRepository->payRankingPayment($userId, $amount, $rank);
+        } catch (Exception $e) {
+            throw new Exception($e->getMessage());
+        }
+    }
 }

@@ -90,4 +90,16 @@ class RankingController extends Controller
             return ResponseHelper::error($e->getMessage(), 400);
         }
     }
+    public function payRankingPayment(Request $request)
+    {
+        try {
+            $userId = $request->user_id;
+            $amount = $request->amount;
+            $rank = $request->rank;
+            $ranking = $this->rankingService->payRankingPayment($userId, $amount, $rank);
+            return ResponseHelper::success($ranking, 'Ranking payment created successfully', 201);
+        } catch (\Exception $e) {
+            return ResponseHelper::error($e->getMessage(), 400);
+        }
+    }
 }

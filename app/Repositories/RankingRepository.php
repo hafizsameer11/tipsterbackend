@@ -177,9 +177,9 @@ class RankingRepository
         foreach ($rankings as $userId => $points) {
             $user = User::with('bankAccount')->find($userId);
             $rankingPayment = RankingPayment::where('user_id', $userId)->whereBetween('created_at', [$startOfWeek, $currentTime])->first();
-            $paidStatus=false;
-            if($rankingPayment){
-                $paidStatus=true;
+            $paidStatus = false;
+            if ($rankingPayment) {
+                $paidStatus = true;
             }
             // Fetch user's tips to calculate win rate
             $tips = Tip::where('user_id', $userId)
@@ -210,5 +210,21 @@ class RankingRepository
         }
 
         return collect(array_slice($rankedUsers, 0, 10)); // Return top 10
+    }
+    public function payRankingPayment($userId, $amount, $rank)
+    {
+        $now = Carbon::now();
+        $startOfWeek = Carbon::now()->startOfWeek()->toDateString();
+        $currentTime = $now->toDateTimeString();
+        $rankingPayment = RankingPayment::where('user_id', $userId)->whereBetween('created_at', [$startOfWeek, $currentTime])->first();
+        if ($rankingPayment) {
+            return $rankingPayment;
+        }
+        return RankingPayment::create([
+            'user_id' => $userId,
+            'amount' => $amount,
+            'rank' => $rank,
+            'status' => 'paid',
+        ]);
     }
 }
