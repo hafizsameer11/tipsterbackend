@@ -160,8 +160,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('rank/get-winners-amount', [RankingController::class, 'getWinnersAmount']);
         Route::get('rank/get-winners-amount-by-rank/{rank}', [RankingController::class, 'getWinnersAmountByRank']);
         Route::post('rank/pay-rank-amount', [RankingController::class, 'payRankingPayment']);
-        Route::post('admin/notifications/create', [NotificationController::class, 'createNotificationForUsers']);
-        Route::get('admin/notifications/get', [NotificationController::class, 'getAdminNotifications']);
+        Route::post('notifications/create', [NotificationController::class, 'createNotificationForUsers']);
+        Route::get('notifications/get', [NotificationController::class, 'getAdminNotifications']);
 
         Route::get('get-post-management-data', [PostController::class, 'getPostManagemtnData']);
     });
