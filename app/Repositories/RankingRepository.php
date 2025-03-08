@@ -36,10 +36,11 @@ class RankingRepository
     {
         return WinnersAmount::where('rank', '=', $rank)->first();
     }
-    public function getUserRanking($userId)
+    public function getUserRanking($userId,$weeksAgo = 1)
     {
         $now = Carbon::now();
-        $startOfWeek = Carbon::now()->startOfWeek()->toDateString();
+        $startOfWeek = Carbon::now()->subDays($weeksAgo)->startOfWeek()->toDateString();
+
         $currentTime = $now->toDateTimeString(); // Get current time for live ranking
 
         // Fetch all users and calculate their weekly points dynamically
@@ -111,10 +112,11 @@ class RankingRepository
     /**
      * Get top 30 users based on weekly rankings
      */
-    public function getTop30Rankings()
+    public function getTop30Rankings($weeksAgo = 1)
     {
         $now = Carbon::now();
-        $startOfWeek = Carbon::now()->startOfWeek()->toDateString();
+        $startOfWeek = Carbon::now()->subDays($weeksAgo)->startOfWeek()->toDateString();
+
         $currentTime = $now->toDateTimeString();
 
         // Fetch all users and calculate their weekly points dynamically

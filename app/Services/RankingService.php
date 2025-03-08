@@ -46,10 +46,10 @@ class RankingService
         }
     }
 
-    public function getTop30Rankings()
+    public function getTop30Rankings($weeksAgo = 1)
     {
         try {
-            return $this->RankingRepository->getTop30Rankings();
+            return $this->RankingRepository->getTop30Rankings($weeksAgo);
         } catch (Exception $e) {
             throw new Exception($e->getMessage());
         }
@@ -62,10 +62,10 @@ class RankingService
             throw new Exception($e->getMessage());
         }
     }
-    public function getUserRanking($userId)
+    public function getUserRanking($userId, $weeksAgo)
     {
         try {
-            return $this->RankingRepository->getUserRanking($userId);
+            return $this->RankingRepository->getUserRanking($userId, $weeksAgo);
         } catch (Exception $e) {
             throw new Exception($e->getMessage());
         }

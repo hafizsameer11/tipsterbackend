@@ -59,10 +59,12 @@ class RankingController extends Controller
             return ResponseHelper::error($e->getMessage(), 400);
         }
     }
-    public function getTop30Rankings()
+    public function getTop30Rankings(Request $request)
     {
         try {
-            $rankings = $this->rankingService->getTop30Rankings();
+            $weeksAgo = $request->query('weeksAgo', 1); // Default to 1 week
+
+            $rankings = $this->rankingService->getTop30Rankings($weeksAgo);
             return ResponseHelper::success($rankings, 'Rankings fetched successfully');
         } catch (\Exception $e) {
             return ResponseHelper::error($e->getMessage(), 400);
@@ -80,11 +82,13 @@ class RankingController extends Controller
         // return $this->rankingService->getTop30Rankings();
     }
 
-    public function getUserRanking()
+    public function getUserRanking(Request $request)
     {
         try {
+            $weeksAgo = $request->query('weeksAgo', 1); // Default to 1 week
+
             $user = Auth::user();
-            $ranking = $this->rankingService->getUserRanking($user->id);
+            $ranking = $this->rankingService->getUserRanking($user->id, $weeksAgo);
             return ResponseHelper::success($ranking, 'Ranking fetched successfully');
         } catch (\Exception $e) {
             return ResponseHelper::error($e->getMessage(), 400);
