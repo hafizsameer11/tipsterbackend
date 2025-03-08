@@ -14,6 +14,11 @@ use Illuminate\Support\Facades\Log;
 
 class PostRepository
 {
+    protected $RankingRepository;
+    public function __construct(RankingRepository $RankingRepository)
+    {
+        $this->RankingRepository = $RankingRepository;
+    }
     public function createPost($data)
     {
         Log::info('Received Post Data:', $data); // Log input data
@@ -61,13 +66,15 @@ class PostRepository
                 foreach ($decodedImages as $index => $imagePath) {
                     $formattedImages['image_' . ($index + 1)] = asset('storage/' . $imagePath) ?? null;
                 }
-
+                $userRank=$this->RankingRepository->getUserRanking($post->user_id);
+                $userRank=$userRank['rank'] ??0;
                 return array_merge([
                     'id' => $post->id,
                     'user' => [
                         'id' => $post->user->id,
                         'username' => $post->user->username,
                         'profile_picture' => asset('storage/' . $post->user->profile_picture ?? '') ?? null,
+                        'rank' => $userRank,
                     ],
                     'timestamp' => $post->created_at->format('h:i A - m/d/Y'),
                     'content' => $post->content,
