@@ -96,7 +96,7 @@ class NotificationController extends Controller
     }
     public function getAllUserActivity()
     {
-        $activities = UserActivity::all();
+        $activities = UserActivity::with('user')->orderBy('created_at', 'desc')->get();
         return ResponseHelper::success($activities, 'Activities retrieved successfully');
     }
 }
