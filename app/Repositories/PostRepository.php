@@ -50,9 +50,7 @@ class PostRepository
 
     public function getAllPosts()
     {
-        return Post::with(['user', 'likes', 'comments' => function ($query) {
-            $query->where('status', 'approved')->latest()->take(2); // Fetch latest 2 approved comments
-        }])
+        return Post::with(['user', 'likes', 'comments'])
             ->orderBy('created_at', 'desc')
             ->get()
             ->map(function ($post) {
