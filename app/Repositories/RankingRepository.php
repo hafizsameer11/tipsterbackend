@@ -2,6 +2,7 @@
 
 namespace App\Repositories;
 
+use App\Models\RankingPayment;
 use App\Models\Tip;
 use App\Models\User;
 use App\Models\WinnersAmount;
@@ -175,7 +176,11 @@ class RankingRepository
 
         foreach ($rankings as $userId => $points) {
             $user = User::with('bankAccount')->find($userId);
-
+            $rankingPayment = RankingPayment::where('user_id', $userId)->whereBetween('created_at', [$startOfWeek, $currentTime])->first();
+            $paidStatus=false;
+            if($rankingPayment){
+                $paidStatus=true;
+            }
             // Fetch user's tips to calculate win rate
             $tips = Tip::where('user_id', $userId)
                 ->whereBetween('created_at', [$startOfWeek, $currentTime])
@@ -197,7 +202,8 @@ class RankingRepository
                 'win_rate' => $winRate . '%',
                 'win_amount' => $winAmount ? $winAmount->amount : null, // Fetch amount
                 'currency' => $winAmount ? $winAmount->currency : null, // Fetch currency
-                'bank_account' => $user->bankAccount // Load bankAccount relation
+                'bank_account' => $user->bankAccount, // Load bankAccount relation,
+                'paid_status' => $paidStatus,
             ];
 
             $rank++;
@@ -205,5 +211,4 @@ class RankingRepository
 
         return collect(array_slice($rankedUsers, 0, 10)); // Return top 10
     }
-
 }
