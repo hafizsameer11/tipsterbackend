@@ -43,6 +43,7 @@ class UserRepository
         $userFormatedtips = $this->tipRepository->getFreeTipofUser($userId);
         $graphicalData = $this->getUserMonthlyWinRateGraph($userId);
         $isFollowing = Follow::where('follower_id', auth()->id())->where('following_id', $userId)->exists();
+        $isSubscribed = UserSubscription::where('subscribed_to_id', $userId)->where('subscriber_id', auth()->id())->exists();
         $follower_count = Follow::where('following_id', $userId)->count();
         $subscriber = UserSubscription::where('subscribed_to_id', $userId)->where('subscriber_id', auth()->id())->exists();
         return [
@@ -57,7 +58,8 @@ class UserRepository
             'graphicalData' => $graphicalData,
             'isFollowing' => $isFollowing,
             'follower_count' => $follower_count,
-            'subscriber' => $subscriber
+            'subscriber' => $subscriber,
+            'isSubscribed' => $isSubscribed
         ];
     }
 

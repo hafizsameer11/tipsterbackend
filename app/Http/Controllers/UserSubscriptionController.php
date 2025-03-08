@@ -15,22 +15,27 @@ class UserSubscriptionController extends Controller
             'subscribed_to_id' => 'required|exists:users,id|different:subscriber_id'
         ]);
 
-        $exists = UserSubscription::where([
+        // Check if the user is already subscribed
+        $subscription = UserSubscription::where([
             'subscriber_id' => $request->subscriber_id,
             'subscribed_to_id' => $request->subscribed_to_id,
-        ])->exists();
+        ])->first();
 
-        if ($exists) {
-            return ResponseHelper::error('You are already subscribed to this user.');
+        if ($subscription) {
+            // If exists, unsubscribe the user
+            $subscription->delete();
+            return ResponseHelper::success(null, 'You have unsubscribed from this user.');
         }
 
-        $subscription = UserSubscription::create([
+        // Otherwise, subscribe the user
+        $newSubscription = UserSubscription::create([
             'subscriber_id' => $request->subscriber_id,
             'subscribed_to_id' => $request->subscribed_to_id,
         ]);
 
-        return ResponseHelper::success($subscription, 'Subscription successful.');
+        return ResponseHelper::success($newSubscription, 'Subscription successful.');
     }
+
 
     // Unsubscribe from a user
     public function unsubscribe(Request $request)
