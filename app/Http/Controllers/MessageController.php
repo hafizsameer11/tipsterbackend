@@ -8,6 +8,34 @@ use Illuminate\Http\Request;
 
 class MessageController extends Controller
 {
+    public function sendMessageforAdmin(Request $request)
+    {
+        $request->validate([
+            'chat_id' => 'required|exists:chats,id',
+            'sender_type' => 'required|in:user,admin',
+            'content' => 'nullable|string',
+            'attachment' => 'nullable|file|mimes:jpg,png,pdf,docx',
+        ]);
+
+        $messageData = [
+            'chat_id' => $request->chat_id,
+            'sender_type' => $request->sender_type,
+            'content' => $request->content,
+        ];
+
+        // Handle file attachment
+        if ($request->hasFile('attachment')) {
+            $filePath = $request->file('attachment')->store('chat_attachments', 'public');
+            $messageData['attachment'] = asset('storage/' . $filePath);
+        }
+
+        $message = Message::create($messageData);
+
+        return response()->json([
+            'message' => 'Message sent successfully',
+            'data' => $message
+        ]);
+    }
     public function sendMessage(Request $request)
     {
         $request->validate([
@@ -42,7 +70,6 @@ class MessageController extends Controller
             'data' => $message
         ]);
     }
-
     public function getChatMessages($chatId)
     {
         $chat = Chat::where('user_id', $chatId)->first();
