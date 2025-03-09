@@ -39,10 +39,28 @@ class MessageController extends Controller
 
     public function getChatMessages($chatId)
     {
-        $chat=Chat::where('user_id', $chatId)->first();
+        $chat = Chat::where('user_id', $chatId)->first();
         $messages = Message::where('chat_id', $chat->id)->orderBy('created_at', 'asc')->get();
 
         return response()->json($messages);
     }
+    public function getChatsForAdmin()
+    {
+        // Fetch all chats with user details and count of unread messages
+        $chats = Chat::with(['user', 'messages' => function ($query) {
+            $query->latest()->limit(1); // Get only the latest message
+        }])
+            ->withCount(['messages as unread_message_count' => function ($query) {
+                $query->where('is_read', false);
+            }])
+            ->get();
 
+        // Ensure latest_message is set properly
+        $chats->each(function ($chat) {
+            $chat->latest_message = $chat->messages->isNotEmpty() ? $chat->messages->first() : null;
+            unset($chat->messages); // Remove messages collection to reduce payload
+        });
+
+        return response()->json($chats);
+    }
 }

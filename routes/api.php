@@ -165,5 +165,6 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::get('get-post-management-data', [PostController::class, 'getPostManagemtnData']);
         Route::get('get-app-actiity',[NotificationController::class,'getAllUserActivity']);
+        Route::get('get-chats-for-admin', [MessageController::class, 'getChatsForAdmin']);
     });
 });
