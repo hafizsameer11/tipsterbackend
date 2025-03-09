@@ -45,22 +45,31 @@ class MessageController extends Controller
         return response()->json($messages);
     }
     public function getChatsForAdmin()
-    {
-        // Fetch all chats with user details and count of unread messages
-        $chats = Chat::with(['user', 'messages' => function ($query) {
-            $query->latest()->limit(1); // Get only the latest message
+{
+    // Fetch all chats with user details and latest message
+    $chats = Chat::with(['user', 'messages' => function ($query) {
+        $query->latest()->limit(1); // Get only the latest message
+    }])
+        ->withCount(['messages as unread_message_count' => function ($query) {
+            $query->where('is_read', false);
         }])
-            ->withCount(['messages as unread_message_count' => function ($query) {
-                $query->where('is_read', false);
-            }])
-            ->get();
+        ->get();
 
-        // Ensure latest_message is set properly
-        $chats->each(function ($chat) {
-            $chat->latest_message = $chat->messages->isNotEmpty() ? $chat->messages->first() : null;
-            unset($chat->messages); // Remove messages collection to reduce payload
-        });
+    // Transform data to match required format
+    $formattedChats = $chats->map(function ($chat) {
+        $latestMessage = $chat->messages->first();
 
-        return response()->json($chats);
-    }
+        return [
+            "id" => $chat->id,
+            "name" => $chat->user->username, // Name of the user
+            "lastMessage" => $latestMessage ? $latestMessage->content : "No messages yet",
+            "lastMessageTime" => $latestMessage ? $latestMessage->created_at->format('h:i A') : "",
+            "lastMessageCount" => $chat->unread_message_count,
+            "UserImage" => asset('storage/' . $chat->user->profile_picture), // Convert to full URL
+        ];
+    });
+
+    return response()->json($formattedChats);
+}
+
 }
