@@ -19,8 +19,15 @@ class RankingRepository
     }
     public function getWinnersAmount()
     {
-        return WinnersAmount::all();
+        $winnerAmounts = WinnersAmount::all()->map(function ($winner) {
+            $winner->amount = number_format($winner->amount, 0, '.', ',');
+            return $winner;
+        });
+
+        return $winnerAmounts;
+        // return response()->json($winnerAmounts);
     }
+
     public function updateWinnersAmounts($winnersData)
     {
         foreach ($winnersData as $data) {
