@@ -57,6 +57,7 @@ class PostRepository
     {
         return Post::with(['user', 'likes', 'comments'])
             ->orderBy('created_at', 'desc')
+            // ->where('status','approved')
             ->get()
             ->map(function ($post) {
                 // Decode images JSON and structure them as separate fields
@@ -76,6 +77,7 @@ class PostRepository
                         'profile_picture' => asset('storage/' . $post->user->profile_picture ?? '') ?? null,
                         'rank' => $userRank,
                     ],
+                    'underReview' => $post->status == 'under_review',
                     'timestamp' => $post->created_at->format('h:i A - m/d/Y'),
                     'content' => $post->content,
                     'type' => $post->type,
