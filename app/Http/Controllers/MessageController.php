@@ -11,14 +11,20 @@ class MessageController extends Controller
     public function sendMessage(Request $request)
     {
         $request->validate([
-            'chat_id' => 'required|exists:chats,id',
+            'chat_id' => 'required|exists:users,id',
             'sender_type' => 'required|in:user,admin',
             'content' => 'nullable|string',
             'attachment' => 'nullable|file|mimes:jpg,png,pdf,docx',
         ]);
 
+
+        $chat = Chat::where('user_id', $request->chat_id)->first();
+        if (!$chat) {
+            //create chat for that user
+            $chat = Chat::firstOrCreate(['user_id' => $request->chat_id, 'status' => 'open']);
+        }
         $messageData = [
-            'chat_id' => $request->chat_id,
+            'chat_id' => $chat->id,
             'sender_type' => $request->sender_type,
             'content' => $request->content,
         ];
