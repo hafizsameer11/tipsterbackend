@@ -71,5 +71,16 @@ class MessageController extends Controller
 
     return response()->json($formattedChats);
 }
-
+public function getMessagesForAdmin($chatId){
+    $messages=Message::where('chat_id',$chatId)->get();
+    $messages=$messages->map(function($message){
+        return[
+            'id'=>$message->id,
+            'text'=>$message->content,
+            'isUser'=>$message->send_type=='user',
+            'timestamp'=>$message->created_at->format('h:i A - m/d/Y'),
+        ];
+    });
+    return $messages;
+}
 }
