@@ -3,6 +3,7 @@
 use App\Http\Controllers\BankController;
 use App\Http\Controllers\BettingCompanyController;
 use App\Http\Controllers\ChatController;
+use App\Http\Controllers\DashboardData;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PostController;
@@ -164,8 +165,10 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('notifications/get', [NotificationController::class, 'getAdminNotifications']);
 
         Route::get('get-post-management-data', [PostController::class, 'getPostManagemtnData']);
-        Route::get('get-app-actiity',[NotificationController::class,'getAllUserActivity']);
+        Route::get('get-app-actiity', [NotificationController::class, 'getAllUserActivity']);
         Route::get('get-chats-for-admin', [MessageController::class, 'getChatsForAdmin']);
-        Route::get('get-messages-for-admin/{chatId}',[MessageController::class,'getMessagesForAdmin']);
+        Route::get('get-messages-for-admin/{chatId}', [MessageController::class, 'getMessagesForAdmin']);
+
+        Route::get('get-dashboard-data', [DashboardData::class, 'getDashboardData']);
     });
 });
