@@ -115,7 +115,7 @@ class MessageController extends Controller
             return [
                 'id' => $message->id,
                 'text' => $message->content,
-                'isUser' => $message->send_type == 'user',
+                'isUser' => $message->sender_type == 'user',
                 'timestamp' => $message->created_at->format('h:i A - m/d/Y'),
             ];
         });
