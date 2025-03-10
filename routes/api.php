@@ -120,6 +120,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('bank')->group(function () {
         Route::post('/create', [BankController::class, 'create']);
         Route::get('/get-for-user', [BankController::class, 'getforAuthUser']);
+        Route::get('/get-of-user/{id}', [BankController::class, 'getOfUser']);
     });
     Route::post('/create-package', [SubscriptionController::class, 'createPackage']);
     Route::get('/packages', [SubscriptionController::class, 'getAllPackage']);

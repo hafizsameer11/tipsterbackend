@@ -16,21 +16,32 @@ class BankController extends Controller
     {
         $this->bankService = $bankService;
     }
-    public function create(BankDetailRequest $request){
-        try{
+    public function create(BankDetailRequest $request)
+    {
+        try {
             $data = $request->validated();
             $bank = $this->bankService->create($data);
             return ResponseHelper::success($bank, 'Bank created successfully', 201);
-        }catch(Exception $e){
+        } catch (Exception $e) {
             return ResponseHelper::error($e->getMessage());
         }
     }
-    public function getforAuthUser(){
-        try{
+    public function getforAuthUser()
+    {
+        try {
             $user = Auth::user();
             $bank = $this->bankService->getByUserId($user->id);
             return ResponseHelper::success($bank, 'Bank fetched successfully', 200);
-        }catch(Exception $e){
+        } catch (Exception $e) {
+            return ResponseHelper::error($e->getMessage());
+        }
+    }
+    public function getOfUser($userId)
+    {
+        try {
+            $bank = $this->bankService->getByUserId($userId);
+            return ResponseHelper::success($bank, 'Bank fetched successfully', 200);
+        } catch (Exception $e) {
             return ResponseHelper::error($e->getMessage());
         }
     }
