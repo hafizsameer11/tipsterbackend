@@ -126,7 +126,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/packages', [SubscriptionController::class, 'getAllPackage']);
     Route::post('/subscriptions', [SubscriptionController::class, 'createSubscription']);
     Route::post('/subscriptions/finish', [SubscriptionController::class, 'finishSubscription']);
-    Route::post('/comments/{commentId}/approve', [PostController::class, 'approveComment']); // Approve a comment
+    Route::post('/comments/{commentId}/approve', [PostController::class, 'approveComment']);
 
 
     Route::post('/user/update-profile/{userId}', [UserController::class, 'updateProfile']);

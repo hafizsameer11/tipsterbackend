@@ -10,6 +10,7 @@ use App\Models\Post;
 use App\Models\PostShare;
 use App\Models\User;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Support\Facades\Log;
 
 class PostRepository
@@ -156,7 +157,7 @@ class PostRepository
             $post->likes()->detach($userId);
 
             // Log Activity for unliking
-            UserActivityHelper::logActivity($userId, "Unliked a post (ID: {$post->id})");
+            UserActivityHelper::logActivity($userId, "Unliked a post (title: {$post->title})");
 
             return [
                 'likes_count' => $post->likes()->count(), // Updated like count
@@ -266,7 +267,21 @@ class PostRepository
     }
     public function approvePost($postId)
     {
-        return Post::where('id', $postId)->update(['status' => 'approved']);
+        $post = Post::where('id', $postId)->first();
+        if (!$post) {
+            throw new Exception('Post not found');
+        }
+        $post->status = 'approved';
+        $post->save();
+        $admin = User::where('email', 'admin@gmail.com')->first();
+        NotificationHelper::sendNotification(
+            $post->user_id,
+            $admin->id,
+            'approve',
+            $post->id,
+            "Your Post {$post->title} has been approved."
+        );
+        return $post;
     }
     public function getPostManagemtnData()
     {
