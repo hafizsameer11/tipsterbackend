@@ -169,10 +169,10 @@ class RankingRepository
 
         return collect(array_slice($rankedUsers, 0, 30)); // Return as a collection
     }
-    public function getTop10Rankings()
+    public function getTop10Rankings($weeksAgo = 1)
     {
         $now = Carbon::now();
-        $startOfWeek = Carbon::now()->startOfWeek()->toDateString();
+        $startOfWeek = Carbon::now()->subDays($weeksAgo)->startOfWeek()->toDateString();
         $currentTime = $now->toDateTimeString();
 
         // Fetch all users
