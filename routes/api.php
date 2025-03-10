@@ -96,6 +96,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/create', [RankingFaqController::class, 'create']);
         Route::put('/update/{id}', [RankingFaqController::class, 'update']);
         Route::delete('/delete/{id}', [RankingFaqController::class, 'delete']);
+        Route::get('get', [RankingFaqController::class, 'getll']);
     });
     Route::prefix('user')->group(function () {
         Route::get('/view-profile/{userId}', [UserController::class, 'viewProfile']);

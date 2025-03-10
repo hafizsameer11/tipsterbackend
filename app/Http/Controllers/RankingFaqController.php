@@ -25,6 +25,14 @@ class RankingFaqController extends Controller
             return ResponseHelper::error($e->getMessage(), 400);
         }
     }
+    public function getll(){
+        try {
+            $ranking = $this->rankingFaqService->all();
+            return ResponseHelper::success($ranking, 'RankingFaq fetched successfully', 200);
+        } catch (Exception $e) {
+            return ResponseHelper::error($e->getMessage(), 400);
+        }
+    }
     public function getAllbyType($type)
     {
         try {
