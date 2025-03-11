@@ -159,7 +159,8 @@ class PostRepository
                 foreach ($decodedImages as $index => $imagePath) {
                     $formattedImages['image_' . ($index + 1)] = $imagePath;
                 }
-
+                $userRank = $this->RankingRepository->getUserRanking($post->user_id);
+                $userRank = $userRank['rank'] ?? 0;
                 return array_merge([
                     'id' => $post->id,
                     'user' => [
@@ -175,6 +176,7 @@ class PostRepository
                     'share_count' => $post->share_count,
                     'view_count' => $post->view_count,
                     'status' => $post->status,
+                    'rank' => $userRank,
                     'recent_comments' => $post->comments->map(function ($comment) {
                         return [
                             'id' => $comment->id,
