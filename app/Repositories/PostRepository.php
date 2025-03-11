@@ -185,6 +185,7 @@ class PostRepository
                                 'id' => $comment->user->id,
                                 'username' => $comment->user->username,
                                 'profile_picture' => $comment->user->profile_picture ?? null,
+                                'status'=>$comment->status
                             ],
                             'content' => $comment->content,
                         ];
