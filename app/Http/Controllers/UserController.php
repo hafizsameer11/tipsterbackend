@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\ResponseHelper;
+use App\Models\User;
 use App\Services\UserService;
 use Exception;
 use Illuminate\Http\Request;
@@ -16,12 +17,21 @@ class UserController extends Controller
     }
     public function getAllUsers()
     {
-        try {
-            $data = $this->userService->getAllUsers();
-            return ResponseHelper::success($data, 'User data fetched successfully');
-        } catch (Exception $e) {
-            return ResponseHelper::error($e->getMessage());
-        }
+        $users=User::all();
+        $users=$users->map(function($user){
+            return [
+                'id'=>$user->id,
+                'name'=>$user->username,
+                'avatar'=>asset('storage/'.$user->profile_picture),
+            ];
+        });
+        return ResponseHelper::success($users, 'User data fetched successfully');
+        // try {
+        //     $data = $this->userService->getAllUsers();
+        //     return ResponseHelper::success($data, 'User data fetched successfully');
+        // } catch (Exception $e) {
+        //     return ResponseHelper::error($e->getMessage());
+        // }
     }
     public function viewProfile($userId)
     {
