@@ -150,7 +150,6 @@ class PostRepository
     {
         return Post::with(['user', 'likes', 'comments'])
             ->orderBy('created_at', 'desc')
-
             ->get()
             ->map(function ($post) {
                 // Decode images JSON and structure them as separate fields
@@ -175,6 +174,7 @@ class PostRepository
                     'comments_count' => $post->comments->count(),
                     'share_count' => $post->share_count,
                     'view_count' => $post->view_count,
+                    'status' => $post->status,
                     'recent_comments' => $post->comments->map(function ($comment) {
                         return [
                             'id' => $comment->id,
