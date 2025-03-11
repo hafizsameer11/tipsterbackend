@@ -146,6 +146,49 @@ class PostRepository
                 ], $formattedImages); // Merging image fields into the response
             });
     }
+    public function getAllPostsForAdmin($status)
+    {
+        return Post::with(['user', 'likes', 'comments'])
+            ->orderBy('created_at', 'desc')
+
+            ->get()
+            ->map(function ($post) {
+                // Decode images JSON and structure them as separate fields
+                $decodedImages = json_decode($post->images, true) ?? [];
+                $formattedImages = [];
+
+                foreach ($decodedImages as $index => $imagePath) {
+                    $formattedImages['image_' . ($index + 1)] = $imagePath;
+                }
+
+                return array_merge([
+                    'id' => $post->id,
+                    'user' => [
+                        'id' => $post->user->id,
+                        'username' => $post->user->username,
+                        'profile_picture' => $post->user->profile_picture ?? null,
+                    ],
+                    'timestamp' => $post->created_at->format('h:i A - m/d/Y'),
+                    'content' => $post->content,
+                    'type' => $post->type,
+                    'likes_count' => $post->likes->count(),
+                    'comments_count' => $post->comments->count(),
+                    'share_count' => $post->share_count,
+                    'view_count' => $post->view_count,
+                    'recent_comments' => $post->comments->map(function ($comment) {
+                        return [
+                            'id' => $comment->id,
+                            'user' => [
+                                'id' => $comment->user->id,
+                                'username' => $comment->user->username,
+                                'profile_picture' => $comment->user->profile_picture ?? null,
+                            ],
+                            'content' => $comment->content,
+                        ];
+                    }),
+                ], $formattedImages); // Merging image fields into the response
+            });
+    }
 
     public function likePost($userId, $postId)
     {
@@ -298,7 +341,7 @@ class PostRepository
         $totalCommentsLastWeek = Comment::where('created_at', '<', $lastWeek)->count();
         $viewCount = Post::sum('view_count');
         $viewCountLastWeek = Post::where('created_at', '<', $lastWeek)->sum('view_count');
-        $posts = $this->getAllPostOnStatus('under_review');
+        $posts = $this->getAllPostsForAdmin('under_review');
         $approvedPosts = $this->getAllPostOnStatus('approved');
         return [
             'stats' => [
