@@ -362,13 +362,13 @@ class PostRepository
                     'icon' => 'images.sidebarIcons.like',
                     'color' => 'red',
                 ],
-                [
-                    'label' => 'Total Shares',
-                    'value' => number_format($totalSharedPost),
-                    'change' => $this->calculatePercentageChange($totalSharedPost, $totalSharedPostLastWeek),
-                    'icon' => 'images.sidebarIcons.share',
-                    'color' => 'red',
-                ],
+                // [
+                //     'label' => 'Total Shares',
+                //     'value' => number_format($totalSharedPost),
+                //     'change' => $this->calculatePercentageChange($totalSharedPost, $totalSharedPostLastWeek),
+                //     'icon' => 'images.sidebarIcons.share',
+                //     'color' => 'red',
+                // ],
                 [
                     'label' => 'Total Comments',
                     'value' => number_format($totalComments),
@@ -376,13 +376,13 @@ class PostRepository
                     'icon' => 'images.sidebarIcons.comment',
                     'color' => 'red',
                 ],
-                [
-                    'label' => 'Total Views',
-                    'value' => number_format($viewCount),
-                    'change' => $this->calculatePercentageChange($viewCount, $viewCountLastWeek),
-                    'icon' => 'images.sidebarIcons.view',
-                    'color' => 'red',
-                ],
+                // [
+                //     'label' => 'Total Views',
+                //     'value' => number_format($viewCount),
+                //     'change' => $this->calculatePercentageChange($viewCount, $viewCountLastWeek),
+                //     'icon' => 'images.sidebarIcons.view',
+                //     'color' => 'red',
+                // ],
                 [
                     'label' => 'Admin Post',
                     'value' => number_format($adminPost),
