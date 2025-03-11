@@ -57,7 +57,7 @@ class PostRepository
 
     public function getAllPosts()
     {
-        $auth=Auth::user();
+        $auth = Auth::user();
         return Post::with(['user', 'likes', 'comments' => function ($query) use ($auth) {
             $query->where('status', 'approved')->orWhere('user_id', $auth->id)->orderBy('created_at', 'desc')->get();
         }])

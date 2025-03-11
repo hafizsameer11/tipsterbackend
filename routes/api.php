@@ -144,6 +144,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/{chatId}', [MessageController::class, 'getChatMessages']); // Get chat messages
     });
     Route::get('/notifications', [NotificationController::class, 'getUserNotifications']);
+    Route::get('/notifications/un-read', [NotificationController::class, 'getUnreadNotificationCount']);
     Route::post('/notifications/{notificationId}/read', [NotificationController::class, 'markAsRead']);
     //admin route
     Route::post('/subscribe', [UserSubscriptionController::class, 'subscribe']); // Subscribe to a user

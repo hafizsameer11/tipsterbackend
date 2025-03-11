@@ -18,14 +18,21 @@ class NotificationController extends Controller
         $notifications = Notification::where('user_id', $userId)
             ->orderBy('created_at', 'desc')
             ->get();
-            //update all current notification and mark as read
-            foreach ($notifications as $notification) {
-                $notification->update(['is_read' => true]);
-                }
+        //update all current notification and mark as read
+        foreach ($notifications as $notification) {
+            $notification->update(['is_read' => true]);
+        }
 
         return ResponseHelper::success($notifications, 'Notifications retrieved successfully');
     }
+    public function getUnreadNotificationCount()
+    {
+        $user = Auth::user();
+        $userId = $user->id;
+        $count = Notification::where('user_id', $userId)->where('is_read', false)->count();
 
+        return ResponseHelper::success(['count' => $count], 'Unread notification count retrieved successfully');
+    }
     // Mark a notification as read
     public function markAsRead($notificationId)
     {
