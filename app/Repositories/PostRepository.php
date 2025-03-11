@@ -298,7 +298,7 @@ class PostRepository
         $totalCommentsLastWeek = Comment::where('created_at', '<', $lastWeek)->count();
         $viewCount = Post::sum('view_count');
         $viewCountLastWeek = Post::where('created_at', '<', $lastWeek)->sum('view_count');
-        $posts = $this->getAllPostOnStatus('under_review');
+        $posts = $this->getAllPosts();
         $approvedPosts = $this->getAllPostOnStatus('approved');
         return [
             'stats' => [
