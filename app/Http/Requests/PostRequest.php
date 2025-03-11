@@ -27,7 +27,8 @@ class PostRequest extends FormRequest
             'content' => 'nullable|string',
             'images' => 'nullable', // Allow up to 4 images
             'images.*' => 'image|max:2048', // Validate each image,
-            'type'=>'nullable|string'
+            'type'=>'nullable|string',
+            'staut'=>'nullable|string'
         ];
     }
         public function failedValidation(\Illuminate\Contracts\Validation\Validator $validator)
