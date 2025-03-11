@@ -120,8 +120,8 @@ class TipRepository
 
             $allTips = Tip::where('user_id', $user->id)->orderBy('created_at', 'desc')->get();
             $totalTips = $allTips->count();
-            $lostTips = $allTips->where('result', 'loss')->count();
-            $winRate = $totalTips > 0 ? round((($totalTips - $lostTips) / $totalTips) * 100, 2) : 0;
+            $wintips = $allTips->where('result', 'won')->count();
+            $winRate = $totalTips > 0 ? round(($wintips / $totalTips) * 100, 0) : 0;
             $lastFiveResults = $allTips->take(5)->pluck('result')->map(function ($result) {
                 return strtoupper(substr($result, 0, 1)); // Extract first letter and convert to uppercase
             })->toArray();
