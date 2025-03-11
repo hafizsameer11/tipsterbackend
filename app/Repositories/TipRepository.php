@@ -45,6 +45,7 @@ class TipRepository
                 'user' => [
                     'id' => $user->id,
                     'username' => $user->username,
+                    'role' => $user->role,
                     'profile_picture' => $user->profile_picture ?? null,
                     'win_rate' => $winRate . '%',
                     'last_five' => $lastFiveResults,
@@ -132,6 +133,7 @@ class TipRepository
                         'profile_picture' => $user->profile_picture ?? null,
                         'win_rate' => $winRate . '%',
                         'last_five' => $lastFiveResults,
+                        'role' => $user->role
                     ],
                 ]);
             });

@@ -77,6 +77,7 @@ class PostRepository
                         'username' => $post->user->username,
                         'profile_picture' => asset('storage/' . $post->user->profile_picture ?? '') ?? null,
                         'rank' => $userRank,
+                        'role' => $post->user->role
                     ],
                     'underReview' => $post->status == 'under_review',
                     'timestamp' => $post->created_at->format('h:i A - m/d/Y'),
@@ -124,6 +125,7 @@ class PostRepository
                         'id' => $post->user->id,
                         'username' => $post->user->username,
                         'profile_picture' => $post->user->profile_picture ?? null,
+                        'role' => $post->user->role
                     ],
                     'timestamp' => $post->created_at->format('h:i A - m/d/Y'),
                     'content' => $post->content,
@@ -167,6 +169,7 @@ class PostRepository
                         'id' => $post->user->id,
                         'username' => $post->user->username,
                         'profile_picture' => $post->user->profile_picture ?? null,
+                        'role' => $post->user->role
                     ],
                     'timestamp' => $post->created_at->format('h:i A - m/d/Y'),
                     'content' => $post->content,
