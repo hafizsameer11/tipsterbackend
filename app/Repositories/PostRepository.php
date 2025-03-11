@@ -185,8 +185,8 @@ class PostRepository
                                 'id' => $comment->user->id,
                                 'username' => $comment->user->username,
                                 'profile_picture' => $comment->user->profile_picture ?? null,
-                                'status'=>$comment->status
                             ],
+                            'status' => $comment->status,
                             'content' => $comment->content,
                         ];
                     }),
@@ -262,7 +262,7 @@ class PostRepository
     }
     public function deleteComment($commentId)
     {
-       return \App\Models\Comment::where('id', $commentId)->delete();
+        return \App\Models\Comment::where('id', $commentId)->delete();
     }
     public function getUserPosts($userId)
     {
