@@ -177,6 +177,7 @@ class PostRepository
                     'view_count' => $post->view_count,
                     'status' => $post->status,
                     'rank' => $userRank,
+                    'is_pinned' => $post->is_pinned,
                     'recent_comments' => $post->comments->map(function ($comment) {
                         return [
                             'id' => $comment->id,

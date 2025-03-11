@@ -44,7 +44,7 @@ class PostController extends Controller
     public function likePost($postId)
     {
         try {
-          $post=  $this->postService->likePost(auth()->id(), $postId);
+            $post =  $this->postService->likePost(auth()->id(), $postId);
             return ResponseHelper::success($post, 'Post liked successfully');
         } catch (Exception $e) {
             return ResponseHelper::error($e->getMessage());
@@ -111,7 +111,7 @@ class PostController extends Controller
             return ResponseHelper::error($e->getMessage());
         }
     }
-public function deletePost($id)
+    public function deletePost($id)
     {
         $post = Post::find($id);
 
@@ -128,6 +128,27 @@ public function deletePost($id)
         try {
             $post = $this->postService->getPostManagemtnData();
             return ResponseHelper::success($post, 'Post fetched successfully');
+        } catch (Exception $e) {
+            return ResponseHelper::error($e->getMessage());
+        }
+    }
+    public function makePostPin($id)
+    {
+        try {
+            $post = Post::where('id', $id)->first();
+            if (!$post) {
+                throw new Exception('Post not found');
+            }
+
+            //check if alrady pin than unpin
+            if ($post->is_pinned) {
+                $post->is_pinned = false;
+                $post->save();
+            } else {
+                $post->is_pinned = true;
+                $post->save();
+            }
+            return ResponseHelper::success($post, 'Post pinned successfully');
         } catch (Exception $e) {
             return ResponseHelper::error($e->getMessage());
         }
