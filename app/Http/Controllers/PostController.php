@@ -83,6 +83,15 @@ class PostController extends Controller
             return ResponseHelper::error($e->getMessage());
         }
     }
+    public function deleteComment($commentId)
+    {
+        try {
+            $this->postService->deleteComment($commentId);
+            return ResponseHelper::success([], 'Comment approved');
+        } catch (Exception $e) {
+            return ResponseHelper::error($e->getMessage());
+        }
+    }
     public function getPostForUser($userId)
     {
         try {

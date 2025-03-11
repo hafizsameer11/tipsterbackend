@@ -259,6 +259,10 @@ class PostRepository
     {
         return \App\Models\Comment::where('id', $commentId)->update(['status' => 'approved']);
     }
+    public function deleteComment($commentId)
+    {
+       return \App\Models\Comment::where('id', $commentId)->delete();
+    }
     public function getUserPosts($userId)
     {
         return Post::with(['user', 'likes', 'comments' => function ($query) {
@@ -370,7 +374,7 @@ class PostRepository
                     'icon' => 'images.sidebarIcons.comment',
                     'color' => 'red',
                 ],
-            
+
                 [
                     'label' => 'Admin Post',
                     'value' => number_format($adminPost),

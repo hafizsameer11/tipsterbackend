@@ -52,6 +52,10 @@ class PostService
     {
         return $this->postRepository->approveComment($commentId);
     }
+    public function deleteComment($commentId)
+    {
+        return $this->postRepository->deleteComment($commentId);
+    }
     public function getUserPosts($userId)
     {
         return $this->postRepository->getUserPosts($userId);
@@ -75,5 +79,5 @@ class PostService
     public function getPostManagemtnData()
     {
         return $this->postRepository->getPostManagemtnData();
-    } 
+    }
 }
