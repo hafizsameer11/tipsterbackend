@@ -11,6 +11,7 @@ use App\Models\PostShare;
 use App\Models\User;
 use Carbon\Carbon;
 use Exception;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 class PostRepository
@@ -56,7 +57,10 @@ class PostRepository
 
     public function getAllPosts()
     {
-        return Post::with(['user', 'likes', 'comments'])
+        $auth=Auth::user();
+        return Post::with(['user', 'likes', 'comments' => function ($query) use ($auth) {
+            $query->where('status', 'approved')->orWhere('user_id', $auth->id)->orderBy('created_at', 'desc')->get();
+        }])
             ->orderBy('created_at', 'desc')
             // ->where('status','approved')
             ->get()
