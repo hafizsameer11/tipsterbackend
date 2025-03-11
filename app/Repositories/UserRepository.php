@@ -31,7 +31,7 @@ class UserRepository
             ->get();
         $totalPredictions = $userTips->count();
         $totalWins = $userTips->where('result', 'won')->count();
-        $winRate = $totalPredictions > 0 ? round(($totalWins / $totalPredictions) * 100, 2) : 0;
+        $winRate = $totalPredictions > 0 ? round(($totalWins / $totalPredictions) * 100, 0) : 0;
         $lastFiveResults = $userTips->take(5)->pluck('result')->map(function ($result) {
             return strtoupper(substr($result, 0, 1)); // Convert result to first letter (W/L)
         })->toArray();

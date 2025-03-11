@@ -8,6 +8,7 @@ use App\Http\Controllers\MessageController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\PostShareController;
+use App\Http\Controllers\PrivacyPageController;
 use App\Http\Controllers\RankingController;
 use App\Http\Controllers\RankingFaqController;
 use App\Http\Controllers\SubscriptionController;
@@ -130,7 +131,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/comments/approve/{commentId}', [PostController::class, 'approveComment']);
     Route::post('/comments/delete/{commentId}', [PostController::class, 'deleteComment']);
 
-
+    Route::post('privacy/create',[PrivacyPageController::class,'create']);
+    Route::get('privacy/get',[PrivacyPageController::class,'index']);
+    
     Route::post('/user/update-profile/{userId}', [UserController::class, 'updateProfile']);
 
     Route::prefix('chat')->group(function () {
