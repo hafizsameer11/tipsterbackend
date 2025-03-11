@@ -16,6 +16,7 @@ use App\Http\Controllers\User\AuthController;
 use App\Http\Controllers\User\FollowController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserSubscriptionController;
+use App\Http\Controllers\VideoController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
@@ -176,5 +177,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('send-messages-for-admin', [MessageController::class, 'sendMessageforAdmin']);
 
         Route::get('get-dashboard-data', [DashboardData::class, 'getDashboardData']);
+
+        Route::post('store-vide', [VideoController::class, 'storeVideo']);
+        Route::get('get-videos', [VideoController::class, 'index']);
     });
 });

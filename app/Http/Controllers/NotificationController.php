@@ -18,6 +18,10 @@ class NotificationController extends Controller
         $notifications = Notification::where('user_id', $userId)
             ->orderBy('created_at', 'desc')
             ->get();
+            //update all current notification and mark as read
+            foreach ($notifications as $notification) {
+                $notification->update(['is_read' => true]);
+                }
 
         return ResponseHelper::success($notifications, 'Notifications retrieved successfully');
     }
