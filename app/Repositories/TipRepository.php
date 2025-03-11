@@ -35,8 +35,8 @@ class TipRepository
             ->get();
 
         $totalTips = $tips->count();
-        $lostTips = $tips->where('result', 'loss')->count();
-        $winRate = $totalTips > 0 ? round((($totalTips - $lostTips) / $totalTips) * 100, 2) : 0;
+        $wintips = $tips->where('result', 'won')->count();
+        $winRate = $totalTips > 0 ? round(($wintips / $totalTips) * 100, 0) : 0;
         $lastFiveResults = $tips->take(5)->pluck('result')->map(function ($result) {
             return strtoupper(substr($result, 0, 1)); // Extract first letter and convert to uppercase
         })->toArray();

@@ -30,9 +30,9 @@ class UserRepository
             ->orderBy('created_at', 'desc')
             ->get();
         $totalPredictions = Tip::where('user_id', $userId)->count();
-        $totalWins = Tip::where('result', 'won')->count();
+        $totalWins = Tip::where('user_id', $userId)->where('result', 'won')->count();
         $winRate = $totalPredictions > 0 ? round(($totalWins / $totalPredictions) * 100, 0) : 0;
-        $lastFiveResults = $userTips->take(5)->pluck('result')->map(function ($result) {
+        $lastFiveResults = $userTips->take(5)->pluck(value: 'result')->map(function ($result) {
             return strtoupper(substr($result, 0, 1)); // Convert result to first letter (W/L)
         })->toArray();
         $totalOdds = $userTips->where('result', 'won')->sum('ods');
