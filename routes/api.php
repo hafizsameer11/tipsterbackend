@@ -71,7 +71,7 @@ Route::prefix('auth')->group(function () {
     Route::post('/verify-forget-password-otp', [AuthController::class, 'verifyForgetPasswordOtp']);
     Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 });
-
+Route::get('admin/user/getAllUsers', [UserController::class, 'getAllUsers']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('betting-company')->group(function () {
         Route::get('/get-all', [BettingCompanyController::class, 'getAll']);
@@ -154,7 +154,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('admin')->group(function () {
         Route::get('/get-user-management-data', [UserController::class, 'getUserManagementData']);
         Route::get('/user/{userId}', [UserController::class, 'userDetails']);
-        Route::get('/user/getAllUsers', [UserController::class, 'getAllUsers']);
+
         Route::get('/get-post-detail/{id}', [PostController::class, 'getPostDetail']);
         Route::post('/tip/update/{tipId}', [TipController::class, 'updateTip']); //only status and result
         Route::get('/tip/get-all', [TipController::class, 'getAllTips']);
