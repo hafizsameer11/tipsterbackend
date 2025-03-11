@@ -29,8 +29,8 @@ class UserRepository
             ->where('created_at', '>=', $thirtyDaysAgo)
             ->orderBy('created_at', 'desc')
             ->get();
-        $totalPredictions = $userTips->count();
-        $totalWins = $userTips->where('result', 'won')->count();
+        $totalPredictions = Tip::where('user_id', $userId)->count();
+        $totalWins = Tip::where('result', 'won')->count();
         $winRate = $totalPredictions > 0 ? round(($totalWins / $totalPredictions) * 100, 0) : 0;
         $lastFiveResults = $userTips->take(5)->pluck('result')->map(function ($result) {
             return strtoupper(substr($result, 0, 1)); // Convert result to first letter (W/L)
