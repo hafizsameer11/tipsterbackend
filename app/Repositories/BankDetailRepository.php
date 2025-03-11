@@ -23,7 +23,11 @@ class BankDetailRepository
     }
 public function getByUserId($userId)
 {
-    return BankDetail::where('user_id', $userId)->first();
+    $bank= BankDetail::where('user_id', $userId)->first();
+    if(!$bank){
+        throw new \Exception('Bank detail not found');
+    }
+    return $bank;
 }
     public function update($id, array $data)
     {
