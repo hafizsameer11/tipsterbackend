@@ -154,6 +154,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('admin')->group(function () {
         Route::get('/get-user-management-data', [UserController::class, 'getUserManagementData']);
         Route::get('/user/{userId}', [UserController::class, 'userDetails']);
+        Route::get('/user/getAllUsers', [UserController::class, 'getAllUsers']);
         Route::get('/get-post-detail/{id}', [PostController::class, 'getPostDetail']);
         Route::post('/tip/update/{tipId}', [TipController::class, 'updateTip']); //only status and result
         Route::get('/tip/get-all', [TipController::class, 'getAllTips']);

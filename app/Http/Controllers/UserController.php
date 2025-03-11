@@ -14,6 +14,15 @@ class UserController extends Controller
     {
         $this->userService = $userService;
     }
+    public function getAllUsers()
+    {
+        try {
+            $data = $this->userService->getAllUsers();
+            return ResponseHelper::success($data, 'User data fetched successfully');
+        } catch (Exception $e) {
+            return ResponseHelper::error($e->getMessage());
+        }
+    }
     public function viewProfile($userId)
     {
         try {

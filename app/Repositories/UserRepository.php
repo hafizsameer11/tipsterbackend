@@ -251,4 +251,15 @@ class UserRepository
         }
         return round((($current - $previous) / $previous) * 100, 2);
     }
+    public function getAllUsers(){
+        $users=User::all();
+        $users=$users->map(function($user){
+            return [
+                'id'=>$user->id,
+                'name'=>$user->username,
+                'avatar'=>asset('storage/'.$user->profile_picture),
+            ];
+        });
+        return $users;
+    }
 }

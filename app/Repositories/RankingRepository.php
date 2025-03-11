@@ -43,7 +43,7 @@ class RankingRepository
     {
         return WinnersAmount::where('rank', '=', $rank)->first();
     }
-    public function getUserRanking($userId,$weeksAgo = 1)
+    public function getUserRanking($userId, $weeksAgo = 1)
     {
         $now = Carbon::now();
         $startOfWeek = Carbon::now()->subDays($weeksAgo)->startOfWeek()->toDateString();

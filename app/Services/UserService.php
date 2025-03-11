@@ -155,4 +155,12 @@ class UserService
             throw new Exception('Error in getting user management data ' . $e->getMessage());
         }
     }
+    public function getAllUsers(){
+        try {
+            return $this->UserRepository->getAllUsers();
+        } catch (Exception $e) {
+            Log::error('Error in getting all users: ' . $e->getMessage());
+            throw new Exception('Error in getting all users ' . $e->getMessage());
+        }
+    }
 }
