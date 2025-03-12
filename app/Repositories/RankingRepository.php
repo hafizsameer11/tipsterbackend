@@ -7,6 +7,7 @@ use App\Models\Tip;
 use App\Models\User;
 use App\Models\WinnersAmount;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 
 class RankingRepository
 {
@@ -69,6 +70,7 @@ class RankingRepository
                 ->count();
 
             $winRate = $totalTips > 0 ? ($totalWins / $totalTips) * 100 : 0;
+            Log::info("User ID: {$user->id}, Total Predictions: {$totalTips}, Total Wins: {$totalWins}, Win Rate: {$winRate}");
 
 
             $totalPoints = $tips->sum(function ($tip) use ($winRate) {
@@ -148,6 +150,7 @@ class RankingRepository
                 ->count();
 
             $winRate = $totalTips > 0 ? ($totalWins / $totalTips) * 100 : 0;
+            Log::info("User ID: {$user->id}, Total Predictions: {$totalTips}, Total Wins: {$totalWins}, Win Rate: {$winRate}");
 
             $totalPoints = $tips->sum(function ($tip) use ($winRate) {
                 return $tip->ods * ($winRate / 100);
@@ -205,6 +208,7 @@ class RankingRepository
                 ->count();
 
             $winRate = $totalTips > 0 ? ($totalWins / $totalTips) * 100 : 0;
+            Log::info("User ID: {$user->id}, Total Predictions: {$totalTips}, Total Wins: {$totalWins}, Win Rate: {$winRate}");
 
             // Calculate points using (Odds * Win Rate) / 100
             $totalPoints = $tips->sum(function ($tip) use ($winRate) {
