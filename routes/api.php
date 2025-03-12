@@ -86,6 +86,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/create', [TipController::class, 'create']);
         Route::get('/get-all-of-user', [TipController::class, 'getFreeTipofUser']);
         Route::get('/get-all-free-running-tips', [TipController::class, 'getAllRunningTips']);
+        Route::get('/get-all-vip-running-tips', [TipController::class, 'getAllRunningTips']);
         Route::get('/approve-tip/{id}', [TipController::class, 'approveTip']);
         Route::post('/set-tip-result/{id}', [TipController::class, 'setTipResult']);
     });
@@ -133,7 +134,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('privacy/create',[PrivacyPageController::class,'create']);
     Route::get('privacy/get',[PrivacyPageController::class,'index']);
-    
+
     Route::post('/user/update-profile/{userId}', [UserController::class, 'updateProfile']);
 
     Route::prefix('chat')->group(function () {
