@@ -61,20 +61,16 @@ class RankingRepository
                 ->whereBetween('match_date', [$startOfWeek, $endOfWeek])
                 ->where('result', 'won')
                 ->get();
-
-            // Calculate total tips and win rate in the last 30 days
             $totalTips = Tip::where('user_id', $user->id)
-                ->whereBetween('match_date', [Carbon::now()->subDays(30)->format('d-m-Y'), Carbon::now()->format('d-m-Y')])
+                ->where('status', 'approved')
                 ->count();
-
             $totalWins = Tip::where('user_id', $user->id)
-                ->whereBetween('match_date', [Carbon::now()->subDays(30)->format('d-m-Y'), Carbon::now()->format('d-m-Y')])
                 ->where('result', 'won')
                 ->count();
 
             $winRate = $totalTips > 0 ? ($totalWins / $totalTips) * 100 : 0;
 
-            // Calculate points based on win rate
+
             $totalPoints = $tips->sum(function ($tip) use ($winRate) {
                 return $tip->ods * ($winRate / 100);
             });
@@ -145,11 +141,9 @@ class RankingRepository
                 ->get();
 
             $totalTips = Tip::where('user_id', $user->id)
-                ->whereBetween('match_date', [Carbon::now()->subDays(30)->format('d-m-Y'), Carbon::now()->format('d-m-Y')])
-                ->count();
+            ->where('status', 'approved')                ->count();
 
             $totalWins = Tip::where('user_id', $user->id)
-                ->whereBetween('match_date', [Carbon::now()->subDays(30)->format('d-m-Y'), Carbon::now()->format('d-m-Y')])
                 ->where('result', 'won')
                 ->count();
 
@@ -178,8 +172,8 @@ class RankingRepository
                 'rank' => $rank++,
                 'points' => round($points, 2),
                 'win_rate' => round($winRate, 2) . '%',
-                'start_of_week'=>$startOfWeek,
-                'end_of_week'=> $endOfWeek,
+                'start_of_week' => $startOfWeek,
+                'end_of_week' => $endOfWeek,
             ];
         }
 
@@ -204,11 +198,9 @@ class RankingRepository
 
             // Calculate total tips and win rate in the last 30 days
             $totalTips = Tip::where('user_id', $user->id)
-                ->whereBetween('match_date', [Carbon::now()->subDays(30)->format('d-m-Y'), Carbon::now()->format('d-m-Y')])
-                ->count();
+            ->where('status', 'approved')                ->count();
 
             $totalWins = Tip::where('user_id', $user->id)
-                ->whereBetween('match_date', [Carbon::now()->subDays(30)->format('d-m-Y'), Carbon::now()->format('d-m-Y')])
                 ->where('result', 'won')
                 ->count();
 
