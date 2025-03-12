@@ -64,11 +64,11 @@ class RankingRepository
 
             // Calculate total tips and win rate in the last 30 days
             $totalTips = Tip::where('user_id', $user->id)
-                ->where('status', 'approved')
+                ->whereBetween('match_date', [Carbon::now()->subDays(30)->format('d-m-Y'), Carbon::now()->format('d-m-Y')])
                 ->count();
 
             $totalWins = Tip::where('user_id', $user->id)
-
+                ->whereBetween('match_date', [Carbon::now()->subDays(30)->format('d-m-Y'), Carbon::now()->format('d-m-Y')])
                 ->where('result', 'won')
                 ->count();
 
@@ -145,11 +145,11 @@ class RankingRepository
                 ->get();
 
             $totalTips = Tip::where('user_id', $user->id)
-                ->where('status', 'approved')
+                ->whereBetween('match_date', [Carbon::now()->subDays(30)->format('d-m-Y'), Carbon::now()->format('d-m-Y')])
                 ->count();
 
             $totalWins = Tip::where('user_id', $user->id)
-
+                ->whereBetween('match_date', [Carbon::now()->subDays(30)->format('d-m-Y'), Carbon::now()->format('d-m-Y')])
                 ->where('result', 'won')
                 ->count();
 
@@ -178,8 +178,8 @@ class RankingRepository
                 'rank' => $rank++,
                 'points' => round($points, 2),
                 'win_rate' => round($winRate, 2) . '%',
-                'start_of_week' => $startOfWeek,
-                'end_of_week' => $endOfWeek,
+                'start_of_week'=>$startOfWeek,
+                'end_of_week'=> $endOfWeek,
             ];
         }
 
@@ -204,11 +204,11 @@ class RankingRepository
 
             // Calculate total tips and win rate in the last 30 days
             $totalTips = Tip::where('user_id', $user->id)
-                ->where('status', 'approved')
+                ->whereBetween('match_date', [Carbon::now()->subDays(30)->format('d-m-Y'), Carbon::now()->format('d-m-Y')])
                 ->count();
 
             $totalWins = Tip::where('user_id', $user->id)
-
+                ->whereBetween('match_date', [Carbon::now()->subDays(30)->format('d-m-Y'), Carbon::now()->format('d-m-Y')])
                 ->where('result', 'won')
                 ->count();
 
