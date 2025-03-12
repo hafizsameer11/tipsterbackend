@@ -46,29 +46,46 @@ class RankingRepository
     public function getUserRanking($userId, $weeksAgo = 1)
     {
         $now = Carbon::now();
-        $startOfWeek = Carbon::now()->subDays($weeksAgo)->startOfWeek()->toDateString();
 
-        $currentTime = $now->toDateTimeString(); // Get current time for live ranking
+        // Calculate the start and end of the selected week
+        $startOfWeek = Carbon::now()->subWeeks($weeksAgo - 1)->startOfWeek()->format('d-m-Y');
+        $endOfWeek = Carbon::now()->subWeeks($weeksAgo - 1)->endOfWeek()->format('d-m-Y');
 
-        // Fetch all users and calculate their weekly points dynamically
+        // Get all users
         $allUsers = User::all();
         $rankings = [];
 
         foreach ($allUsers as $user) {
-            $totalPoints = Tip::where('user_id', $user->id)
-                ->whereBetween('created_at', [$startOfWeek, $currentTime])
+            // Get tips within the selected week (using match_date)
+            $tips = Tip::where('user_id', $user->id)
+                ->whereBetween('match_date', [$startOfWeek, $endOfWeek])
                 ->where('result', 'won')
-                ->sum('ods');
+                ->get();
+
+            // Calculate total tips and win rate in the last 30 days
+            $totalTips = Tip::where('user_id', $user->id)
+                ->whereBetween('match_date', [Carbon::now()->subDays(30)->format('d-m-Y'), Carbon::now()->format('d-m-Y')])
+                ->count();
+
+            $totalWins = Tip::where('user_id', $user->id)
+                ->whereBetween('match_date', [Carbon::now()->subDays(30)->format('d-m-Y'), Carbon::now()->format('d-m-Y')])
+                ->where('result', 'won')
+                ->count();
+
+            $winRate = $totalTips > 0 ? ($totalWins / $totalTips) * 100 : 0;
+
+            // Calculate points based on win rate
+            $totalPoints = $tips->sum(function ($tip) use ($winRate) {
+                return $tip->ods * ($winRate / 100);
+            });
 
             if ($totalPoints > 0) {
                 $rankings[$user->id] = $totalPoints;
             }
         }
 
-        // Sort users by highest points
         arsort($rankings);
 
-        // If user has no tips, return default ranking
         if (!array_key_exists($userId, $rankings)) {
             $user = User::find($userId);
             return [
@@ -76,6 +93,7 @@ class RankingRepository
                 'rank' => 0,
                 'points' => 0,
                 'week_start' => $startOfWeek,
+                'week_end' => $endOfWeek,
                 'status' => 'live',
                 'username' => $user ? $user->username : 'Unknown',
                 'profile_picture' => $user ? $user->profile_picture : null,
@@ -83,30 +101,21 @@ class RankingRepository
             ];
         }
 
-        // Assign ranks dynamically
         $rank = 1;
         foreach ($rankings as $id => $points) {
             if ($id == $userId) {
                 $user = User::find($userId);
 
-                // Fetch user's tips to calculate win rate
-                $tips = Tip::where('user_id', $userId)
-                    ->whereBetween('created_at', [$startOfWeek, $currentTime])
-                    ->get();
-
-                $totalTips = $tips->count();
-                $lostTips = $tips->where('result', 'loss')->count();
-                $winRate = $totalTips > 0 ? round((($totalTips - $lostTips) / $totalTips) * 100, 2) : 0;
-
                 return [
                     'user_id' => $userId,
                     'rank' => $rank,
-                    'points' => $points,
+                    'points' => round($points, 2),
                     'week_start' => $startOfWeek,
+                    'week_end' => $endOfWeek,
                     'status' => 'live',
                     'username' => $user->username,
                     'profile_picture' => $user->profile_picture,
-                    'win_rate' => $winRate . '%',
+                    'win_rate' => round($winRate, 2) . '%',
                 ];
             }
             $rank++;
@@ -115,26 +124,40 @@ class RankingRepository
         return null;
     }
 
-
     /**
      * Get top 30 users based on weekly rankings
      */
     public function getTop30Rankings($weeksAgo = 1)
     {
         $now = Carbon::now();
-        $startOfWeek = Carbon::now()->subDays($weeksAgo)->startOfWeek()->toDateString();
 
-        $currentTime = $now->toDateTimeString();
+        // Calculate the start and end of the selected week
+        $startOfWeek = Carbon::now()->subWeeks($weeksAgo - 1)->startOfWeek()->format('d-m-Y');
+        $endOfWeek = Carbon::now()->subWeeks($weeksAgo - 1)->endOfWeek()->format('d-m-Y');
 
-        // Fetch all users and calculate their weekly points dynamically
         $allUsers = User::all();
         $rankings = [];
 
         foreach ($allUsers as $user) {
-            $totalPoints = Tip::where('user_id', $user->id)
-                ->whereBetween('created_at', [$startOfWeek, $currentTime])
+            $tips = Tip::where('user_id', $user->id)
+                ->whereBetween('match_date', [$startOfWeek, $endOfWeek])
                 ->where('result', 'won')
-                ->sum('ods');
+                ->get();
+
+            $totalTips = Tip::where('user_id', $user->id)
+                ->whereBetween('match_date', [Carbon::now()->subDays(30)->format('d-m-Y'), Carbon::now()->format('d-m-Y')])
+                ->count();
+
+            $totalWins = Tip::where('user_id', $user->id)
+                ->whereBetween('match_date', [Carbon::now()->subDays(30)->format('d-m-Y'), Carbon::now()->format('d-m-Y')])
+                ->where('result', 'won')
+                ->count();
+
+            $winRate = $totalTips > 0 ? ($totalWins / $totalTips) * 100 : 0;
+
+            $totalPoints = $tips->sum(function ($tip) use ($winRate) {
+                return $tip->ods * ($winRate / 100);
+            });
 
             if ($totalPoints > 0) {
                 $rankings[$user->id] = $totalPoints;
@@ -148,43 +171,51 @@ class RankingRepository
         foreach ($rankings as $userId => $points) {
             $user = User::find($userId);
 
-            // Fetch user's tips to calculate win rate
-            $tips = Tip::where('user_id', $userId)
-                ->whereBetween('created_at', [$startOfWeek, $currentTime])
-                ->get();
-
-            $totalTips = $tips->count();
-            $lostTips = $tips->where('result', 'loss')->count();
-            $winRate = $totalTips > 0 ? round((($totalTips - $lostTips) / $totalTips) * 100, 2) : 0;
-
             $rankedUsers[] = [
                 'user_id' => $userId,
                 'username' => $user->username,
                 'profile_picture' => $user->profile_picture ?? null,
                 'rank' => $rank++,
-                'points' => $points,
-                'win_rate' => $winRate . '%' // Adding win rate
+                'points' => round($points, 2),
+                'win_rate' => round($winRate, 2) . '%'
             ];
         }
 
-        return collect(array_slice($rankedUsers, 0, 30)); // Return as a collection
+        return collect(array_slice($rankedUsers, 0, 30));
     }
     public function getTop10Rankings($weeksAgo = 1)
     {
-        $now = Carbon::now();
-        $startOfWeek = Carbon::now()->subDays($weeksAgo)->startOfWeek()->toDateString();
-        $currentTime = $now->toDateTimeString();
+        // Calculate the start and end of the selected week using match_date
+        $startOfWeek = Carbon::now()->subWeeks($weeksAgo - 1)->startOfWeek()->format('d-m-Y');
+        $endOfWeek = Carbon::now()->subWeeks($weeksAgo - 1)->endOfWeek()->format('d-m-Y');
 
-        // Fetch all users
+        // Fetch all users with bank accounts
         $allUsers = User::with('bankAccount')->get();
         $rankings = [];
 
         foreach ($allUsers as $user) {
-            // Calculate total points (won tips sum)
-            $totalPoints = Tip::where('user_id', $user->id)
-                ->whereBetween('created_at', [$startOfWeek, $currentTime])
+            // Get tips within the selected week using match_date
+            $tips = Tip::where('user_id', $user->id)
+                ->whereBetween('match_date', [$startOfWeek, $endOfWeek])
                 ->where('result', 'won')
-                ->sum('ods');
+                ->get();
+
+            // Calculate total tips and win rate in the last 30 days
+            $totalTips = Tip::where('user_id', $user->id)
+                ->whereBetween('match_date', [Carbon::now()->subDays(30)->format('d-m-Y'), Carbon::now()->format('d-m-Y')])
+                ->count();
+
+            $totalWins = Tip::where('user_id', $user->id)
+                ->whereBetween('match_date', [Carbon::now()->subDays(30)->format('d-m-Y'), Carbon::now()->format('d-m-Y')])
+                ->where('result', 'won')
+                ->count();
+
+            $winRate = $totalTips > 0 ? ($totalWins / $totalTips) * 100 : 0;
+
+            // Calculate points using (Odds * Win Rate) / 100
+            $totalPoints = $tips->sum(function ($tip) use ($winRate) {
+                return $tip->ods * ($winRate / 100);
+            });
 
             if ($totalPoints > 0) {
                 $rankings[$user->id] = $totalPoints;
@@ -201,14 +232,16 @@ class RankingRepository
 
         foreach ($rankings as $userId => $points) {
             $user = User::with('bankAccount')->find($userId);
-            $rankingPayment = RankingPayment::where('user_id', $userId)->whereBetween('created_at', [$startOfWeek, $currentTime])->first();
-            $paidStatus = false;
-            if ($rankingPayment) {
-                $paidStatus = true;
-            }
-            // Fetch user's tips to calculate win rate
+
+            // Check if ranking payment exists for the selected week
+            $rankingPayment = RankingPayment::where('user_id', $userId)
+                ->whereBetween('match_date', [$startOfWeek, $endOfWeek])
+                ->first();
+            $paidStatus = $rankingPayment ? true : false;
+
+            // Get tips again to calculate win rate
             $tips = Tip::where('user_id', $userId)
-                ->whereBetween('created_at', [$startOfWeek, $currentTime])
+                ->whereBetween('match_date', [$startOfWeek, $endOfWeek])
                 ->get();
 
             $totalTips = $tips->count();
@@ -223,10 +256,10 @@ class RankingRepository
                 'username' => $user->username,
                 'profile_picture' => $user->profile_picture ?? null,
                 'rank' => $rank,
-                'points' => $points,
-                'win_rate' => $winRate . '%',
-                'win_amount' => $winAmount ? $winAmount->amount : null, // Fetch amount
-                'currency' => $winAmount ? $winAmount->currency : null, // Fetch currency
+                'points' => round($points, 2),
+                'win_rate' => round($winRate, 2) . '%',
+                'win_amount' => $winAmount ? $winAmount->amount : null,
+                'currency' => $winAmount ? $winAmount->currency : null,
                 'bank_account' => $user->bankAccount, // Load bankAccount relation,
                 'paid_status' => $paidStatus,
             ];

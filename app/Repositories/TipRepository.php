@@ -118,7 +118,7 @@ class TipRepository
         $groupedTips = $tips->groupBy('user_id')->map(function ($userTips) {
             $user = $userTips->first()->user;
 
-            $allTips = Tip::where('user_id', $user->id)->orderBy('created_at', 'desc')->get();
+            $allTips = Tip::where('user_id', $user->id)->where('status','approved')->orderBy('created_at', 'desc')->get();
             $totalTips = $allTips->count();
             $wintips = $allTips->where('result', 'won')->count();
             $winRate = $totalTips > 0 ? round(($wintips / $totalTips) * 100, 0) : 0;
