@@ -19,13 +19,21 @@ class Tip extends Model
         'match_date',
         'betting_category'
     ];
-    // protected $appends = ['match_date'];
+    protected $appends = ['formatted_match_date']; // Ensures it's included in API responses
 
-    // // Accessor to format match_date like created_at (ISO 8601 format)
-    // public function getMatchDateAttribute($value)
-    // {
-    //     return $value ? Carbon::createFromFormat('d-m-Y', $value)->toISOString() : null;
-    // }
+    // Convert match_date (dd-mm-yyyy) to ISO 8601 format (same as created_at)
+    public function getFormattedMatchDateAttribute()
+    {
+        if (!isset($this->attributes['match_date']) || empty($this->attributes['match_date'])) {
+            return null; // Return null if match_date is not set
+        }
+
+        try {
+            return Carbon::createFromFormat('d-m-Y', $this->attributes['match_date'])->toISOString();
+        } catch (\Exception $e) {
+            return null; // Return null if conversion fails
+        }
+    }
 
     public function user()
     {
