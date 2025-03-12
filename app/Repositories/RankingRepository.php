@@ -141,7 +141,7 @@ class RankingRepository
                 ->get();
 
             $totalTips = Tip::where('user_id', $user->id)
-            ->where('status', 'approved')                ->count();
+                ->where('status', 'approved')->count();
 
             $totalWins = Tip::where('user_id', $user->id)
                 ->where('result', 'won')
@@ -198,7 +198,7 @@ class RankingRepository
 
             // Calculate total tips and win rate in the last 30 days
             $totalTips = Tip::where('user_id', $user->id)
-            ->where('status', 'approved')                ->count();
+                ->where('status', 'approved')->count();
 
             $totalWins = Tip::where('user_id', $user->id)
                 ->where('result', 'won')
