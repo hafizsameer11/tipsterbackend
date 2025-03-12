@@ -62,6 +62,8 @@ class RankingRepository
                 ->whereBetween('match_date', [$startOfWeek, $endOfWeek])
                 ->where('result', 'won')
                 ->get();
+
+            // Ensure win rate is calculated correctly
             $totalTips = Tip::where('user_id', $user->id)
                 ->where('status', 'approved')
                 ->count();
@@ -69,16 +71,19 @@ class RankingRepository
                 ->where('result', 'won')
                 ->count();
 
-            $winRate = $totalTips > 0 ? ($totalWins / $totalTips) * 100 : 0;
-            Log::info("User ID: {$user->id}, Total Predictions: {$totalTips}, Total Wins: {$totalWins}, Win Rate: {$winRate}");
+            $winRate = $totalTips > 0 ? round(($totalWins / $totalTips) * 100, 2) : 0;
 
+            Log::info("User ID: {$user->id}, Total Predictions: {$totalTips}, Total Wins: {$totalWins}, Win Rate: {$winRate}");
 
             $totalPoints = $tips->sum(function ($tip) use ($winRate) {
                 return $tip->ods * ($winRate / 100);
             });
 
             if ($totalPoints > 0) {
-                $rankings[$user->id] = $totalPoints;
+                $rankings[$user->id] = [
+                    'points' => $totalPoints,
+                    'win_rate' => $winRate // Store win rate with ranking
+                ];
             }
         }
 
@@ -95,25 +100,25 @@ class RankingRepository
                 'status' => 'live',
                 'username' => $user ? $user->username : 'Unknown',
                 'profile_picture' => $user ? $user->profile_picture : null,
-                'win_rate' => $winRate . '%',
+                'win_rate' => '0%', // Return zero if no data is found
             ];
         }
 
         $rank = 1;
-        foreach ($rankings as $id => $points) {
+        foreach ($rankings as $id => $data) {
             if ($id == $userId) {
                 $user = User::find($userId);
 
                 return [
                     'user_id' => $userId,
                     'rank' => $rank,
-                    'points' => round($points, 2),
+                    'points' => round($data['points'], 2),
                     'week_start' => $startOfWeek,
                     'week_end' => $endOfWeek,
                     'status' => 'live',
                     'username' => $user->username,
                     'profile_picture' => $user->profile_picture,
-                    'win_rate' => round($winRate, 2) . '%',
+                    'win_rate' => round($data['win_rate'], 2) . '%', // Corrected win rate assignment
                 ];
             }
             $rank++;
@@ -121,6 +126,7 @@ class RankingRepository
 
         return null;
     }
+
 
     /**
      * Get top 30 users based on weekly rankings
