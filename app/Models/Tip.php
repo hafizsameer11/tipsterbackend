@@ -17,7 +17,8 @@ class Tip extends Model
         'status',
         'result',
         'match_date',
-        'betting_category'
+        'betting_category',
+        'rejection_reason'
     ];
     protected $appends = ['formatted_match_date']; // Ensures it's included in API responses
 
