@@ -95,7 +95,7 @@ class RankingRepository
                 'status' => 'live',
                 'username' => $user ? $user->username : 'Unknown',
                 'profile_picture' => $user ? $user->profile_picture : null,
-                'win_rate' => '0%',
+                'win_rate' => $winRate . '%',
             ];
         }
 
@@ -149,7 +149,7 @@ class RankingRepository
                 ->where('result', 'won')
                 ->count();
 
-            $winRate = $totalTips > 0 ? ($totalWins / $totalTips) * 100 : 0;
+            $winRate = $totalTips > 0 ? ($totalWins / $totalTips) * 100:0 ;
             Log::info("User ID: {$user->id}, Total Predictions: {$totalTips}, Total Wins: {$totalWins}, Win Rate: {$winRate}");
 
             $totalPoints = $tips->sum(function ($tip) use ($winRate) {
