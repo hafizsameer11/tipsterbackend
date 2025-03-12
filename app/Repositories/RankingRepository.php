@@ -143,35 +143,42 @@ class RankingRepository
         $rankings = [];
 
         foreach ($allUsers as $user) {
+            // Get tips within the selected week (using match_date)
             $tips = Tip::where('user_id', $user->id)
                 ->whereBetween('match_date', [$startOfWeek, $endOfWeek])
                 ->where('result', 'won')
                 ->get();
 
+            // Calculate win rate across all-time predictions
             $totalTips = Tip::where('user_id', $user->id)
                 ->where('status', 'approved')->count();
 
             $totalWins = Tip::where('user_id', $user->id)
-                ->where('result', 'won')
-                ->count();
+                ->where('result', 'won')->count();
 
-            $winRate = $totalTips > 0 ? ($totalWins / $totalTips) * 100:0 ;
+            $winRate = $totalTips > 0 ? round(($totalWins / $totalTips) * 100, 2) : 0;
+
             Log::info("User ID: {$user->id}, Total Predictions: {$totalTips}, Total Wins: {$totalWins}, Win Rate: {$winRate}");
 
+            // Calculate points using (Odds * Win Rate) / 100
             $totalPoints = $tips->sum(function ($tip) use ($winRate) {
                 return $tip->ods * ($winRate / 100);
             });
 
             if ($totalPoints > 0) {
-                $rankings[$user->id] = $totalPoints;
+                $rankings[$user->id] = [
+                    'points' => $totalPoints,
+                    'win_rate' => $winRate, // Store win rate properly
+                ];
             }
         }
 
+        // Sort rankings in descending order
         arsort($rankings);
         $rankedUsers = [];
         $rank = 1;
 
-        foreach ($rankings as $userId => $points) {
+        foreach ($rankings as $userId => $data) {
             $user = User::find($userId);
 
             $rankedUsers[] = [
@@ -179,8 +186,8 @@ class RankingRepository
                 'username' => $user->username,
                 'profile_picture' => $user->profile_picture ?? null,
                 'rank' => $rank++,
-                'points' => round($points, 2),
-                'win_rate' => round($winRate, 2) . '%',
+                'points' => round($data['points'], 2),
+                'win_rate' => round($data['win_rate'], 2) . '%', // Now this is correctly assigned
                 'start_of_week' => $startOfWeek,
                 'end_of_week' => $endOfWeek,
             ];
@@ -188,6 +195,7 @@ class RankingRepository
 
         return collect(array_slice($rankedUsers, 0, 30));
     }
+
     public function getTop10Rankings($weeksAgo = 1)
     {
         // Calculate the start and end of the selected week using match_date
