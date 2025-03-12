@@ -177,7 +177,9 @@ class RankingRepository
                 'profile_picture' => $user->profile_picture ?? null,
                 'rank' => $rank++,
                 'points' => round($points, 2),
-                'win_rate' => round($winRate, 2) . '%'
+                'win_rate' => round($winRate, 2) . '%',
+                'start_of_week'=>$startOfWeek,
+                'end_of_week'=> $endOfWeek,
             ];
         }
 
