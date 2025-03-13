@@ -54,10 +54,10 @@ class RankingService
             throw new Exception($e->getMessage());
         }
     }
-    public function getTop10Rankings()
+    public function getTop10Rankings($weeksAgo)
     {
         try {
-            return $this->RankingRepository->getTop10Rankings();
+            return $this->RankingRepository->getTop10Rankings($weeksAgo);
         } catch (Exception $e) {
             throw new Exception($e->getMessage());
         }

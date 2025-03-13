@@ -71,10 +71,11 @@ class RankingController extends Controller
         }
         // return $this->rankingService->getTop30Rankings();
     }
-    public function getTop10Rankings()
+    public function getTop10Rankings(Request $request)
     {
         try {
-            $rankings = $this->rankingService->getTop10Rankings();
+            $weeksAgo = $request->query('weeksAgo', 1); // Default to 1 week
+            $rankings = $this->rankingService->getTop10Rankings($weeksAgo);
             return ResponseHelper::success($rankings, 'Rankings fetched successfully');
         } catch (\Exception $e) {
             return ResponseHelper::error($e->getMessage(), 400);
