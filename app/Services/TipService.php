@@ -56,10 +56,11 @@ class TipService
             throw new Exception($e->getMessage());
         }
     }
-    public function getAllTips(){
-        try{
-        return $this->TipRepository->getAllTips();
-        }catch(Exception $e){
+    public function getAllTips()
+    {
+        try {
+            return $this->TipRepository->getAllTips();
+        } catch (Exception $e) {
             throw new Exception($e->getMessage());
         }
     }
@@ -72,10 +73,10 @@ class TipService
         }
     }
 
-    public function updateTip($tipId, $status, $result)
+    public function updateTip($tipId, $status, $result, $ods, $rejection_reason)
     {
         try {
-            return $this->TipRepository->update($tipId, ['status' => $status, 'result' => $result]);
+            return $this->TipRepository->update($tipId, ['status' => $status, 'result' => $result, 'ods' => $ods, 'rejection_reason' => $rejection_reason]);
         } catch (Exception $e) {
             throw new Exception($e->getMessage());
         }
