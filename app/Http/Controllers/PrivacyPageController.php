@@ -26,7 +26,13 @@ class PrivacyPageController extends Controller
     }
     public function index()
     {
-        $privacy = PrivacyPage::first();
-        return response()->json(['data' => $privacy]);
+        $privacy = PrivacyPage::where('title','privacy')->first();
+        $term=PrivacyPage::where('title','terms')->first();
+        return response()->json([
+            'data'=>[
+                'privacy'=>$privacy,
+                'term'=>$term
+            ]
+        ]);
     }
 }
