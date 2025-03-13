@@ -24,7 +24,7 @@ class PrivacyPageController extends Controller
         $link->save();
         return response()->json(['success' => 'Link added successfully', 'data' => $link]);
     }
-    public function getPrivacyPolicy()
+    public function index()
     {
         $privacy = PrivacyPage::first();
         return response()->json(['data' => $privacy]);
