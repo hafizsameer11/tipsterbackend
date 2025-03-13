@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Validator;
 class PrivacyPageController extends Controller
 {
     //
-    public function store(Request $request)
+    public function create(Request $request)
     {
         $validatedData = Validator::make($request->all(), [
             'title' => 'required',
