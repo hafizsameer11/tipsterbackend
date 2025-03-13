@@ -198,30 +198,32 @@ class RankingRepository
 
     public function getTop10Rankings($weeksAgo = 1)
     {
-        // Calculate the start and end of the selected week using match_date
+        $now = Carbon::now();
+
+        // Calculate the start and end of the selected week
         $startOfWeek = Carbon::now()->subWeeks($weeksAgo - 1)->startOfWeek()->format('d-m-Y');
         $endOfWeek = Carbon::now()->subWeeks($weeksAgo - 1)->endOfWeek()->format('d-m-Y');
 
-        // Fetch all users with bank accounts
-        $allUsers = User::with('bankAccount')->get();
+        // Fetch all users
+        $allUsers = User::all();
         $rankings = [];
 
         foreach ($allUsers as $user) {
-            // Get tips within the selected week using match_date
+            // Get tips within the selected week (using match_date)
             $tips = Tip::where('user_id', $user->id)
                 ->whereBetween('match_date', [$startOfWeek, $endOfWeek])
                 ->where('result', 'won')
                 ->get();
 
-            // Calculate total tips and win rate in the last 30 days
+            // Calculate win rate across all-time predictions
             $totalTips = Tip::where('user_id', $user->id)
                 ->where('status', 'approved')->count();
 
             $totalWins = Tip::where('user_id', $user->id)
-                ->where('result', 'won')
-                ->count();
+                ->where('result', 'won')->count();
 
-            $winRate = $totalTips > 0 ? ($totalWins / $totalTips) * 100 : 0;
+            $winRate = $totalTips > 0 ? round(($totalWins / $totalTips) * 100, 2) : 0;
+
             Log::info("User ID: {$user->id}, Total Predictions: {$totalTips}, Total Wins: {$totalWins}, Win Rate: {$winRate}");
 
             // Calculate points using (Odds * Win Rate) / 100
@@ -230,7 +232,10 @@ class RankingRepository
             });
 
             if ($totalPoints > 0) {
-                $rankings[$user->id] = $totalPoints;
+                $rankings[$user->id] = [
+                    'points' => $totalPoints,
+                    'win_rate' => $winRate, // Store win rate properly
+                ];
             }
         }
 
@@ -242,45 +247,36 @@ class RankingRepository
         // Fetch Winner Amounts and map by rank
         $winnerAmounts = WinnersAmount::all()->keyBy('rank');
 
-        foreach ($rankings as $userId => $points) {
-            $user = User::with('bankAccount')->find($userId);
-
-            // Check if ranking payment exists for the selected week
-            $rankingPayment = RankingPayment::where('user_id', $userId)
-                ->whereBetween('match_date', [$startOfWeek, $endOfWeek])
-                ->first();
-            $paidStatus = $rankingPayment ? true : false;
-
-            // Get tips again to calculate win rate
-            $tips = Tip::where('user_id', $userId)
-                ->whereBetween('match_date', [$startOfWeek, $endOfWeek])
-                ->get();
-
-            $totalTips = $tips->count();
-            $lostTips = $tips->where('result', 'loss')->count();
-            $winRate = $totalTips > 0 ? round((($totalTips - $lostTips) / $totalTips) * 100, 2) : 0;
+        foreach ($rankings as $userId => $data) {
+            $user = User::find($userId);
 
             // Get Win Amount from WinnersAmount Model using rank
             $winAmount = $winnerAmounts[$rank] ?? null;
+
+            // Check if ranking payment exists for the selected week
+            $rankingPayment = RankingPayment::where('user_id', $userId)
+                ->first();
+            $paidStatus = $rankingPayment ? true : false;
 
             $rankedUsers[] = [
                 'user_id' => $userId,
                 'username' => $user->username,
                 'profile_picture' => $user->profile_picture ?? null,
-                'rank' => $rank,
-                'points' => round($points, 2),
-                'win_rate' => round($winRate, 2) . '%',
+                'rank' => $rank++,
+                'points' => round($data['points'], 2),
+                'win_rate' => round($data['win_rate'], 2) . '%',
                 'win_amount' => $winAmount ? $winAmount->amount : null,
                 'currency' => $winAmount ? $winAmount->currency : null,
-                'bank_account' => $user->bankAccount, // Load bankAccount relation,
                 'paid_status' => $paidStatus,
+                'start_of_week' => $startOfWeek,
+                'end_of_week' => $endOfWeek,
             ];
-
-            $rank++;
         }
 
-        return collect(array_slice($rankedUsers, 0, 10)); // Return top 10
+        // Return top 10
+        return collect(array_slice($rankedUsers, 0, 10));
     }
+
     public function payRankingPayment($userId, $amount, $rank)
     {
         $now = Carbon::now();
