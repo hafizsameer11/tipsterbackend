@@ -30,8 +30,8 @@ class PrivacyPageController extends Controller
         $term=PrivacyPage::where('title','terms')->first();
         return response()->json([
             'data'=>[
-                'privacy'=>$privacy,
-                'term'=>$term
+                'privacy'=>$privacy->url,
+                'term'=>$term->url
             ]
         ]);
     }
