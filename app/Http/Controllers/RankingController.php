@@ -74,7 +74,7 @@ class RankingController extends Controller
     public function getTop10Rankings(Request $request)
     {
         try {
-            $weeksAgo = $request->query('weeksAgo', 1); // Default to 1 week
+            $weeksAgo = $request->query('weekAgo', 1); // Default to 1 week
             $rankings = $this->rankingService->getTop10Rankings($weeksAgo);
             return ResponseHelper::success($rankings, 'Rankings fetched successfully');
         } catch (\Exception $e) {
