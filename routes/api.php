@@ -74,6 +74,7 @@ Route::prefix('auth')->group(function () {
     Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 });
 Route::get('admin/user/getAllUsers', [UserController::class, 'getAllUsers']);
+Route::get('privacy/get',[PrivacyPageController::class,'index']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('betting-company')->group(function () {
         Route::get('/get-all', [BettingCompanyController::class, 'getAll']);
@@ -133,7 +134,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/comments/delete/{commentId}', [PostController::class, 'deleteComment']);
 
     Route::post('privacy/create',[PrivacyPageController::class,'create']);
-    Route::get('privacy/get',[PrivacyPageController::class,'index']);
+
 
     Route::post('/user/update-profile/{userId}', [UserController::class, 'updateProfile']);
 
