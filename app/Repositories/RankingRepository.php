@@ -270,6 +270,7 @@ class RankingRepository
                 'paid_status' => $paidStatus,
                 'start_of_week' => $startOfWeek,
                 'end_of_week' => $endOfWeek,
+                'weekago' => $weeksAgo
             ];
         }
 

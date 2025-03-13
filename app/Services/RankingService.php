@@ -54,7 +54,7 @@ class RankingService
             throw new Exception($e->getMessage());
         }
     }
-    public function getTop10Rankings($weeksAgo)
+    public function getTop10Rankings($weeksAgo=1)
     {
         try {
             return $this->RankingRepository->getTop10Rankings($weeksAgo);
