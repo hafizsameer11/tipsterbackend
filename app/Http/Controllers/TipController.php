@@ -66,7 +66,7 @@ class TipController extends Controller
         try{
             $status=$request->status;
             $result=$request->result;
-            $ods=$request->ods;
+            $ods=$request->odds;
             $rejection_reason=$request->rejection_reason;
             $tip=$this->tipService->updateTip($tipId,$status,$result, $ods, $rejection_reason);
             return ResponseHelper::success($tip, 'Tip updated successfully', 200);
