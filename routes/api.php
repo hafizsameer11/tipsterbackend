@@ -168,7 +168,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/tip/update/{tipId}', [TipController::class, 'updateTip']); //only status and result
         Route::get('/tip/get-all', [TipController::class, 'getAllTips']);
         //rank management
-        Route::get('rank/get-top-10-rankings', [RankingController::class, 'getTopT10Rankings']);
+        Route::get('rank/get-top-10-rankings', [RankingController::class, 'getTop10Rankings']);
         Route::post('rank/update-winner-amount', [RankingController::class, 'updateWinnersAmounts']);
         Route::get('rank/get-winners-amount', [RankingController::class, 'getWinnersAmount']);
         Route::get('rank/get-winners-amount-by-rank/{rank}', [RankingController::class, 'getWinnersAmountByRank']);
