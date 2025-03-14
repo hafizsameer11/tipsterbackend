@@ -118,13 +118,17 @@ class TipRepository
         $groupedTips = $tips->groupBy('user_id')->map(function ($userTips) {
             $user = $userTips->first()->user;
 
-            $allTips = Tip::where('user_id', $user->id)->where('status','approved')->orderBy('created_at', 'desc')->get();
+            $allTips = Tip::where('user_id', $user->id)->where('status', 'approved')->orderBy('created_at', 'desc')->get();
             $totalTips = $allTips->count();
             $wintips = $allTips->where('result', 'won')->count();
             $winRate = $totalTips > 0 ? round(($wintips / $totalTips) * 100, 0) : 0;
-            $lastFiveResults = $allTips->take(5)->pluck('result')->map(function ($result) {
-                return strtoupper(substr($result, 0, 1)); // Extract first letter and convert to uppercase
-            })->toArray();
+            $lastFiveResults = $allTips
+                ->reject(fn($tip) => strtolower($tip->result) === 'running') // Skip where result is "running"
+                ->take(5)
+                ->pluck('result')
+                ->map(fn($result) => strtoupper(substr($result, 0, 1))) // Extract first letter and convert to uppercase
+                ->toArray();
+
             $tipsWithUser = $userTips->map(function ($tip) use ($user, $winRate, $lastFiveResults) {
                 return array_merge($tip->toArray(), [
                     'user' => [
