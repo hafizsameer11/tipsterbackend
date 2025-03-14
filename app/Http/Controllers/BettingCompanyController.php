@@ -26,7 +26,7 @@ class BettingCompanyController extends Controller
     public function update($id, BettingCompanyRequest $request)
     {
         try {
-            $response = $this->bettingCompanyService->update($id, $request->all());
+            $response = $this->bettingCompanyService->update($id, $request->validated());
             return ResponseHelper::success($response, 'Betting Company updated successfully', 200);
         } catch (\Exception $e) {
             return ResponseHelper::error($e->getMessage());
