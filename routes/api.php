@@ -78,10 +78,10 @@ Route::get('privacy/get',[PrivacyPageController::class,'index']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('betting-company')->group(function () {
         Route::get('/get-all', [BettingCompanyController::class, 'getAll']);
-        Route::put('/get-all/{id}', [BettingCompanyController::class, 'update']);
+        // Route::put('/get-all/{id}', [BettingCompanyController::class, 'update']);
         Route::get('/get-single/{id}', [BettingCompanyController::class, 'getOne']);
         Route::post('/create', [BettingCompanyController::class, 'create']);
-        Route::put('/update/{id}', [BettingCompanyController::class, 'update']);
+        Route::post('/update/{id}', [BettingCompanyController::class, 'update']);
         Route::delete('/delete/{id}', [BettingCompanyController::class, 'delete']);
     });
     Route::prefix('tip')->group(function () {
