@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('subscriptions', function (Blueprint $table) {
+        Schema::table('packages', function (Blueprint $table) {
             $table->string('google_product_id')->nullable();
             $table->double('amount_usd')->  nullable();
         });
