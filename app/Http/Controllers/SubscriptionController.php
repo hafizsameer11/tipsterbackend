@@ -75,6 +75,7 @@ class SubscriptionController extends Controller
             'amount' => $package->amount_usd,
             'transaction_date' => now(),
             'status' => 'completed',
+            'response'=>$request->response
         ]);
 
         // Update user VIP status
