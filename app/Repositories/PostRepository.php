@@ -61,6 +61,7 @@ class PostRepository
         return Post::with(['user', 'likes', 'comments' => function ($query) use ($auth) {
             $query->where('status', 'approved')->orWhere('user_id', $auth->id)->orderBy('created_at', 'desc')->get();
         }])
+        ->where('status','approved')
             ->orderBy('created_at', 'desc')
             // ->where('status','approved')
             ->get()
@@ -83,6 +84,7 @@ class PostRepository
                         'rank' => $userRank,
                         'role' => $post->user->role
                     ],
+
                     'underReview' => $post->status == 'under_review',
                     'timestamp' => $post->created_at->format('h:i A - m/d/Y'),
                     'content' => $post->content,
