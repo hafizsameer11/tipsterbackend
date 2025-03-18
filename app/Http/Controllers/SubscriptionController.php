@@ -70,7 +70,7 @@ class SubscriptionController extends Controller
             'user_id' => $user->id,
             'subscription_id' => $subscription->id,
             'google_product_id' => $request->google_product_id,
-            'order_id' => $request->order_id,
+            'order_id' => $request->order_id ?? null,
             'purchase_token' => $request->purchase_token,
             'amount' => $package->amount_usd,
             'transaction_date' => now(),
