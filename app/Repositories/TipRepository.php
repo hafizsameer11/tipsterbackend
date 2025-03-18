@@ -18,11 +18,17 @@ class TipRepository
     }
 
     public function create(array $data)
-    {
-        $user = Auth::user();
-        $data['user_id'] = $user->id;
-        return Tip::create($data);
-    }
+{
+    $user = Auth::user();
+    $data['user_id'] = $user->id;
+
+    // Convert the date string to Carbon, add a day, and format it back
+    $data['match_date'] = Carbon::createFromFormat('d-m-Y', $data['match_date'])
+                                ->addDay()
+                                ->format('d-m-Y');
+
+    return Tip::create($data);
+}
     public function getFreeTipofUser($userId)
     {
         $user = User::findOrFail($userId);
