@@ -29,7 +29,7 @@ class NotificationController extends Controller
     {
         $user = Auth::user();
         $userId = $user->id;
-        $vipStatu = $user->vip_statu;
+        $vipStatu = $user->vip_status;
         $count = Notification::where('user_id', $userId)->where('is_read', false)->count();
 
         return ResponseHelper::success(['count' => $count, 'vipStatus' => $vipStatu], 'Unread notification count retrieved successfully');
