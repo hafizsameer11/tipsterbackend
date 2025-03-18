@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('subscriptions', function (Blueprint $table) {
-            $table->string('google_product_id')->nullable()->after('package_id');
+            // $table->string('google_product_id')->nullable()->after('package_id');
             $table->string('purchase_token')->unique()->after('google_product_id');
             $table->timestamp('expires_at')->nullable()->after('renewal_date');
         });
