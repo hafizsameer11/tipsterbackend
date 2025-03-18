@@ -106,6 +106,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('user')->group(function () {
         Route::get('/view-profile/{userId}', [UserController::class, 'viewProfile']);
         Route::post('/change-password', [AuthController::class, 'changePassword']);
+        Route::get('/delete', [UserController::class, 'delete']);
     });
 
     Route::post('/follow/{userId}', [FollowController::class, 'followUser']);

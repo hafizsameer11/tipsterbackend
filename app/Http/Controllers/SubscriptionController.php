@@ -14,6 +14,7 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class SubscriptionController extends Controller
 {
@@ -26,11 +27,12 @@ class SubscriptionController extends Controller
 
     public function storePurchase(Request $request)
     {
+        Log::info("Data received for subscription:", $request->all());
         $request->validate([
-            'google_product_id' => 'required|string',
-            'purchase_date' => 'required|date',
-            'order_id' => 'required|string|unique:subscriptions,order_id',
-            'purchase_token' => 'required|string|unique:subscriptions,purchase_token',
+            'google_product_id' => 'nullable|string',
+            'purchase_date' => 'nullable|date',
+            'order_id' => 'nullable|string|unique:subscriptions,order_id',
+            'purchase_token' => 'nullable|string|unique:subscriptions,purchase_token',
         ]);
 
         $user = Auth::user();
@@ -77,8 +79,8 @@ class SubscriptionController extends Controller
 
         // Update user VIP status
         // $user->update(['vip_status' => true]);
-        $authUser=User::where('user_id',$user->id)->first();
-        $authUser->vip_status='active';
+        $authUser = User::where('user_id', $user->id)->first();
+        $authUser->vip_status = 'active';
         $authUser->save();
         return response()->json([
             'message' => 'Subscription and transaction stored successfully!',

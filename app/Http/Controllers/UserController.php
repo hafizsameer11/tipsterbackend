@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Services\UserService;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
 {
@@ -71,5 +72,12 @@ class UserController extends Controller
         } catch (Exception $e) {
             return ResponseHelper::error($e->getMessage());
         }
+    }
+    public function delete(){
+        $user=Auth::user();
+        $authUser=User::where('id',$user->id)->first();
+        $authUser->email=$authUser->email.'-deleted';
+        $authUser->save();
+        return ResponseHelper::success($authUser, 'User deleted successfully');
     }
 }
