@@ -80,4 +80,10 @@ class UserController extends Controller
         $authUser->save();
         return ResponseHelper::success($authUser, 'User deleted successfully');
     }
+    public function checkUserVipStatus(){
+        $user=Auth::user();
+        $user=User::where('id',$user->id)->first();
+        $vipStatus=$user->vip_status;
+        return ResponseHelper::success($user, 'User data fetched successfully');
+    }
 }

@@ -29,9 +29,10 @@ class NotificationController extends Controller
     {
         $user = Auth::user();
         $userId = $user->id;
+        $vipStatu = $user->vip_statu;
         $count = Notification::where('user_id', $userId)->where('is_read', false)->count();
 
-        return ResponseHelper::success(['count' => $count], 'Unread notification count retrieved successfully');
+        return ResponseHelper::success(['count' => $count, 'vipStatus' => $vipStatu], 'Unread notification count retrieved successfully');
     }
     // Mark a notification as read
     public function markAsRead($notificationId)
