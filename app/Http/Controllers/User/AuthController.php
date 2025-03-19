@@ -28,7 +28,7 @@ class AuthController extends Controller
     {
         try {
             $user = $this->userService->create($request->validated());
-            
+
             return ResponseHelper::success($user, 'User registered successfully', 201);
         } catch (\Exception $e) {
             return ResponseHelper::error($e->getMessage());
@@ -51,10 +51,10 @@ class AuthController extends Controller
             $userd = $user['user'];
 
 
-            Log::info('User Logged In:', [
-                'user' => $user,
-                'request_headers' => request()->headers->all()
-            ]);
+            // Log::info('User Logged In:', [
+            //     'user' => $user,
+            //     'request_headers' => request()->headers->all()
+            // ]);
             $token= $user->createToken('auth_token')->plainTextToken;
 
             $data=[

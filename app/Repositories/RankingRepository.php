@@ -73,7 +73,7 @@ class RankingRepository
 
             $winRate = $totalTips > 0 ? round(($totalWins / $totalTips) * 100, 2) : 0;
 
-            Log::info("User ID: {$user->id}, Total Predictions: {$totalTips}, Total Wins: {$totalWins}, Win Rate: {$winRate}");
+            // Log::info("User ID: {$user->id}, Total Predictions: {$totalTips}, Total Wins: {$totalWins}, Win Rate: {$winRate}");
 
             $totalPoints = $tips->sum(function ($tip) use ($winRate) {
                 return $tip->ods * ($winRate / 100);
@@ -158,7 +158,7 @@ class RankingRepository
 
             $winRate = $totalTips > 0 ? round(($totalWins / $totalTips) * 100, 2) : 0;
 
-            Log::info("User ID: {$user->id}, Total Predictions: {$totalTips}, Total Wins: {$totalWins}, Win Rate: {$winRate}");
+            // Log::info("User ID: {$user->id}, Total Predictions: {$totalTips}, Total Wins: {$totalWins}, Win Rate: {$winRate}");
 
             // Calculate points using (Odds * Win Rate) / 100
             $totalPoints = $tips->sum(function ($tip) use ($winRate) {
@@ -224,7 +224,7 @@ class RankingRepository
 
             $winRate = $totalTips > 0 ? round(($totalWins / $totalTips) * 100, 2) : 0;
 
-            Log::info("User ID: {$user->id}, Total Predictions: {$totalTips}, Total Wins: {$totalWins}, Win Rate: {$winRate}");
+            // Log::info("User ID: {$user->id}, Total Predictions: {$totalTips}, Total Wins: {$totalWins}, Win Rate: {$winRate}");
 
             // Calculate points using (Odds * Win Rate) / 100
             $totalPoints = $tips->sum(function ($tip) use ($winRate) {

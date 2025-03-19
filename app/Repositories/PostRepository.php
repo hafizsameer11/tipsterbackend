@@ -23,7 +23,7 @@ class PostRepository
     }
     public function createPost($data)
     {
-        Log::info('Received Post Data:', $data); // Log input data
+        // Log::info('Received Post Data:', $data); // Log input data
 
         $imagePaths = [];
 
@@ -38,7 +38,7 @@ class PostRepository
         // Store images as JSON if images exist, else store an empty JSON array
         $data['images'] = !empty($imagePaths) ? json_encode($imagePaths) : json_encode([]);
 
-        Log::info('Processed Images:', ['images' => $imagePaths]); // Log stored image paths
+        // Log::info('Processed Images:', ['images' => $imagePaths]); // Log stored image paths
 
         $post = Post::create($data);
 
