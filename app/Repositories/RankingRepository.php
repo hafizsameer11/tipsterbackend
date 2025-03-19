@@ -101,7 +101,7 @@ class RankingRepository
                 'username' => $user ? $user->username : 'Unknown',
                 'profile_picture' => $user ? $user->profile_picture : null,
                 'win_rate' => '0%', // Return zero if no data is found
-                'win_amount' => null
+                'win_amount' => 0
             ];
         }
         $winnerAmounts = WinnersAmount::all()->keyBy('rank');
