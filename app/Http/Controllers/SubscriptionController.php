@@ -66,7 +66,7 @@ class SubscriptionController extends Controller
             'purchase_token' => $request->purchase_token,
             'status' => 'active',
             'renewal_date' => $expiresAt,
-            'amount_usd'=>$package->amount,
+            'amount_usd' => $package->amount,
 
         ]);
 

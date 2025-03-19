@@ -178,9 +178,10 @@ class RankingRepository
         $rankedUsers = [];
         $rank = 1;
 
+        $winnerAmounts = WinnersAmount::all()->keyBy('rank');
         foreach ($rankings as $userId => $data) {
             $user = User::find($userId);
-
+            $winAmount = $winnerAmounts[$rank] ?? null;
             $rankedUsers[] = [
                 'user_id' => $userId,
                 'username' => $user->username,
@@ -190,6 +191,7 @@ class RankingRepository
                 'win_rate' => round($data['win_rate'], 2) . '%', // Now this is correctly assigned
                 'start_of_week' => $startOfWeek,
                 'end_of_week' => $endOfWeek,
+                'win_amount' => $winAmount ? $winAmount->amount : null,
             ];
         }
 
@@ -254,7 +256,7 @@ class RankingRepository
             $rankingPayment = RankingPayment::where('user_id', $userId)
                 ->first();
             $paidStatus = $rankingPayment ? true : false;
-
+            // $winAmount = $winnerAmounts[$rank] ?? null;
             $rankedUsers[] = [
                 'user_id' => $userId,
                 'username' => $user->username,
