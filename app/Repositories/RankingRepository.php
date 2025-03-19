@@ -194,7 +194,7 @@ class RankingRepository
                 'win_rate' => round($data['win_rate'], 2) . '%', // Now this is correctly assigned
                 'start_of_week' => $startOfWeek,
                 'end_of_week' => $endOfWeek,
-                'win_amount' => $winAmount ? $winAmount->amount : null,
+                'win_amount' => $winAmount ? number_format($winAmount->amount, 0, '.', ',') : null,
             ];
         }
 
