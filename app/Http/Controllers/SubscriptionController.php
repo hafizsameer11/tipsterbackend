@@ -29,25 +29,29 @@ class SubscriptionController extends Controller
     {
         Log::info("Data received for subscription:", $request->all());
         $request->validate([
-            'google_product_id' => 'nullable|string',
-            'purchase_date' => 'nullable|date',
-            'order_id' => 'nullable|string|unique:subscriptions,order_id',
-            'purchase_token' => 'nullable|string|unique:subscriptions,purchase_token',
+            'package_id' => 'nullable',
+            'google_product_id' => 'nullable',
+            'purchase_date' => 'nullable',
+            'order_id' => 'nullable',
+            'purchase_token' => 'nullable',
         ]);
 
         $user = Auth::user();
-
+        $authUser = User::where('user_id', $user->id)->first();
+        $authUser->vip_status = 'active';
+        $authUser->save();
+        $pruchaseDate = now();
         // Find package from database
-        $package = DB::table('packages')->where('google_product_id', $request->google_product_id)->first();
-        if (!$package) {
-            return response()->json(["error" => "Package not found"], 404);
-        }
-
+        // $package = DB::table('packages')->where('google_product_id', $request->google_product_id)->first();
+        // if (!$package) {
+        //     return response()->json(["error" => "Package not found"], 404);
+        // }
+        $package = Package::find($request->package_id);
         // Calculate expiration date
         $expiresAt = match ($package->duration) {
-            "1 Month" => Carbon::parse($request->purchase_date)->addMonth(),
-            "1 Week" => Carbon::parse($request->purchase_date)->addWeek(),
-            "1 Day" => Carbon::parse($request->purchase_date)->addDay(),
+            "30" => Carbon::parse($pruchaseDate)->addMonth(),
+            "7" => Carbon::parse($pruchaseDate)->addWeek(),
+            "1" => Carbon::parse($pruchaseDate)->addDay(),
             default => now(),
         };
 
@@ -62,7 +66,8 @@ class SubscriptionController extends Controller
             'purchase_token' => $request->purchase_token,
             'status' => 'active',
             'renewal_date' => $expiresAt,
-            'expires_at' => $expiresAt,
+            'amount_usd'=>$package->amount,
+
         ]);
 
         // Store transaction record
@@ -72,17 +77,15 @@ class SubscriptionController extends Controller
             'google_product_id' => $request->google_product_id,
             'order_id' => $request->order_id ?? null,
             'purchase_token' => $request->purchase_token,
-            'amount' => $package->amount_usd,
+            'amount' => $package->amount,
             'transaction_date' => now(),
             'status' => 'completed',
-            'response'=>$request->response
+            'response' => $request->response
         ]);
 
         // Update user VIP status
         // $user->update(['vip_status' => true]);
-        $authUser = User::where('user_id', $user->id)->first();
-        $authUser->vip_status = 'active';
-        $authUser->save();
+
         return response()->json([
             'message' => 'Subscription and transaction stored successfully!',
             'subscription' => $subscription,

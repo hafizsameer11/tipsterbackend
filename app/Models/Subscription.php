@@ -12,7 +12,10 @@ class Subscription extends Model
         'user_id',
         'package_id',
         'renewal_date',
-        'status'
+        'status',
+        'google_product_id',
+        'purchase_token',
+        'amount_usd'
     ];
     public function user()
     {
