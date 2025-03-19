@@ -190,7 +190,7 @@ class RankingRepository
             $user = User::find($userId);
             $winAmount = $winnerAmounts[$rank] ?? null;
             if ($weeksAgo == 1) {
-                $winAmount = null;
+                $winAmount = 0;
             }
             $rankedUsers[] = [
                 'user_id' => $userId,
@@ -201,7 +201,7 @@ class RankingRepository
                 'win_rate' => round($data['win_rate'], 2) . '%', // Now this is correctly assigned
                 'start_of_week' => $startOfWeek,
                 'end_of_week' => $endOfWeek,
-                'win_amount' => $winAmount ? number_format($winAmount->amount, 0, '.', ',') : null,
+                'win_amount' => $winAmount ? number_format($winAmount->amount, 0, '.', ',') : 0,
             ];
         }
 

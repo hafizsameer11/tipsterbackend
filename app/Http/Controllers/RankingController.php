@@ -87,7 +87,7 @@ class RankingController extends Controller
     {
         try {
             $weeksAgo = $request->query('weeksAgo', 1); // Default to 1 week
-
+            
             $user = Auth::user();
             $ranking = $this->rankingService->getUserRanking($user->id, $weeksAgo);
             return ResponseHelper::success($ranking, 'Ranking fetched successfully');
