@@ -182,6 +182,9 @@ class RankingRepository
         foreach ($rankings as $userId => $data) {
             $user = User::find($userId);
             $winAmount = $winnerAmounts[$rank] ?? null;
+            if($weeksAgo == 1){
+                $winAmount=null;
+            }
             $rankedUsers[] = [
                 'user_id' => $userId,
                 'username' => $user->username,
