@@ -103,9 +103,14 @@ class RankingRepository
                 'win_rate' => '0%', // Return zero if no data is found
             ];
         }
-
+        $winnerAmounts = WinnersAmount::all()->keyBy('rank');
         $rank = 1;
+
         foreach ($rankings as $id => $data) {
+            $winAmount = $winnerAmounts[$rank] ?? null;
+            if ($weeksAgo == 1) {
+                $winAmount = null;
+            }
             if ($id == $userId) {
                 $user = User::find($userId);
 
@@ -119,6 +124,7 @@ class RankingRepository
                     'username' => $user->username,
                     'profile_picture' => $user->profile_picture,
                     'win_rate' => round($data['win_rate'], 2) . '%', // Corrected win rate assignment
+                    'win_amount' => $winAmount ? number_format($winAmount->amount, 0, '.', ',') : null
                 ];
             }
             $rank++;
@@ -182,8 +188,8 @@ class RankingRepository
         foreach ($rankings as $userId => $data) {
             $user = User::find($userId);
             $winAmount = $winnerAmounts[$rank] ?? null;
-            if($weeksAgo == 1){
-                $winAmount=null;
+            if ($weeksAgo == 1) {
+                $winAmount = null;
             }
             $rankedUsers[] = [
                 'user_id' => $userId,
