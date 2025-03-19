@@ -94,7 +94,7 @@ class SubscriptionController extends Controller
     }
     public function getTransaction(){
         $user=Auth::user();
-        $transactions=Transaction::where('user_id',$user->id)->with('user','subscription')->get();
+        $transactions=Transaction::where('user_id',$user->id)->with('user','subscription.package')->get();
         return ResponseHelper::success($transactions, 'Subscription created successfully');
     }
     public function createSubscription(SubscriptionRequest $request)
