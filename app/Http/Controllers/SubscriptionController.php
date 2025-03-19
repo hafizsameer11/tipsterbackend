@@ -92,11 +92,24 @@ class SubscriptionController extends Controller
             'transaction' => $transaction,
         ], 201);
     }
-    public function getTransaction(){
-        $user=Auth::user();
-        $transactions=Transaction::where('user_id',$user->id)->with('user','subscription.package')->get();
-        return ResponseHelper::success($transactions, 'Subscription created successfully');
+    public function getTransaction()
+    {
+        $user = Auth::user();
+        $transactions = Transaction::where('user_id', $user->id)
+            ->with('subscription.package')
+            ->get()
+            ->map(function ($transaction) {
+                return [
+                    'title' => optional($transaction->subscription->package)->title ?? 'Subscription Payment',
+                    'amount' => (float) $transaction->amount,
+                    'ref' => $transaction->order_id,
+                    'date' => \Carbon\Carbon::parse($transaction->created_at)->format('d/m/Y'),
+                ];
+            });
+    
+        return ResponseHelper::success($transactions, 'Subscription data fetched successfully');
     }
+    
     public function createSubscription(SubscriptionRequest $request)
     {
         try {
