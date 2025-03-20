@@ -84,6 +84,7 @@ class PostRepository
                         'rank' => $userRank,
                         'role' => $post->user->role
                     ],
+                    'is_pin' => $post->is_pinned,
 
                     'underReview' => $post->status == 'under_review',
                     'timestamp' => $post->created_at->format('h:i A - m/d/Y'),
