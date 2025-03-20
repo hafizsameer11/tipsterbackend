@@ -58,57 +58,84 @@ class PostRepository
     public function getAllPosts()
     {
         $auth = Auth::user();
-        return Post::with(['user', 'likes', 'comments' => function ($query) use ($auth) {
-            $query->where('status', 'approved')->orWhere('user_id', $auth->id)->orderBy('created_at', 'desc')->get();
-        }])
-        ->where('status','approved')
+        $posts = Post::with(['user', 'likes', 'comments' => function ($query) use ($auth) {
+                $query->where('status', 'approved')
+                    ->orWhere('user_id', $auth->id)
+                    ->orderBy('created_at', 'desc');
+            }])
+            ->where('status', 'approved')
             ->orderBy('created_at', 'desc')
-            // ->where('status','approved')
-            ->get()
-            ->map(function ($post) {
-                // Decode images JSON and structure them as separate fields
-                $decodedImages = json_decode($post->images, true) ?? [];
-                $formattedImages = [];
+            ->get();
 
-                foreach ($decodedImages as $index => $imagePath) {
-                    $formattedImages['image_' . ($index + 1)] = asset('storage/' . $imagePath) ?? null;
-                }
-                $userRank = $this->RankingRepository->getUserRanking($post->user_id);
-                $userRank = $userRank['rank'] ?? 0;
-                return array_merge([
-                    'id' => $post->id,
-                    'user' => [
-                        'id' => $post->user->id,
-                        'username' => $post->user->username,
-                        'profile_picture' => asset('storage/' . $post->user->profile_picture ?? '') ?? null,
-                        'rank' => $userRank,
-                        'role' => $post->user->role
-                    ],
-                    'is_pin' => $post->is_pinned,
+        $formattedPosts = [];
 
-                    'underReview' => $post->status == 'under_review',
-                    'timestamp' => $post->created_at->format('h:i A - m/d/Y'),
-                    'content' => $post->content,
-                    'type' => $post->type,
-                    'likes_count' => $post->likes->count(),
-                    'comments_count' => $post->comments->count(),
-                    'share_count' => $post->share_count,
-                    'view_count' => $post->view_count,
-                    'recent_comments' => $post->comments->map(function ($comment) {
-                        return [
-                            'id' => $comment->id,
-                            'user' => [
-                                'id' => $comment->user->id,
-                                'username' => $comment->user->username,
-                                'profile_picture' => asset('storage/' . $comment->user->profile_picture) ?? null,
-                                'status' => $comment->status
-                            ],
-                            'content' => $comment->content,
-                        ];
-                    }),
-                ], $formattedImages); // Merging image fields into the response
-            });
+        foreach ($posts as $post) {
+            // Decode images JSON and structure them as separate fields
+            $decodedImages = json_decode($post->images, true) ?? [];
+            $formattedImages = [];
+
+            foreach ($decodedImages as $index => $imagePath) {
+                $formattedImages['image_' . ($index + 1)] = asset('storage/' . $imagePath) ?? null;
+            }
+
+            $userRank = $this->RankingRepository->getUserRanking($post->user_id);
+            $userRank = $userRank['rank'] ?? 0;
+
+            // Construct post data
+            $postData = array_merge([
+                'id' => $post->id,
+                'user' => [
+                    'id' => $post->user->id,
+                    'username' => $post->user->username,
+                    'profile_picture' => asset('storage/' . $post->user->profile_picture ?? '') ?? null,
+                    'rank' => $userRank,
+                    'role' => $post->user->role
+                ],
+                'is_pin' => $post->is_pin,
+                'underReview' => $post->status == 'under_review',
+                'timestamp' => $post->created_at->format('h:i A - m/d/Y'),
+                'content' => $post->content,
+                'type' => $post->type,
+                'likes_count' => $post->likes->count(),
+                'comments_count' => $post->comments->count(),
+                'share_count' => $post->share_count,
+                'view_count' => $post->view_count,
+                'recent_comments' => $post->comments->map(function ($comment) {
+                    return [
+                        'id' => $comment->id,
+                        'user' => [
+                            'id' => $comment->user->id,
+                            'username' => $comment->user->username,
+                            'profile_picture' => asset('storage/' . $comment->user->profile_picture) ?? null,
+                            'status' => $comment->status
+                        ],
+                        'content' => $comment->content,
+                    ];
+                }),
+            ], $formattedImages);
+
+            // Add the post
+            $formattedPosts[] = $postData;
+
+            // Duplicate announcements as posts
+            if ($post->type === 'announcement') {
+                $postData['type'] = 'post';
+                $formattedPosts[] = $postData;
+            }
+        }
+
+        // Sort: Pinned posts first, then by created_at (descending)
+        usort($formattedPosts, function ($a, $b) {
+            return $b['is_pin'] <=> $a['is_pin'] ?: strtotime($b['timestamp']) <=> strtotime($a['timestamp']);
+        });
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $formattedPosts,
+            'message' => 'Posts fetched successfully'
+        ]);
     }
+
 
     public function getAllPostOnStatus($status)
     {
