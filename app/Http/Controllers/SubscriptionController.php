@@ -37,7 +37,7 @@ class SubscriptionController extends Controller
         ]);
 
         $user = Auth::user();
-        $authUser = User::where('user_id', $user->id)->first();
+        $authUser = User::where('id', $user->id)->first();
         $authUser->vip_status = 'active';
         $authUser->save();
         $pruchaseDate = now();
