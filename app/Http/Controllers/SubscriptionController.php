@@ -26,72 +26,72 @@ class SubscriptionController extends Controller
     }
 
     public function storePurchase(Request $request)
-    {
-        Log::info("Data received for subscription:", $request->all());
-        $request->validate([
-            'package_id' => 'nullable',
-            'google_product_id' => 'nullable',
-            'purchase_date' => 'nullable',
-            'order_id' => 'nullable',
-            'purchase_token' => 'nullable',
-        ]);
+{
+    Log::info("Data received for subscription:", $request->all());
 
-        $user = Auth::user();
-        $authUser = User::where('id', $user->id)->first();
-        $authUser->vip_status = 'active';
-        $authUser->save();
-        $pruchaseDate = now();
-        // Find package from database
-        // $package = DB::table('packages')->where('google_product_id', $request->google_product_id)->first();
-        // if (!$package) {
-        //     return response()->json(["error" => "Package not found"], 404);
-        // }
-        $package = Package::find($request->package_id);
-        // Calculate expiration date
-        $expiresAt = match ($package->duration) {
-            "30" => Carbon::parse($pruchaseDate)->addMonth(),
-            "7" => Carbon::parse($pruchaseDate)->addWeek(),
-            "1" => Carbon::parse($pruchaseDate)->addDay(),
-            default => now(),
-        };
+    $request->validate([
+        'package_id' => 'nullable',
+        'google_product_id' => 'nullable|array',
+        'purchase_date' => 'nullable',
+        'order_id' => 'nullable',
+        'purchase_token' => 'nullable',
+    ]);
 
-        // Deactivate existing subscriptions
-        Subscription::where('user_id', $user->id)->update(['status' => 'expired']);
+    $user = Auth::user();
+    $authUser = User::where('id', $user->id)->first();
+    $authUser->vip_status = 'active';
+    $authUser->save();
 
-        // Create new subscription
-        $subscription = Subscription::create([
-            'user_id' => $user->id,
-            'package_id' => $package->id,
-            'google_product_id' => $request->google_product_id,
-            'purchase_token' => $request->purchase_token,
-            'status' => 'active',
-            'renewal_date' => $expiresAt,
-            'amount_usd' => $package->amount,
+    $purchaseDate = now();
 
-        ]);
-
-        // Store transaction record
-        $transaction = Transaction::create([
-            'user_id' => $user->id,
-            'subscription_id' => $subscription->id,
-            'google_product_id' => $request->google_product_id,
-            'order_id' => $request->order_id ?? null,
-            'purchase_token' => $request->purchase_token,
-            'amount' => $package->amount,
-            'transaction_date' => now(),
-            'status' => 'completed',
-            'response' => $request->response
-        ]);
-
-        // Update user VIP status
-        // $user->update(['vip_status' => true]);
-
-        return response()->json([
-            'message' => 'Subscription and transaction stored successfully!',
-            'subscription' => $subscription,
-            'transaction' => $transaction,
-        ], 201);
+    // Find package from database
+    $package = Package::find($request->package_id);
+    if (!$package) {
+        return response()->json(["error" => "Package not found"], 404);
     }
+
+    // Calculate expiration date
+    $expiresAt = match ($package->duration) {
+        "30" => Carbon::parse($purchaseDate)->addMonth(),
+        "7" => Carbon::parse($purchaseDate)->addWeek(),
+        "1" => Carbon::parse($purchaseDate)->addDay(),
+        default => now(),
+    };
+
+    // Deactivate existing subscriptions
+    Subscription::where('user_id', $user->id)->update(['status' => 'expired']);
+
+    // Create new subscription
+    $subscription = Subscription::create([
+        'user_id' => $user->id,
+        'package_id' => $package->id,
+        'google_product_id' => json_encode($request->google_product_id), // Convert array to JSON
+        'purchase_token' => $request->purchase_token,
+        'status' => 'active',
+        'renewal_date' => $expiresAt,
+        'amount_usd' => $package->amount,
+    ]);
+
+    // Store transaction record
+    $transaction = Transaction::create([
+        'user_id' => $user->id,
+        'subscription_id' => $subscription->id,
+        'google_product_id' => json_encode($request->google_product_id), // Convert array to JSON
+        'order_id' => $request->order_id ?? null,
+        'purchase_token' => $request->purchase_token,
+        'amount' => $package->amount,
+        'transaction_date' => now(),
+        'status' => 'completed',
+        'response' => $request->response
+    ]);
+
+    return response()->json([
+        'message' => 'Subscription and transaction stored successfully!',
+        'subscription' => $subscription,
+        'transaction' => $transaction,
+    ], 201);
+}
+
     public function getTransaction()
     {
         $user = Auth::user();
@@ -106,10 +106,10 @@ class SubscriptionController extends Controller
                     'date' => \Carbon\Carbon::parse($transaction->created_at)->format('d/m/Y'),
                 ];
             });
-    
+
         return ResponseHelper::success($transactions, 'Subscription data fetched successfully');
     }
-    
+
     public function createSubscription(SubscriptionRequest $request)
     {
         try {
