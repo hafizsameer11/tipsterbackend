@@ -129,11 +129,7 @@ class PostRepository
             return $b['is_pin'] <=> $a['is_pin'] ?: strtotime($b['timestamp']) <=> strtotime($a['timestamp']);
         });
 
-        return response()->json([
-            'status' => 'success',
-            'data' => $formattedPosts,
-            'message' => 'Posts fetched successfully'
-        ]);
+        return $formattedPosts;
     }
 
 
