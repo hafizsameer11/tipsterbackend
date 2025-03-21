@@ -151,29 +151,45 @@ class SubscriptionController extends Controller
         return response()->json(['message' => 'All packages', 'data' => $packages], 200);
     }
     public function getSubscriptions()
-{
-    $subscriptions = Subscription::with('user', 'package')->get();
+    {
+        $subscriptions = Subscription::with('user', 'package')->get();
 
-    $transformed = $subscriptions->map(function ($sub) {
-        return [
-            'select' => false,
-            'name' => $sub->user->username ?? 'N/A',
-            'duration' => $sub->package->duration . ' Day' . ($sub->package->duration > 1 ? 's' : ''),
-            'reference' => json_decode($sub->google_product_id)->order_id ?? 'N/A',
-            'email' => $sub->user->email ?? 'N/A',
-            'amount' => 'N ' . number_format($sub->amount_usd, 2),
-            'sub_date' => \Carbon\Carbon::parse($sub->created_at)->format('Y-m-d'),
-            'exp_date' => $sub->expires_at
-                ? \Carbon\Carbon::parse($sub->expires_at)->format('Y-m-d')
-                : \Carbon\Carbon::parse($sub->renewal_date)->format('Y-m-d'),
-            'status' => $sub->status === 'active'
-        ];
-    });
+        $transformed = $subscriptions->map(function ($sub) {
+            return [
+                'select' => false,
+                'name' => $sub->user->username ?? 'N/A',
+                'duration' => $sub->package->duration . ' Day' . ($sub->package->duration > 1 ? 's' : ''),
+                'reference' => json_decode($sub->google_product_id)->order_id ?? 'N/A',
+                'email' => $sub->user->email ?? 'N/A',
+                'amount' => 'N ' . number_format($sub->amount_usd, 2),
+                'sub_date' => \Carbon\Carbon::parse($sub->created_at)->format('Y-m-d'),
+                'exp_date' => $sub->expires_at
+                    ? \Carbon\Carbon::parse($sub->expires_at)->format('Y-m-d')
+                    : \Carbon\Carbon::parse($sub->renewal_date)->format('Y-m-d'),
+                'status' => $sub->status === 'active'
+            ];
+        });
 
-    return response()->json([
-        'message' => 'All subscriptions',
-        'data' => $transformed
-    ], 200);
-}
+        // Calculate total revenue using package amount
+        $totalRevenue = $subscriptions->sum(function ($sub) {
+            return (float) $sub->package->amount;
+        });
+
+        $totalUsers = \App\Models\User::count();
+        $totalSubscribers = $subscriptions->pluck('user_id')->unique()->count();
+        $totalProfit = $totalRevenue; // Change this if profit differs
+
+        return response()->json([
+            'message' => 'All subscriptions',
+            'stats' => [
+                'totalUsers' => $totalUsers,
+                'totalSubscribers' => $totalSubscribers,
+                'subscriptionRevenue' => 'N ' . number_format($totalRevenue, 0),
+                'totalProfit' => 'N ' . number_format($totalProfit, 0),
+            ],
+            'data' => $transformed
+        ], 200);
+    }
+
 
 }
