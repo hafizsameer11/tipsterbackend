@@ -62,25 +62,27 @@ class TipController extends Controller
             return ResponseHelper::error($e->getMessage(), 400);
         }
     }
-    public function updateTip(Request $request, $tipId){
-        try{
-            $status=$request->status;
-            $result=$request->result;
-            $ods=$request->odds;
-            $rejection_reason=$request->rejection_reason;
-            $tip=$this->tipService->updateTip($tipId,$status,$result, $ods, $rejection_reason);
+    public function updateTip(Request $request, $tipId)
+    {
+        try {
+            $status = $request->status;
+            $result = $request->result;
+            $ods = $request->odds;
+            $tip_code = $request->tip_code;
+            $rejection_reason = $request->rejection_reason;
+            $tip = $this->tipService->updateTip($tipId, $status, $result, $ods, $rejection_reason, $tip_code);
             return ResponseHelper::success($tip, 'Tip updated successfully', 200);
-        }catch(\Exception $e){
+        } catch (\Exception $e) {
             return ResponseHelper::error($e->getMessage(), 400);
         }
     }
-    public function getAllTips(){
-        try{
-            $tips=$this->tipService->getAllTips();
+    public function getAllTips()
+    {
+        try {
+            $tips = $this->tipService->getAllTips();
             return ResponseHelper::success($tips, 'Tips fetched successfully', 200);
-        }catch(\Exception $e){
+        } catch (\Exception $e) {
             return ResponseHelper::error($e->getMessage(), 400);
         }
-
     }
 }
