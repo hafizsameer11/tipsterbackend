@@ -116,9 +116,9 @@ class TipRepository
     }
     public function getAllRunningTips()
     {
-        $tips = Tip::where('result', 'running')
+        $tips = Tip::where('status', 'approved')
             ->with('user', 'bettingCompany') // Eager load user data
-            ->where('status', 'approved')
+
             ->orderBy('created_at', 'desc')
             ->get();
 
