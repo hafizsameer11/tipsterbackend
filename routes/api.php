@@ -135,7 +135,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/subscriptions/finish', [SubscriptionController::class, 'finishSubscription']);
     Route::post('/comments/approve/{commentId}', [PostController::class, 'approveComment']);
     Route::post('/comments/delete/{commentId}', [PostController::class, 'deleteComment']);
-    
+
 
     Route::post('privacy/create',[PrivacyPageController::class,'create']);
 
@@ -190,5 +190,6 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::post('store-vide', [VideoController::class, 'storeVideo']);
         Route::get('get-videos', [VideoController::class, 'index']);
+        Route::get('/get-subscriptions',[SubscriptionController::class,'getSubscriptions']);
     });
 });

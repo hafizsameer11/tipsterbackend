@@ -150,4 +150,8 @@ class SubscriptionController extends Controller
         $packages = Package::all();
         return response()->json(['message' => 'All packages', 'data' => $packages], 200);
     }
+    public function getSubscriptions(){
+        $subscriptions=Subscription::with('user','package')->get();
+        return response()->json(['message'=>'All subscriptions','data'=>$subscriptions],200);
+    }
 }
