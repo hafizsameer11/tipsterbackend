@@ -47,6 +47,7 @@ class AuthController extends Controller
     public function login(LoginRequest $request)
     {
         try {
+            Log::info('Login Request:', $request->validated());
             $user = $this->userService->login($request->validated());
             $userd = $user['user'];
 
@@ -61,7 +62,7 @@ class AuthController extends Controller
                 'user'=>$user,
                 'token'=>$token
             ];
-
+            
             return ResponseHelper::success($data, 'User logged in successfully', 200);
         } catch (\Exception $e) {
             Log::error('Login Error:', ['error' => $e->getMessage()]);
