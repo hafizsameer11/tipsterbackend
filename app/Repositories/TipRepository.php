@@ -7,6 +7,7 @@ use App\Models\User;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class TipRepository
 {
@@ -22,7 +23,7 @@ class TipRepository
         $user = Auth::user();
         $data['user_id'] = $user->id;
         $dateString = trim($data['match_date']); // e.g., "27-03-2025"
-Log::info("match date $dateString");
+        Log::info("match date $dateString");
         // Convert the date string to Carbon, add a day, and format it back
         $data['match_date'] = Carbon::createFromFormat('d-m-Y',  $dateString)
             ->addDay()
