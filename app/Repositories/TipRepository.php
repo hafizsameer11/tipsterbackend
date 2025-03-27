@@ -18,17 +18,17 @@ class TipRepository
     }
 
     public function create(array $data)
-{
-    $user = Auth::user();
-    $data['user_id'] = $user->id;
+    {
+        $user = Auth::user();
+        $data['user_id'] = $user->id;
 
-    // Convert the date string to Carbon, add a day, and format it back
-    // $data['match_date'] = Carbon::createFromFormat('d-m-Y', $data['match_date'])
-    //                             ->addDay()
-    //                             ->format('d-m-Y');
+        // Convert the date string to Carbon, add a day, and format it back
+        $data['match_date'] = Carbon::createFromFormat('d-m-Y', $data['match_date'])
+                                    ->addDay()
+                                    ->format('d-m-Y');
 
-    return Tip::create($data);
-}
+        return Tip::create($data);
+    }
     public function getFreeTipofUser($userId)
     {
         $user = User::findOrFail($userId);
@@ -38,7 +38,7 @@ class TipRepository
 
         $tips = Tip::where('user_id', $userId)->with('bettingCompany')
             ->orderBy('created_at', 'desc')
-            ->where('status','approved')
+            ->where('status', 'approved')
             ->get();
 
         $totalTips = $tips->count();
