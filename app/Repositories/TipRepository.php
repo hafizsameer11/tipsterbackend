@@ -119,10 +119,52 @@ class TipRepository
     public function getAllRunningTips()
     {
         $tips = Tip::where('status', 'approved')
-            ->with('user', 'bettingCompany') // Eager load user data
+        ->with(['user', 'bettingCompany']) // Eager load user and betting company
+        ->whereNotIn('user_id', [80, 79]) // Exclude both user IDs
+        ->orderBy('created_at', 'desc')
+        ->get();
 
-            ->orderBy('created_at', 'desc')
-            ->get();
+
+        $groupedTips = $tips->groupBy('user_id')->map(function ($userTips) {
+            $user = $userTips->first()->user;
+
+            $allTips = Tip::where('user_id', $user->id)->where('status', 'approved')->orderBy('created_at', 'desc')->get();
+            $totalTips = $allTips->count();
+            $wintips = $allTips->where('result', 'won')->count();
+            $winRate = $totalTips > 0 ? round(($wintips / $totalTips) * 100, 0) : 0;
+            $lastFiveResults = $allTips
+                ->reject(fn($tip) => strtolower($tip->result) === 'running') // Skip where result is "running"
+                ->take(5)
+                ->pluck('result')
+                ->map(fn($result) => strtoupper(substr($result, 0, 1))) // Extract first letter and convert to uppercase
+                ->toArray();
+
+            $tipsWithUser = $userTips->map(function ($tip) use ($user, $winRate, $lastFiveResults) {
+                return array_merge($tip->toArray(), [
+                    'user' => [
+                        'id' => $user->id,
+                        'username' => $user->username,
+                        'profile_picture' => $user->profile_picture ?? null,
+                        'win_rate' => $winRate . '%',
+                        'last_five' => $lastFiveResults,
+                        'role' => $user->role
+                    ],
+                ]);
+            });
+
+            return $tipsWithUser;
+        });
+
+        return $groupedTips->values()->flatten(1); // Flatten to avoid nested arrays
+    }
+    public function getAllVipTips()
+    {
+        $tips = Tip::where('status', 'approved')
+        ->with(['user', 'bettingCompany']) // Eager load user and betting company
+        ->whereIn('user_id', [80, 79]) // Get tips from both user IDs
+        ->orderBy('created_at', 'desc')
+        ->get();
+
 
         $groupedTips = $tips->groupBy('user_id')->map(function ($userTips) {
             $user = $userTips->first()->user;
