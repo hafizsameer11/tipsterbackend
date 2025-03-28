@@ -48,6 +48,14 @@ class TipService
             throw new Exception($e->getMessage());
         }
     }
+    public function getAllVipTips()
+    {
+        try {
+            return $this->TipRepository->getAllVipTips();
+        } catch (Exception $e) {
+            throw new Exception($e->getMessage());
+        }
+    }
     public function approveTip($tipId)
     {
         try {

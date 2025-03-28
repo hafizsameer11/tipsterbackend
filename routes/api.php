@@ -88,7 +88,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/create', [TipController::class, 'create']);
         Route::get('/get-all-of-user', [TipController::class, 'getFreeTipofUser']);
         Route::get('/get-all-free-running-tips', [TipController::class, 'getAllRunningTips']);
-        Route::get('/get-all-vip-running-tips', [TipController::class, 'getAllRunningTips']);
+        Route::get('/get-all-vip-running-tips', [TipController::class, 'getAllVipTips']);
         Route::get('/approve-tip/{id}', [TipController::class, 'approveTip']);
         Route::post('/set-tip-result/{id}', [TipController::class, 'setTipResult']);
     });
