@@ -81,10 +81,10 @@ class TipService
         }
     }
 
-    public function updateTip($tipId, $status, $result, $ods, $rejection_reason, $tip_code)
+    public function updateTip($tipId, $status, $result, $ods, $rejection_reason, $tip_code, $match_date)
     {
         try {
-            return $this->TipRepository->update($tipId, ['status' => $status, 'result' => $result, 'ods' => $ods, 'rejection_reason' => $rejection_reason, 'tip_code' => $tip_code]);
+            return $this->TipRepository->update($tipId, ['status' => $status, 'result' => $result, 'ods' => $ods, 'rejection_reason' => $rejection_reason, 'tip_code' => $tip_code, 'match_date' => $match_date]);
         } catch (Exception $e) {
             throw new Exception($e->getMessage());
         }

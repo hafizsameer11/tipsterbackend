@@ -78,8 +78,9 @@ class TipController extends Controller
             $result = $request->result;
             $ods = $request->odds;
             $tip_code = $request->tip_code;
+            $match_date= $request->match_date;
             $rejection_reason = $request->rejection_reason;
-            $tip = $this->tipService->updateTip($tipId, $status, $result, $ods, $rejection_reason, $tip_code);
+            $tip = $this->tipService->updateTip($tipId, $status, $result, $ods, $rejection_reason, $tip_code, $match_date);
             return ResponseHelper::success($tip, 'Tip updated successfully', 200);
         } catch (\Exception $e) {
             return ResponseHelper::error($e->getMessage(), 400);
