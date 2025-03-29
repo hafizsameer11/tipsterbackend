@@ -157,7 +157,7 @@ class SubscriptionController extends Controller
         $transformed = $subscriptions->map(function ($sub) {
             return [
                 'select' => false,
-                'icon' => asset('storage/' . $sub->user->profile_image) ?? 'N/A',
+                'icon' => asset('storage/' . $sub->user->profile_picture) ?? 'N/A',
                 'name' => $sub->user->username ?? 'N/A',
                 'duration' => $sub->package->duration . ' Day' . ($sub->package->duration > 1 ? 's' : ''),
                 'reference' => json_decode($sub->google_product_id)->order_id ?? 'N/A',
