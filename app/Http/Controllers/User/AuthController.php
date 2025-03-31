@@ -121,4 +121,14 @@ class AuthController extends Controller
             return ResponseHelper::error($e->getMessage());
         }
     }
+    public function testFcmNotification(Request $request)
+    {
+        $userId = $request->userId;
+        try {
+            $notification = $this->NotificationService->sendToUserById($userId, 'Test Notification', 'This is a test notification');
+            return ResponseHelper::success($notification, 'notification tewst successfull', 200);
+        } catch (\Exception $e) {
+            return ResponseHelper::error($e->getMessage());
+        }
+    }
 }
