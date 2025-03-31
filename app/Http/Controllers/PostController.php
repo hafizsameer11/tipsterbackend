@@ -15,9 +15,9 @@ use App\Services\NotificationService;
 
 class PostController extends Controller
 {
-    protected $postService,$NotificationService;
+    protected $postService, $NotificationService;
 
-    public function __construct(PostService $postService,NotificationService $NotificationService)
+    public function __construct(PostService $postService, NotificationService $NotificationService)
     {
         $this->postService = $postService;
         $this->NotificationService = $NotificationService;
@@ -38,7 +38,7 @@ class PostController extends Controller
     {
         try {
             $posts = $this->postService->getAllPosts();
-            $userd=Auth::user();
+            $userd = Auth::user();
             $notification = $this->NotificationService->sendToUserById($userd->id, 'Like Alert', 'You have successfully liked a post.');
             return ResponseHelper::success($posts, 'Posts fetched successfully');
         } catch (Exception $e) {
@@ -50,7 +50,7 @@ class PostController extends Controller
     {
         try {
             $post =  $this->postService->likePost(auth()->id(), $postId);
-            // $notification=
+            $notification = $this->NotificationService->sendToUserById($post['userId'], 'Like Alert', 'You have successfully liked a post.');
             return ResponseHelper::success($post, 'Post liked successfully');
         } catch (Exception $e) {
             return ResponseHelper::error($e->getMessage());

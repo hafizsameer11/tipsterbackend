@@ -267,6 +267,7 @@ class PostRepository
         return [
             'likes_count' => $post->likes()->count(), // Updated like count
             'is_liked' => true, // User has liked the post
+            'userId' => $userId, // ID of the user who liked the post
         ];
     }
 
