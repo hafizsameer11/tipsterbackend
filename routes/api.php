@@ -196,13 +196,14 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 Route::get('/test-notification', [AuthController::class, 'testFcmNotification']);
 
-return response()->json([
-    'old_version' => '1.0.0',
-    'new_version' => '1.3.0',
-    'force_update' => true,
-    'message' => 'You must update the app to continue using it.',
-    'store_link' => [
-        'android' => 'https://play.google.com/store/apps/details?id=com.yourapp',
-        'ios' => 'https://apps.apple.com/app/idYOUR_APP_ID'
-    ]
-]);
+Route::get('/app-version',function(){
+    return response()->json([
+        'old_version' => '1.0.0',
+        'new_version' => '1.3.0',
+        'force_update' => true,
+        'message' => 'You must update the app to continue using it.',
+        'store_link' => [
+            'android' => 'https://play.google.com/store/apps/details?id=com.yourapp',
+            'ios' => 'https://apps.apple.com/app/idYOUR_APP_ID'
+        ]
+    ]);
