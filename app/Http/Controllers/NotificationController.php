@@ -5,12 +5,19 @@ namespace App\Http\Controllers;
 use App\Helpers\ResponseHelper;
 use App\Models\Notification;
 use App\Models\UserActivity;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
 class NotificationController extends Controller
+
 {
+    protected $NotificationService;
+    public function __construct(NotificationService $NotificationService)
+    {
+        $this->NotificationService = $NotificationService;
+    }
     public function getUserNotifications()
     {
         $user = Auth::user();
@@ -74,6 +81,8 @@ class NotificationController extends Controller
 
         // Loop through all user IDs and create notifications
         foreach ($request->user_ids as $userId) {
+            // Send notification to each user
+            $this->NotificationService->sendToUserById($userId, $request->message, $request->message);
             $notifications[] = [
                 'user_id' => $userId,
                 'triggered_by_username' => $request->heading,
@@ -111,5 +120,4 @@ class NotificationController extends Controller
         $activities = UserActivity::with('user')->orderBy('created_at', 'desc')->get();
         return ResponseHelper::success($activities, 'Activities retrieved successfully');
     }
-   
 }
