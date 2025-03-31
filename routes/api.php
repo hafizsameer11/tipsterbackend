@@ -207,3 +207,4 @@ Route::get('/app-version',function(){
             'ios' => 'https://apps.apple.com/app/idYOUR_APP_ID'
         ]
     ]);
+});
