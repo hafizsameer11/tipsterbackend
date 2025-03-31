@@ -8,6 +8,7 @@ use App\Services\UserService;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class UserController extends Controller
 {
@@ -18,12 +19,12 @@ class UserController extends Controller
     }
     public function getAllUsers()
     {
-        $users=User::all();
-        $users=$users->map(function($user){
+        $users = User::all();
+        $users = $users->map(function ($user) {
             return [
-                'id'=>$user->id,
-                'name'=>$user->username,
-                'avatar'=>asset('storage/'.$user->profile_picture),
+                'id' => $user->id,
+                'name' => $user->username,
+                'avatar' => asset('storage/' . $user->profile_picture),
             ];
         });
         return ResponseHelper::success($users, 'User data fetched successfully');
@@ -73,17 +74,30 @@ class UserController extends Controller
             return ResponseHelper::error($e->getMessage());
         }
     }
-    public function delete(){
-        $user=Auth::user();
-        $authUser=User::where('id',$user->id)->first();
-        $authUser->email=$authUser->email.'-deleted';
+    public function delete()
+    {
+        $user = Auth::user();
+        $authUser = User::where('id', $user->id)->first();
+        $authUser->email = $authUser->email . '-deleted';
         $authUser->save();
         return ResponseHelper::success($authUser, 'User deleted successfully');
     }
-    public function checkUserVipStatus(){
-        $user=Auth::user();
-        $user=User::where('id',$user->id)->first();
-        $vipStatus=$user->vip_status;
+    public function checkUserVipStatus()
+    {
+        $user = Auth::user();
+        $user = User::where('id', $user->id)->first();
+        $vipStatus = $user->vip_status;
         return ResponseHelper::success($user, 'User data fetched successfully');
+    }
+    public function setFcmToken(Request $request)
+    {
+        $userId = Auth::user()->id;
+        Log::info("FC token set: " . $request->fcmToken);
+        $fcmToken = $request->fcmToken;
+
+        $user = User::where('id', $userId)->first();
+        $user->fcmToken = $fcmToken;
+        $user->save();
+        return response()->json(['status' => 'success', 'message' => 'FCM token set successfully'], 200);
     }
 }

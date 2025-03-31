@@ -107,6 +107,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/view-profile/{userId}', [UserController::class, 'viewProfile']);
         Route::post('/change-password', [AuthController::class, 'changePassword']);
         Route::get('/delete', [UserController::class, 'delete']);
+        Route::post('/set-fcm-token', [UserController::class, 'setFcmToken']);
     });
 
     Route::post('/follow/{userId}', [FollowController::class, 'followUser']);
