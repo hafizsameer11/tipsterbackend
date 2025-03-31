@@ -55,13 +55,18 @@ class FirebaseNotificationService
         $payload = [
             "message" => [
                 "token" => $fcmToken,
-                "data" => [
+                "notification" => [ // ✅ This is what displays in system tray
                     "title" => $title,
                     "body" => $body,
-                    "userId" => $userId
+                ],
+                "data" => [ // ✅ Optional: passed to app for foreground logic
+                    "title" => $title,
+                    "body" => $body,
+                    "userId" => (string) $userId
                 ]
             ],
         ];
+
 
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, str_replace('{projectId}', $this->projectId, $this->fcmUrl));
