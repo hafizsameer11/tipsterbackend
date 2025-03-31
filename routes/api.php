@@ -197,3 +197,15 @@ Route::middleware('auth:sanctum')->group(function () {
 
 });
 Route::get('/test-notification',[AuthController::class,'testFcmNotification']);
+
+Route::get('/app-version', function () {
+    return response()->json([
+        'latest_version' => '1.2.0',
+        'force_update' => true,
+        'message' => 'Please update the app to continue.',
+        'store_link' => [
+            'android' => 'https://play.google.com/store/apps/details?id=com.yourapp',
+            'ios' => 'https://apps.apple.com/app/idYOUR_APP_ID'
+        ]
+    ]);
+});
