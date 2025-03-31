@@ -125,7 +125,7 @@ class AuthController extends Controller
     {
         $userId = $request->userId;
         try {
-            $notification = $this->NotificationService->sendToUserById($userId, 'Test Notification', 'This is a test notification');
+            $notification = $this->NotificationService->sendToUserById($userId, 'Test Notification. This is a test notification ', 'This is a test notification');
             return ResponseHelper::success($notification, 'notification tewst successfull', 200);
         } catch (\Exception $e) {
             return ResponseHelper::error($e->getMessage());
