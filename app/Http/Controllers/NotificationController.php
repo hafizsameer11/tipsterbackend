@@ -82,7 +82,7 @@ class NotificationController extends Controller
         // Loop through all user IDs and create notifications
         foreach ($request->user_ids as $userId) {
             // Send notification to each user
-            $this->NotificationService->sendToUserById($userId, $request->title, $request->message);
+            $this->NotificationService->sendToUserById($userId, $request->heading, $request->message);
             $notifications[] = [
                 'user_id' => $userId,
                 'triggered_by_username' => $request->heading,
