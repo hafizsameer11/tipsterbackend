@@ -193,4 +193,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('get-videos', [VideoController::class, 'index']);
         Route::get('/get-subscriptions',[SubscriptionController::class,'getSubscriptions']);
     });
+
+
 });
+Route::get('/test-notification',[AuthController::class,'testFcmNotification']);
