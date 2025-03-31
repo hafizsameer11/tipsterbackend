@@ -10,14 +10,17 @@ use App\Services\PostService;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Services\NotificationService;
+
 
 class PostController extends Controller
 {
-    protected $postService;
+    protected $postService,$NotificationService;
 
-    public function __construct(PostService $postService)
+    public function __construct(PostService $postService,NotificationService $NotificationService)
     {
         $this->postService = $postService;
+        $this->NotificationService = $NotificationService;
     }
     public function createPost(PostRequest $request)
     {
@@ -35,6 +38,8 @@ class PostController extends Controller
     {
         try {
             $posts = $this->postService->getAllPosts();
+            $userd=Auth::user();
+            $notification = $this->NotificationService->sendToUserById($userd->id, 'Like Alert', 'You have successfully liked a post.');
             return ResponseHelper::success($posts, 'Posts fetched successfully');
         } catch (Exception $e) {
             return ResponseHelper::error($e->getMessage());
@@ -45,6 +50,7 @@ class PostController extends Controller
     {
         try {
             $post =  $this->postService->likePost(auth()->id(), $postId);
+            // $notification=
             return ResponseHelper::success($post, 'Post liked successfully');
         } catch (Exception $e) {
             return ResponseHelper::error($e->getMessage());
