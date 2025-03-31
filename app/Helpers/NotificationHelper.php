@@ -20,11 +20,12 @@ class NotificationHelper
         if (!$triggeredByUser) {
             return false; // Avoid errors if user is not found
         }
+        $notifyService=new NotificationService();
 
         // Use the custom message if provided, otherwise use a default message
         $message = $customMessage ?? "{$triggeredByUser->username} performed an action on your post.";
         // Send the notification using the NotificationService
-        $notification = self::$notificationService->sendToUserById($userId, $type, $message);
+        $notification = $notifyService->sendToUserById($userId, $type, $message);
         return Notification::create([
             'user_id' => $userId,
             'triggered_by_username' => $triggeredByUser->username, // Store username instead of ID
