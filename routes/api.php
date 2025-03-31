@@ -196,7 +196,7 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 Route::get('/test-notification', [AuthController::class, 'testFcmNotification']);
 
-Route::get('/app-version',function(){
+Route::get('/app-version', function () {
     return response()->json([
         'old_version' => '1.0.0',
         'new_version' => '1.3.0',
