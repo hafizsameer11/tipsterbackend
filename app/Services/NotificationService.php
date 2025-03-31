@@ -25,7 +25,7 @@ class NotificationService
     public function sendToUserById(int $userId, string $title, string $body): array
     {
         $user = User::find($userId);
-
+        Log::info("data received",[$userId,$title,$body]);  
         if (!$user || !$user->fcmToken) {
             Log::warning("User or FCM token not found for userId: $userId");
             return ['status' => 'error', 'message' => 'User or FCM token not found'];

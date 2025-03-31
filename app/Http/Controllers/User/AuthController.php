@@ -10,6 +10,7 @@ use App\Http\Requests\OtpVerificationRequst;
 use App\Http\Requests\RegisterRequest;
 use App\Http\Requests\ResetPasswordRequest;
 use App\Models\User;
+use App\Services\NotificationService;
 use App\Services\ResetPasswordService;
 use App\Services\UserService;
 use Illuminate\Http\Request;
@@ -19,10 +20,12 @@ class AuthController extends Controller
 {
     protected $userService;
     protected $resetPasswordService;
-    public function __construct(UserService $userService, ResetPasswordService $resetPasswordService)
+    protected $NotificationService;
+    public function __construct(UserService $userService, ResetPasswordService $resetPasswordService, NotificationService $NotificationService)
     {
         $this->userService = $userService;
         $this->resetPasswordService = $resetPasswordService;
+        $this->NotificationService = $NotificationService;
     }
     public function register(RegisterRequest $request)
     {
@@ -56,13 +59,15 @@ class AuthController extends Controller
             //     'user' => $user,
             //     'request_headers' => request()->headers->all()
             // ]);
-            $token= $user->createToken('auth_token')->plainTextToken;
+            $notification = $this->NotificationService->sendToUserById($userd->id, 'Login Alert', 'You have successfully logged in to your account.');
+            Log::info('Notification Response:', $notification);
+            $token = $user->createToken('auth_token')->plainTextToken;
 
-            $data=[
-                'user'=>$user,
-                'token'=>$token
+            $data = [
+                'user' => $user,
+                'token' => $token
             ];
-            
+
             return ResponseHelper::success($data, 'User logged in successfully', 200);
         } catch (\Exception $e) {
             Log::error('Login Error:', ['error' => $e->getMessage()]);
