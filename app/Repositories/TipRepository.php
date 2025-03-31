@@ -31,9 +31,9 @@ class TipRepository
         $dateString = trim($data['match_date']); // e.g., "27-03-2025"
         Log::info("match date $dateString");
         // Convert the date string to Carbon, add a day, and format it back
-        $data['match_date'] = Carbon::createFromFormat('d-m-Y',  $dateString)
-            ->addDay()
-            ->format('d-m-Y');
+        // $data['match_date'] = Carbon::createFromFormat('d-m-Y',  $dateString)
+        //     ->addDay()
+        //     ->format('d-m-Y');
 
         return Tip::create($data);
     }
