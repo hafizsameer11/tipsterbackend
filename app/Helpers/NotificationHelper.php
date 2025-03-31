@@ -4,6 +4,7 @@ namespace App\Helpers;
 
 use App\Models\Notification;
 use App\Models\User;
+use App\Services\FirebaseNotificationService;
 use App\Services\NotificationService;
 
 class NotificationHelper
@@ -20,7 +21,7 @@ class NotificationHelper
         if (!$triggeredByUser) {
             return false; // Avoid errors if user is not found
         }
-        $notifyService=new NotificationService();
+        $notifyService=new NotificationService(new FirebaseNotificationService());
 
         // Use the custom message if provided, otherwise use a default message
         $message = $customMessage ?? "{$triggeredByUser->username} performed an action on your post.";
