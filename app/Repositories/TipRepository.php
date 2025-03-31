@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Models\Tip;
 use App\Models\User;
+use App\Services\NotificationService;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\Auth;
@@ -11,6 +12,11 @@ use Illuminate\Support\Facades\Log;
 
 class TipRepository
 {
+    protected $NotificationSevice;
+    public function __construct(NotificationService $NotificationSevice)
+    {
+        $this->NotificationSevice = $NotificationSevice;
+    }
     public function all() {}
 
     public function find($id)
@@ -119,10 +125,10 @@ class TipRepository
     public function getAllRunningTips()
     {
         $tips = Tip::where('status', 'approved')
-        ->with(['user', 'bettingCompany']) // Eager load user and betting company
-        ->whereNotIn('user_id', [80, 79]) // Exclude both user IDs
-        ->orderBy('created_at', 'desc')
-        ->get();
+            ->with(['user', 'bettingCompany']) // Eager load user and betting company
+            ->whereNotIn('user_id', [80, 79]) // Exclude both user IDs
+            ->orderBy('created_at', 'desc')
+            ->get();
 
 
         $groupedTips = $tips->groupBy('user_id')->map(function ($userTips) {
@@ -160,10 +166,10 @@ class TipRepository
     public function getAllVipTips()
     {
         $tips = Tip::where('status', 'approved')
-        ->with(['user', 'bettingCompany']) // Eager load user and betting company
-        ->whereIn('user_id', [80, 79]) // Get tips from both user IDs
-        ->orderBy('created_at', 'desc')
-        ->get();
+            ->with(['user', 'bettingCompany']) // Eager load user and betting company
+            ->whereIn('user_id', [80, 79]) // Get tips from both user IDs
+            ->orderBy('created_at', 'desc')
+            ->get();
 
 
         $groupedTips = $tips->groupBy('user_id')->map(function ($userTips) {
@@ -226,6 +232,10 @@ class TipRepository
     public function update($id, array $data)
     {
         $tip = Tip::findOrFail($id);
+        $userId = $tip->user_id;
+        $result = $data['result'];
+        $body = "Your tip got $result ";
+        $this->NotificationSevice->sendToUserById($userId, 'Tip Result', $body);
         if (!$tip) {
             throw new Exception('Tip not found.');
         }
