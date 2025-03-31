@@ -74,7 +74,7 @@ Route::prefix('auth')->group(function () {
     Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 });
 Route::get('admin/user/getAllUsers', [UserController::class, 'getAllUsers']);
-Route::get('privacy/get',[PrivacyPageController::class,'index']);
+Route::get('privacy/get', [PrivacyPageController::class, 'index']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('betting-company')->group(function () {
         Route::get('/get-all', [BettingCompanyController::class, 'getAll']);
@@ -138,7 +138,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/comments/delete/{commentId}', [PostController::class, 'deleteComment']);
 
 
-    Route::post('privacy/create',[PrivacyPageController::class,'create']);
+    Route::post('privacy/create', [PrivacyPageController::class, 'create']);
 
 
     Route::post('/user/update-profile/{userId}', [UserController::class, 'updateProfile']);
@@ -191,21 +191,18 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::post('store-vide', [VideoController::class, 'storeVideo']);
         Route::get('get-videos', [VideoController::class, 'index']);
-        Route::get('/get-subscriptions',[SubscriptionController::class,'getSubscriptions']);
+        Route::get('/get-subscriptions', [SubscriptionController::class, 'getSubscriptions']);
     });
-
-
 });
-Route::get('/test-notification',[AuthController::class,'testFcmNotification']);
+Route::get('/test-notification', [AuthController::class, 'testFcmNotification']);
 
-Route::get('/app-version', function () {
-    return response()->json([
-        'latest_version' => '1.2.0',
-        'force_update' => true,
-        'message' => 'Please update the app to continue.',
-        'store_link' => [
-            'android' => 'https://play.google.com/store/apps/details?id=com.yourapp',
-            'ios' => 'https://apps.apple.com/app/idYOUR_APP_ID'
-        ]
-    ]);
-});
+return response()->json([
+    'old_version' => '1.0.0',
+    'new_version' => '1.3.0',
+    'force_update' => true,
+    'message' => 'You must update the app to continue using it.',
+    'store_link' => [
+        'android' => 'https://play.google.com/store/apps/details?id=com.yourapp',
+        'ios' => 'https://apps.apple.com/app/idYOUR_APP_ID'
+    ]
+]);
