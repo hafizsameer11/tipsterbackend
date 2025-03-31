@@ -59,7 +59,7 @@ class AuthController extends Controller
             //     'user' => $user,
             //     'request_headers' => request()->headers->all()
             // ]);
-            $notification = $this->NotificationService->sendToUserById($userd->id, 'Login Alert', 'You have successfully logged in to your account.');
+            $notification = $this->NotificationService->sendToUserById($user->id, 'Login Alert', 'You have successfully logged in to your account.');
             Log::info('Notification Response:', $notification);
             $token = $user->createToken('auth_token')->plainTextToken;
 
