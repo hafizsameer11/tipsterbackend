@@ -95,7 +95,7 @@ class TipController extends Controller
             return ResponseHelper::error($e->getMessage(), 400);
         }
     }
-    public function deleteTip($tipId)
+    public function delete($tipId)
     {
         try {
             $this->tipService->delete($tipId);
