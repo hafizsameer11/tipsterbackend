@@ -277,6 +277,12 @@ class TipRepository
 
     public function delete($id)
     {
-        // Add logic to delete data
+        $tip = Tip::findOrFail($id);
+        if (!$tip) {
+            throw new Exception('Tip not found.');
+        }
+        $tip->delete();
+
+        return $tip;
     }
 }

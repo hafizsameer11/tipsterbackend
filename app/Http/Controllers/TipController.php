@@ -18,7 +18,7 @@ class TipController extends Controller
     public function create(TipRequest $request)
     {
         try {
-            $tip = $this->tipService->create($request->all());
+            $tip = $this->tipService->create($request->validated());
             return ResponseHelper::success($tip, 'Tip created successfully', 201);
         } catch (\Exception $e) {
             return ResponseHelper::error($e->getMessage(), 400);
@@ -78,7 +78,7 @@ class TipController extends Controller
             $result = $request->result;
             $ods = $request->odds;
             $tip_code = $request->tip_code;
-            $match_date= $request->match_date;
+            $match_date = $request->match_date;
             $rejection_reason = $request->rejection_reason;
             $tip = $this->tipService->updateTip($tipId, $status, $result, $ods, $rejection_reason, $tip_code, $match_date);
             return ResponseHelper::success($tip, 'Tip updated successfully', 200);
@@ -91,6 +91,15 @@ class TipController extends Controller
         try {
             $tips = $this->tipService->getAllTips();
             return ResponseHelper::success($tips, 'Tips fetched successfully', 200);
+        } catch (\Exception $e) {
+            return ResponseHelper::error($e->getMessage(), 400);
+        }
+    }
+    public function deleteTip($tipId)
+    {
+        try {
+            $this->tipService->delete($tipId);
+            return ResponseHelper::success(null, 'Tip deleted successfully', 200);
         } catch (\Exception $e) {
             return ResponseHelper::error($e->getMessage(), 400);
         }
