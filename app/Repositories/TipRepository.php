@@ -126,7 +126,7 @@ class TipRepository
     {
         $tips = Tip::where('status', 'approved')
             ->with(['user', 'bettingCompany']) // Eager load user and betting company
-           
+
             ->orderBy('created_at', 'desc')
             ->get();
 
@@ -266,6 +266,12 @@ class TipRepository
         $userId = $tip->user_id;
         $result = $data['result'];
         $body = "Your tip got $result ";
+        $status = $data['status'];
+        if ($status == 'approved') {
+            $body = "Your Tip has been approved.";
+        } elseif ($status == 'rejected') {
+            $body = "Your Tip Was rejected, check to see reason why.";
+        }
         $this->NotificationSevice->sendToUserById($userId, 'Tip Result', $body);
         if (!$tip) {
             throw new Exception('Tip not found.');

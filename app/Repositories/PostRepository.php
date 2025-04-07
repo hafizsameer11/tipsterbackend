@@ -59,10 +59,10 @@ class PostRepository
     {
         $auth = Auth::user();
         $posts = Post::with(['user', 'likes', 'comments' => function ($query) use ($auth) {
-                $query->where('status', 'approved')
-                    ->orWhere('user_id', $auth->id)
-                    ->orderBy('created_at', 'desc');
-            }])
+            $query->where('status', 'approved')
+                ->orWhere('user_id', $auth->id)
+                ->orderBy('created_at', 'desc');
+        }])
             ->where('status', 'approved')
             ->orderBy('created_at', 'desc')
             ->get();
@@ -258,7 +258,7 @@ class PostRepository
             $userId,
             'like',
             $post->id,
-            "{$liker->username} liked your post."
+            "Someone Just liked your post"
         );
 
         // Log Activity
@@ -365,7 +365,7 @@ class PostRepository
             $admin->id,
             'approve',
             $post->id,
-            "Your Post {$post->title} has been approved."
+            "Your post has been approved"
         );
         return $post;
     }

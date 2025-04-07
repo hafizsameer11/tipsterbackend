@@ -51,7 +51,7 @@ class PostController extends Controller
         try {
             $user=Auth::user();
             $post =  $this->postService->likePost(auth()->id(), $postId);
-            $notification = $this->NotificationService->sendToUserById($user->id, 'You have successfully liked a post', 'You have successfully liked a post.');
+            // $notification = $this->NotificationService->sendToUserById($user->id, 'You have successfully liked a post', 'You have successfully liked a post.');
             return ResponseHelper::success($post, 'Post liked successfully');
         } catch (Exception $e) {
             return ResponseHelper::error($e->getMessage());
