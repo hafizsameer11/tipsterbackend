@@ -126,7 +126,7 @@ class TipRepository
     {
         $tips = Tip::where('status', 'approved')
             ->with(['user', 'bettingCompany']) // Eager load user and betting company
-            ->whereNotIn('user_id', [80, 79]) // Exclude both user IDs
+           
             ->orderBy('created_at', 'desc')
             ->get();
 
