@@ -163,11 +163,42 @@ class TipRepository
 
         return $groupedTips->values()->flatten(1); // Flatten to avoid nested arrays
     }
+    public function getTop3UserIdsOfLastWeek()
+    {
+        $startOfWeek = Carbon::now()->subWeeks(1)->startOfWeek()->format('Y-m-d');
+        $endOfWeek = Carbon::now()->subWeeks(1)->endOfWeek()->format('Y-m-d');
+
+        $allUsers = User::all();
+        $rankings = [];
+
+        foreach ($allUsers as $user) {
+            $tips = Tip::where('user_id', $user->id)
+                ->whereBetween('match_date', [$startOfWeek, $endOfWeek])
+                ->where('result', 'won')
+                ->get();
+
+            $totalTips = Tip::where('user_id', $user->id)->where('status', 'approved')->count();
+            $totalWins = Tip::where('user_id', $user->id)->where('result', 'won')->count();
+            $winRate = $totalTips > 0 ? round(($totalWins / $totalTips) * 100, 2) : 0;
+
+            $totalPoints = $tips->sum(function ($tip) use ($winRate) {
+                return $tip->ods * ($winRate / 100);
+            });
+
+            if ($totalPoints > 0) {
+                $rankings[$user->id] = $totalPoints;
+            }
+        }
+
+        arsort($rankings);
+        return array_slice(array_keys($rankings), 0, 3); // return top 3 user_ids
+    }
     public function getAllVipTips()
     {
+        $topUserIds = $this->getTop3UserIdsOfLastWeek(); // Call helper method
         $tips = Tip::where('status', 'approved')
-            ->with(['user', 'bettingCompany']) // Eager load user and betting company
-            ->whereIn('user_id', [80, 79]) // Get tips from both user IDs
+            ->with(['user', 'bettingCompany'])
+            ->whereIn('user_id', $topUserIds) // Filter by top user IDs
             ->orderBy('created_at', 'desc')
             ->get();
 
