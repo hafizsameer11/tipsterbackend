@@ -44,10 +44,14 @@ class TipRepository
             throw new Exception('User not found.');
         }
 
-        $tips = Tip::where('user_id', $userId)->with('bettingCompany')
-            ->orderBy('created_at', 'desc')
-            ->where('status', 'approved')->orWhere('status', 'rejected')
-            ->get();
+        $tips = Tip::where('user_id', $userId)
+        ->where(function ($query) {
+            $query->where('status', 'approved')
+                  ->orWhere('status', 'rejected');
+        })
+        ->with('bettingCompany')
+        ->orderBy('created_at', 'desc')
+        ->get();
 
         $totalTips = $tips->count();
         $wintips = $tips->where('result', 'won')->count();
