@@ -46,7 +46,7 @@ class TipRepository
 
         $tips = Tip::where('user_id', $userId)->with('bettingCompany')
             ->orderBy('created_at', 'desc')
-            ->where('status', 'approved')
+            ->where('status', 'approved')->orWhere('status', 'rejected')
             ->get();
 
         $totalTips = $tips->count();
