@@ -45,13 +45,13 @@ class TipRepository
         }
 
         $tips = Tip::where('user_id', $userId)
-        ->where(function ($query) {
-            $query->where('status', 'approved')
-                  ->orWhere('status', 'rejected');
-        })
-        ->with('bettingCompany')
-        ->orderBy('created_at', 'desc')
-        ->get();
+            ->where(function ($query) {
+                $query->where('status', 'approved')
+                    ->orWhere('status', 'rejected');
+            })
+            ->with('bettingCompany')
+            ->orderBy('created_at', 'desc')
+            ->get();
 
         $totalTips = $tips->count();
         $wintips = $tips->where('result', 'won')->count();
@@ -268,22 +268,37 @@ class TipRepository
     {
         $tip = Tip::findOrFail($id);
         $userId = $tip->user_id;
-        $result = $data['result'];
-        $body = "Your tip got $result ";
-        $status = $data['status'];
-        if ($status == 'approved') {
-            $body = "Your Tip has been approved.";
-        } elseif ($status == 'rejected') {
-            $body = "Your Tip Was rejected, check to see reason why.";
+
+        $originalResult = $tip->result;
+        $originalStatus = $tip->status;
+
+        $updatedResult = $data['result'] ?? $originalResult;
+        $updatedStatus = $data['status'] ?? $originalStatus;
+
+        // Check if result changed
+        if ($originalResult !== $updatedResult) {
+            $body = "Your tip with booking code {$tip->codes} has {$updatedResult}.";
+            $this->NotificationSevice->sendToUserById($userId, 'Tip Result Updated', $body);
         }
-        $this->NotificationSevice->sendToUserById($userId, 'Tip Result', $body);
-        if (!$tip) {
-            throw new Exception('Tip not found.');
+
+        // Check if status changed
+        if ($originalStatus !== $updatedStatus) {
+            if ($updatedStatus === 'approved') {
+                $body = "Your tip with booking code {$tip->codes} has been approved.";
+            } elseif ($updatedStatus === 'rejected') {
+                $body = "Your tip with booking code {$tip->codes} was rejected. Please check for the reason.";
+            } else {
+                $body = "Status of your tip with booking code {$tip->codes} has been updated to {$updatedStatus}.";
+            }
+
+            $this->NotificationSevice->sendToUserById($userId, 'Tip Status Updated', $body);
         }
+
         $tip->update($data);
 
         return $tip;
     }
+
 
     public function delete($id)
     {
