@@ -82,13 +82,13 @@ class UserService
             if (!Hash::check($data['password'], $user->password)) {
                 throw new Exception('Invalid password.');
             }
-            NotificationHelper::sendNotification(
-                $user->id,
-                $user->id,
-                'login',
-                null,
-                "You have logged in successfully."
-            );
+            // NotificationHelper::sendNotification(
+            //     $user->id,
+            //     $user->id,
+            //     'login',
+            //     null,
+            //     "You have logged in successfully."
+            // );
             $user->profile_picture = asset('storage/' . $user->profile_picture);
 
             return $user;

@@ -39,7 +39,7 @@ class PostController extends Controller
         try {
             $posts = $this->postService->getAllPosts();
             $userd = Auth::user();
-            $notification = $this->NotificationService->sendToUserById($userd->id, 'Like Alert', 'You have successfully liked a post.');
+            // $notification = $this->NotificationService->sendToUserById($userd->id, 'Like Alert', 'You have successfully liked a post.');
             return ResponseHelper::success($posts, 'Posts fetched successfully');
         } catch (Exception $e) {
             return ResponseHelper::error($e->getMessage());
