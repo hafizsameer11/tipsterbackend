@@ -128,11 +128,14 @@ class TipRepository
     }
     public function getAllRunningTips()
     {
-        $tips = Tip::where('status', 'approved')
-            ->with(['user', 'bettingCompany']) // Eager load user and betting company
 
-            ->orderBy('created_at', 'desc')
-            ->get();
+        $topUserIds = $this->getTop3UserIdsOfLastWeek(); // Call helper method
+        $tips = Tip::where('status', 'approved')
+    ->with(['user', 'bettingCompany'])
+    ->whereNotIn('user_id', $topUserIds) // Exclude top user IDs
+    ->orderBy('created_at', 'desc')
+    ->get();
+
 
 
         $groupedTips = $tips->groupBy('user_id')->map(function ($userTips) {
