@@ -173,8 +173,8 @@ class TipRepository
     }
     public function getTop3UserIdsOfLastWeek()
     {
-        $startOfWeek = Carbon::now()->subWeeks(1)->startOfWeek();
-        $endOfWeek = Carbon::now()->subWeeks(1)->endOfWeek();
+        $startOfWeek = Carbon::now()->subWeeks(1)->startOfWeek()->format('Y-m-d');
+        $endOfWeek = Carbon::now()->subWeeks(1)->endOfWeek()->format('Y-m-d');
 
         $allUsers = User::all();
         $rankings = [];
