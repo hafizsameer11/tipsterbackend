@@ -173,24 +173,28 @@ class TipRepository
     }
     public function getTop3UserIdsOfLastWeek()
     {
-        $startOfWeek = Carbon::now()->subWeeks(1)->startOfWeek()->format('Y-m-d');
-        $endOfWeek = Carbon::now()->subWeeks(1)->endOfWeek()->format('Y-m-d');
+        $startOfWeek = Carbon::now()->subWeeks(1)->startOfWeek();
+        $endOfWeek = Carbon::now()->subWeeks(1)->endOfWeek();
 
         $allUsers = User::all();
         $rankings = [];
 
         foreach ($allUsers as $user) {
-            $tips = Tip::where('user_id', $user->id)
+            // Get all tips (not just wins!)
+            $weeklyTips = Tip::where('user_id', $user->id)
                 ->whereBetween('match_date', [$startOfWeek, $endOfWeek])
-                ->where('result', 'won')
+                ->whereIn('status', ['approved', 'rejected']) // or just 'approved'
                 ->get();
 
-            $totalTips = Tip::where('user_id', $user->id)->where('status', 'approved')->whereBetween('match_date', [$startOfWeek, $endOfWeek])->count();
-            $totalWins =  Tip::where('user_id', $user->id)->where('status', 'approved')->whereBetween('match_date', [$startOfWeek, $endOfWeek])->where('result', 'won')->count();
+            $wonTips = $weeklyTips->where('result', 'won');
+
+            $totalTips = $weeklyTips->count();
+            $totalWins = $wonTips->count();
+
             $winRate = $totalTips > 0 ? round(($totalWins / $totalTips) * 100, 2) : 0;
 
-            $totalPoints = $tips->sum(function ($tip) use ($winRate) {
-                return $tip->ods * ($winRate / 100);
+            $totalPoints = $wonTips->sum(function ($tip) use ($winRate) {
+                return is_numeric($tip->ods) ? $tip->ods * ($winRate / 100) : 0;
             });
 
             if ($totalPoints > 0) {
@@ -199,8 +203,9 @@ class TipRepository
         }
 
         arsort($rankings);
-        return array_slice(array_keys($rankings), 0, 3); // return top 3 user_ids
+        return array_slice(array_keys($rankings), 0, 3);
     }
+
     public function getAllVipTips()
     {
         $startOfWeek = Carbon::now()->subWeeks(1)->startOfWeek()->format('Y-m-d');
