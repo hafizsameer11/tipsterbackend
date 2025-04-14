@@ -284,15 +284,7 @@ class RankingRepository
                 ->get();
 
             // Calculate win rate across all-time predictions
-            $today = Carbon::today();
-
-            // Calculate Monday (start of the week)
-            $daysToMonday = $today->dayOfWeek === 0 ? 6 : $today->dayOfWeek - 1;
-            $startOfWeek = $today->copy()->subDays($daysToMonday);
-
-            // Calculate Sunday (end of the week)
-            $daysToSunday = $today->dayOfWeek === 0 ? 0 : 7 - $today->dayOfWeek;
-            $endOfWeek = $today->copy()->addDays($daysToSunday)->endOfDay();
+    
 
             // Filter tips and wins only for this week
             $totalTips = Tip::where('user_id', $user->id)
@@ -305,7 +297,7 @@ class RankingRepository
                 ->whereBetween('created_at', [$startOfWeek, $endOfWeek])
                 ->count();
 
-            $winRate = $this->calculateWinRate($user->id);
+            $winRate = $totalTips > 0 ? round(($totalWins / $totalTips) * 100, 2) : 0;
             $totalPoints = $tips->sum(function ($tip) use ($winRate) {
                 return $tip->ods * ($winRate / 100);
             });
