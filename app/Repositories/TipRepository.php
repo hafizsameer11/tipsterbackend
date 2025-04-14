@@ -230,7 +230,8 @@ class TipRepository
             $allTips = Tip::where('user_id', $user->id)->where('status', 'approved')->orderBy('created_at', 'desc')->get();
             $totalTips = $allTips->whereBetween('match_date', [$startOfWeek, $endOfWeek])->count();
             $wintips = $allTips->where('result', operator: 'won')->whereBetween('match_date', [$startOfWeek, $endOfWeek])->count();
-
+            Log::info("Total tips: $totalTips and won tips: $wintips");
+            Log::info("All tips", $allTips);
             $winRate = $totalTips > 0 ? round(($wintips / $totalTips) * 100, 0) : 0;
             $lastFiveResults = $allTips
                 ->reject(fn($tip) => strtolower($tip->result) === 'running')
