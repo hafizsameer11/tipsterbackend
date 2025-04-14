@@ -11,6 +11,33 @@ use Illuminate\Support\Facades\Log;
 
 class RankingRepository
 {
+    private function calculateWinRate($userId): int
+    {
+        // $userId = auth()->id(); // or pass it manually if needed
+        $tips = Tip::where('user_id', $userId)
+            ->where(function ($query) {
+                $query->where('status', 'approved')
+                    ->orWhere('status', 'rejected');
+            })
+            ->get();
+
+        // Calculate this week (Monday to Sunday)
+        $today = Carbon::today();
+        $daysToMonday = $today->dayOfWeek === 0 ? 6 : $today->dayOfWeek - 1;
+        $startOfWeek = $today->copy()->subDays($daysToMonday);
+        $daysToSunday = $today->dayOfWeek === 0 ? 0 : 7 - $today->dayOfWeek;
+        $endOfWeek = $today->copy()->addDays($daysToSunday)->endOfDay();
+
+        // Filter tips in current week
+        $weeklyTips = $tips->filter(function ($tip) use ($startOfWeek, $endOfWeek) {
+            return $tip->created_at >= $startOfWeek && $tip->created_at <= $endOfWeek;
+        });
+
+        $total = $weeklyTips->count();
+        $wins = $weeklyTips->where('result', 'won')->count();
+
+        return $total > 0 ? round(($wins / $total) * 100, 0) : 0;
+    }
     public function createWinnersAmount($rank, $amount)
     {
         return WinnersAmount::create([
@@ -278,7 +305,7 @@ class RankingRepository
                 ->whereBetween('created_at', [$startOfWeek, $endOfWeek])
                 ->count();
 
-            $winRate = $totalTips > 0 ? round(($totalWins / $totalTips) * 100, 2) : 0;
+            $winRate = $this->calculateWinRate($user->id);
             $totalPoints = $tips->sum(function ($tip) use ($winRate) {
                 return $tip->ods * ($winRate / 100);
             });
