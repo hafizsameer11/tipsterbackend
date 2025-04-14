@@ -212,8 +212,8 @@ class TipRepository
 
     public function getAllVipTips()
     {
-        $startOfWeek = Carbon::now()->subWeeks(0)->startOfWeek()->format('Y-m-d');
-        $endOfWeek = Carbon::now()->subWeeks(0)->endOfWeek()->format('Y-m-d');
+        $startOfWeek = Carbon::now()->subWeeks(0)->startOfWeek()->format('d-m-Y');
+        $endOfWeek = Carbon::now()->subWeeks(0)->endOfWeek()->format('d-m-Y');
         Log::info("start of week $startOfWeek and $endOfWeek");
         $topUserIds = $this->getTop3UserIdsOfLastWeek();
         Log::info("Top and vip users", $topUserIds);
