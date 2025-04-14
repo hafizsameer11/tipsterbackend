@@ -171,30 +171,29 @@ class TipRepository
 
         return $groupedTips->values()->flatten(1); // Flatten to avoid nested arrays
     }
-    public function getTop3UserIdsOfLastWeek()
+    public function getTop3UserIdsOfLastWeek($weeksAgo = 2)
 {
-    // ✅ Use Carbon week range WITHOUT formatting
-    $startOfWeek = Carbon::now()->subWeeks(1)->startOfWeek();
-    $endOfWeek = Carbon::now()->subWeeks(1)->endOfWeek();
+    // Use Carbon week range without formatting
+    $startOfWeek = Carbon::now()->subWeeks($weeksAgo - 1)->startOfWeek();
+    $endOfWeek = Carbon::now()->subWeeks($weeksAgo - 1)->endOfWeek();
 
     $allUsers = User::all();
     $rankings = [];
 
     foreach ($allUsers as $user) {
-        // ✅ Get all tips of the user in the week
+        // Get all weekly tips (approved/rejected)
         $weeklyTips = Tip::where('user_id', $user->id)
             ->whereBetween('match_date', [$startOfWeek, $endOfWeek])
-            ->whereIn('status', ['approved', 'rejected']) // include only valid tips
+            ->whereIn('status', ['approved', 'rejected'])
             ->get();
 
-        // ✅ Filter won tips from the same weekly tips
         $wonTips = $weeklyTips->where('result', 'won');
 
         $totalTips = $weeklyTips->count();
         $totalWins = $wonTips->count();
+
         $winRate = $totalTips > 0 ? round(($totalWins / $totalTips) * 100, 2) : 0;
 
-        // ✅ Calculate points only for won tips
         $totalPoints = $wonTips->sum(function ($tip) use ($winRate) {
             return is_numeric($tip->ods) ? $tip->ods * ($winRate / 100) : 0;
         });
@@ -204,10 +203,9 @@ class TipRepository
         }
     }
 
-    // ✅ Sort by highest points
+    // Sort and return only top 3 user IDs
     arsort($rankings);
 
-    // ✅ Return top 3 user IDs
     return array_slice(array_keys($rankings), 0, 3);
 }
 
