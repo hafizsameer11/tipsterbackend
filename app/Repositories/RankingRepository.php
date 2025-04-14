@@ -308,9 +308,9 @@ class RankingRepository
         $totalWins = $wonTips->count();
 
         $winRate = $totalTips > 0 ? round(($totalWins / $totalTips) * 100, 2) : 0;
-            $totalPoints = $tips->sum(function (User $tip) use ($winRate) {
-                return $tip->ods * ($winRate / 100);
-            });
+        $totalPoints = $wonTips->sum(function ($tip) use ($winRate) {
+            return is_numeric($tip->ods) ? $tip->ods * ($winRate / 100) : 0;
+        });
 
             if ($totalPoints > 0) {
                 $rankings[$user->id] = [
