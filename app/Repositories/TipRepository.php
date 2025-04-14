@@ -171,11 +171,11 @@ class TipRepository
 
         return $groupedTips->values()->flatten(1); // Flatten to avoid nested arrays
     }
-    public function getTop3UserIdsOfLastWeek($weeksAgo = 3)
+    public function getTop3UserIdsOfLastWeek($weeksAgo = 2)
 {
     // Use Carbon week range without formatting
-    $startOfWeek = Carbon::now()->subWeeks($weeksAgo - 1)->startOfWeek();
-    $endOfWeek = Carbon::now()->subWeeks($weeksAgo - 1)->endOfWeek();
+    $startOfWeek = Carbon::now()->subWeeks($weeksAgo - 1)->startOfWeek()->format('d-m-Y');
+    $endOfWeek = Carbon::now()->subWeeks($weeksAgo - 1)->endOfWeek()->format('d-m-Y');
 
     $allUsers = User::all();
     $rankings = [];
