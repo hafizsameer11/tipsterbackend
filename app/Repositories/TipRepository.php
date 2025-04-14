@@ -214,6 +214,7 @@ class TipRepository
     {
         $startOfWeek = Carbon::now()->subWeeks(1)->startOfWeek()->format('Y-m-d');
         $endOfWeek = Carbon::now()->subWeeks(1)->endOfWeek()->format('Y-m-d');
+        Log::info("start of week $startOfWeek and $endOfWeek");
         $topUserIds = $this->getTop3UserIdsOfLastWeek();
         Log::info("Top and vip users", $topUserIds);
         $tips = Tip::where('status', 'approved')
@@ -228,7 +229,7 @@ class TipRepository
 
             $allTips = Tip::where('user_id', $user->id)->where('status', 'approved')->orderBy('created_at', 'desc')->get();
             $totalTips = $allTips->whereBetween('match_date', [$startOfWeek, $endOfWeek])->count();
-            $wintips = $allTips->where('result', 'won')->whereBetween('match_date', [$startOfWeek, $endOfWeek])->count();
+            $wintips = $allTips->where('result', operator: 'won')->whereBetween('match_date', [$startOfWeek, $endOfWeek])->count();
 
             $winRate = $totalTips > 0 ? round(($wintips / $totalTips) * 100, 0) : 0;
             $lastFiveResults = $allTips
