@@ -296,10 +296,19 @@ class RankingRepository
             //     ->where('result', 'won')
             //     ->whereBetween('created_at', [$startOfWeek, $endOfWeek])
             //     ->count();
-            $totalTips = $tips->count();
-            $totalWins = $tips->where('result', 'won')->count();
-            $winRate = $totalTips > 0 ? round(($totalWins / $totalTips) * 100, 2) : 0;
-            $totalPoints = $tips->sum(function ($tip) use ($winRate) {
+            $weeklyTips = Tip::where('user_id', $user->id)
+            ->whereBetween('match_date', [$startOfWeek, $endOfWeek])
+            ->whereIn('status', ['approved', 'rejected']) // use if applicable
+            ->get();
+
+        // Only won tips for points calculation
+        $wonTips = $weeklyTips->where('result', 'won');
+
+        $totalTips = $weeklyTips->count();
+        $totalWins = $wonTips->count();
+
+        $winRate = $totalTips > 0 ? round(($totalWins / $totalTips) * 100, 2) : 0;
+            $totalPoints = $tips->sum(function (User $tip) use ($winRate) {
                 return $tip->ods * ($winRate / 100);
             });
 
