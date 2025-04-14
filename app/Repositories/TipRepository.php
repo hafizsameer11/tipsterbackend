@@ -172,42 +172,42 @@ class TipRepository
         return $groupedTips->values()->flatten(1); // Flatten to avoid nested arrays
     }
     public function getTop3UserIdsOfLastWeek($weeksAgo = 2)
-{
-    // Use Carbon week range without formatting
-    $startOfWeek = Carbon::now()->subWeeks($weeksAgo - 1)->startOfWeek()->format('d-m-Y');
-    $endOfWeek = Carbon::now()->subWeeks($weeksAgo - 1)->endOfWeek()->format('d-m-Y');
+    {
+        // Use Carbon week range without formatting
+        $startOfWeek = Carbon::now()->subWeeks($weeksAgo - 1)->startOfWeek()->format('d-m-Y');
+        $endOfWeek = Carbon::now()->subWeeks($weeksAgo - 1)->endOfWeek()->format('d-m-Y');
 
-    $allUsers = User::all();
-    $rankings = [];
+        $allUsers = User::all();
+        $rankings = [];
 
-    foreach ($allUsers as $user) {
-        // Get all weekly tips (approved/rejected)
-        $weeklyTips = Tip::where('user_id', $user->id)
-            ->whereBetween('match_date', [$startOfWeek, $endOfWeek])
-            ->whereIn('status', ['approved', 'rejected'])
-            ->get();
+        foreach ($allUsers as $user) {
+            // Get all weekly tips (approved/rejected)
+            $weeklyTips = Tip::where('user_id', $user->id)
+                ->whereBetween('match_date', [$startOfWeek, $endOfWeek])
+                ->whereIn('status', ['approved', 'rejected'])
+                ->get();
 
-        $wonTips = $weeklyTips->where('result', 'won');
+            $wonTips = $weeklyTips->where('result', 'won');
 
-        $totalTips = $weeklyTips->count();
-        $totalWins = $wonTips->count();
+            $totalTips = $weeklyTips->count();
+            $totalWins = $wonTips->count();
 
-        $winRate = $totalTips > 0 ? round(($totalWins / $totalTips) * 100, 2) : 0;
+            $winRate = $totalTips > 0 ? round(($totalWins / $totalTips) * 100, 2) : 0;
 
-        $totalPoints = $wonTips->sum(function ($tip) use ($winRate) {
-            return is_numeric($tip->ods) ? $tip->ods * ($winRate / 100) : 0;
-        });
+            $totalPoints = $wonTips->sum(function ($tip) use ($winRate) {
+                return is_numeric($tip->ods) ? $tip->ods * ($winRate / 100) : 0;
+            });
 
-        if ($totalPoints > 0) {
-            $rankings[$user->id] = $totalPoints;
+            if ($totalPoints > 0) {
+                $rankings[$user->id] = $totalPoints;
+            }
         }
+
+        // Sort and return only top 3 user IDs
+        arsort($rankings);
+
+        return array_slice(array_keys($rankings), 0, 3);
     }
-
-    // Sort and return only top 3 user IDs
-    arsort($rankings);
-
-    return array_slice(array_keys($rankings), 0, 3);
-}
 
 
     public function getAllVipTips()
@@ -223,12 +223,13 @@ class TipRepository
             ->get();
 
 
-        $groupedTips = $tips->groupBy('user_id')->map(function ($userTips) {
+        $groupedTips = $tips->groupBy('user_id')->map(function ($userTips) use ($startOfWeek, $endOfWeek) {
             $user = $userTips->first()->user;
 
             $allTips = Tip::where('user_id', $user->id)->where('status', 'approved')->orderBy('created_at', 'desc')->get();
-            $totalTips = $allTips->whereBetween('match_date', [Carbon::now()->subWeeks(1)->startOfWeek()->format('Y-m-d'), Carbon::now()->subWeeks(1)->endOfWeek()->format('Y-m-d')])->count();
-            $wintips = $allTips->where('result', 'won')->whereBetween('match_date', [Carbon::now()->subWeeks(1)->startOfWeek()->format('Y-m-d'), Carbon::now()->subWeeks(1)->endOfWeek()->format('Y-m-d')])->count();
+            $totalTips = $allTips->whereBetween('match_date', [$startOfWeek, $endOfWeek])->count();
+            $wintips = $totalTips->where('result', 'won')->count();
+            
             $winRate = $totalTips > 0 ? round(($wintips / $totalTips) * 100, 0) : 0;
             $lastFiveResults = $allTips
                 ->reject(fn($tip) => strtolower($tip->result) === 'running')
