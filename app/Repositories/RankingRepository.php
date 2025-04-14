@@ -284,19 +284,20 @@ class RankingRepository
                 ->get();
 
             // Calculate win rate across all-time predictions
-    
+
 
             // Filter tips and wins only for this week
-            $totalTips = Tip::where('user_id', $user->id)
-                ->where('status', 'approved')
-                ->whereBetween('created_at', [$startOfWeek, $endOfWeek])
-                ->count();
+            // $totalTips = Tip::where('user_id', $user->id)
+            //     ->where('status', 'approved')
+            //     ->whereBetween('created_at', [$startOfWeek, $endOfWeek])
+            //     ->count();
 
-            $totalWins = Tip::where('user_id', $user->id)
-                ->where('result', 'won')
-                ->whereBetween('created_at', [$startOfWeek, $endOfWeek])
-                ->count();
-
+            // $totalWins = Tip::where('user_id', $user->id)
+            //     ->where('result', 'won')
+            //     ->whereBetween('created_at', [$startOfWeek, $endOfWeek])
+            //     ->count();
+            $totalTips = $tips->count();
+            $totalWins = $tips->where('result', 'won')->count();
             $winRate = $totalTips > 0 ? round(($totalWins / $totalTips) * 100, 2) : 0;
             $totalPoints = $tips->sum(function ($tip) use ($winRate) {
                 return $tip->ods * ($winRate / 100);
