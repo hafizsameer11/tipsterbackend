@@ -20,6 +20,34 @@ class UserRepository
     {
         $this->tipRepository = $RankingRepository;
     }
+    private function calculateWinRate($userId): int
+{
+    // $userId = auth()->id(); // or pass it manually if needed
+    $tips = Tip::where('user_id', $userId)
+        ->where(function ($query) {
+            $query->where('status', 'approved')
+                  ->orWhere('status', 'rejected');
+        })
+        ->get();
+
+    // Calculate this week (Monday to Sunday)
+    $today = Carbon::today();
+    $daysToMonday = $today->dayOfWeek === 0 ? 6 : $today->dayOfWeek - 1;
+    $startOfWeek = $today->copy()->subDays($daysToMonday);
+    $daysToSunday = $today->dayOfWeek === 0 ? 0 : 7 - $today->dayOfWeek;
+    $endOfWeek = $today->copy()->addDays($daysToSunday)->endOfDay();
+
+    // Filter tips in current week
+    $weeklyTips = $tips->filter(function ($tip) use ($startOfWeek, $endOfWeek) {
+        return $tip->created_at >= $startOfWeek && $tip->created_at <= $endOfWeek;
+    });
+
+    $total = $weeklyTips->count();
+    $wins = $weeklyTips->where('result', 'won')->count();
+
+    return $total > 0 ? round(($wins / $total) * 100, 0) : 0;
+}
+
 
     public function viewprofile($userId)
     {
@@ -31,7 +59,7 @@ class UserRepository
             ->get();
         $totalPredictions = Tip::where('user_id', $userId)->count();
         $totalWins = Tip::where('user_id', $userId)->where('result', 'won')->count();
-        $winRate = $totalPredictions > 0 ? round(($totalWins / $totalPredictions) * 100, 0) : 0;
+        $winRate = $this->calculateWinRate($userId);
         $lastFiveResults = $userTips->take(5)->pluck(value: 'result')->map(function ($result) {
             return strtoupper(substr($result, 0, 1)); // Convert result to first letter (W/L)
         })->toArray();
@@ -86,7 +114,7 @@ class UserRepository
             $totalWins = $monthlyTips->where('result', 'win')->count();
 
             // Calculate monthly win rate
-            $winRate = $totalPredictions > 0 ? round(($totalWins / $totalPredictions) * 100, 2) : 0;
+            $winRate =$this->calculateWinRate($userId);
 
             // Store in array
             $winRateData[] = [

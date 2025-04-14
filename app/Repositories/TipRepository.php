@@ -37,6 +37,8 @@ class TipRepository
 
         return Tip::create($data);
     }
+    // use Carbon\Carbon;/
+
     public function getFreeTipofUser($userId)
     {
         $user = User::findOrFail($userId);
@@ -44,6 +46,7 @@ class TipRepository
             throw new Exception('User not found.');
         }
 
+        // ✅ Fetch tips once (no changes here)
         $tips = Tip::where('user_id', $userId)
             ->where(function ($query) {
                 $query->where('status', 'approved')
@@ -53,12 +56,27 @@ class TipRepository
             ->orderBy('created_at', 'desc')
             ->get();
 
-        $totalTips = $tips->count();
-        $wintips = $tips->where('result', 'won')->count();
+        // ✅ Filter only tips from current week for win rate
+        $today = Carbon::today();
+        $daysToMonday = $today->dayOfWeek === 0 ? 6 : $today->dayOfWeek - 1;
+        $startOfWeek = $today->copy()->subDays($daysToMonday);
+        $daysToSunday = $today->dayOfWeek === 0 ? 0 : 7 - $today->dayOfWeek;
+        $endOfWeek = $today->copy()->addDays($daysToSunday)->endOfDay();
+
+        $currentWeekTips = $tips->filter(function ($tip) use ($startOfWeek, $endOfWeek) {
+            return $tip->created_at >= $startOfWeek && $tip->created_at <= $endOfWeek;
+        });
+
+        $totalTips = $currentWeekTips->count();
+        $wintips = $currentWeekTips->where('result', 'won')->count();
         $winRate = $totalTips > 0 ? round(($wintips / $totalTips) * 100, 0) : 0;
+
+        // ✅ Last 5 tip result letters (unchanged)
         $lastFiveResults = $tips->take(5)->pluck('result')->map(function ($result) {
-            return strtoupper(substr($result, 0, 1)); // Extract first letter and convert to uppercase
+            return strtoupper(substr($result, 0, 1));
         })->toArray();
+
+        // ✅ Attach win rate & last 5 results to each tip
         $tipsWithUser = $tips->map(function ($tip) use ($user, $winRate, $lastFiveResults) {
             return array_merge($tip->toArray(), [
                 'user' => [
@@ -74,6 +92,7 @@ class TipRepository
 
         return $tipsWithUser;
     }
+
     public function getAllTips()
     {
         $lastWeek = Carbon::now()->subWeek();
@@ -126,15 +145,44 @@ class TipRepository
         }
         return round((($current - $previous) / $previous) * 100, 2);
     }
+    private function calculateWinRate($userId): int
+    {
+        // $userId = auth()->id(); // or pass it manually if needed
+        $tips = Tip::where('user_id', $userId)
+            ->where(function ($query) {
+                $query->where('status', 'approved')
+                    ->orWhere('status', 'rejected');
+            })
+            ->get();
+
+        // Calculate this week (Monday to Sunday)
+        $today = Carbon::today();
+        $daysToMonday = $today->dayOfWeek === 0 ? 6 : $today->dayOfWeek - 1;
+        $startOfWeek = $today->copy()->subDays($daysToMonday);
+        $daysToSunday = $today->dayOfWeek === 0 ? 0 : 7 - $today->dayOfWeek;
+        $endOfWeek = $today->copy()->addDays($daysToSunday)->endOfDay();
+
+        // Filter tips in current week
+        $weeklyTips = $tips->filter(function ($tip) use ($startOfWeek, $endOfWeek) {
+            return $tip->created_at >= $startOfWeek && $tip->created_at <= $endOfWeek;
+        });
+
+        $total = $weeklyTips->count();
+        $wins = $weeklyTips->where('result', 'won')->count();
+
+        return $total > 0 ? round(($wins / $total) * 100, 0) : 0;
+    }
+
+
     public function getAllRunningTips()
     {
 
         $topUserIds = $this->getTop3UserIdsOfLastWeek(); // Call helper method
         $tips = Tip::where('status', 'approved')
-    ->with(['user', 'bettingCompany'])
-    ->whereNotIn('user_id', $topUserIds) // Exclude top user IDs
-    ->orderBy('created_at', 'desc')
-    ->get();
+            ->with(['user', 'bettingCompany'])
+            ->whereNotIn('user_id', $topUserIds) // Exclude top user IDs
+            ->orderBy('created_at', 'desc')
+            ->get();
 
 
 
@@ -144,7 +192,7 @@ class TipRepository
             $allTips = Tip::where('user_id', $user->id)->where('status', 'approved')->orderBy('created_at', 'desc')->get();
             $totalTips = $allTips->count();
             $wintips = $allTips->where('result', 'won')->count();
-            $winRate = $totalTips > 0 ? round(($wintips / $totalTips) * 100, 0) : 0;
+            $winRate = $this->calculateWinRate($user->id);
             $lastFiveResults = $allTips
                 ->reject(fn($tip) => strtolower($tip->result) === 'running') // Skip where result is "running"
                 ->take(5)
@@ -186,7 +234,7 @@ class TipRepository
 
             $totalTips = Tip::where('user_id', $user->id)->where('status', 'approved')->count();
             $totalWins = Tip::where('user_id', $user->id)->where('result', 'won')->count();
-            $winRate = $totalTips > 0 ? round(($totalWins / $totalTips) * 100, 2) : 0;
+            $winRate = $this->calculateWinRate($user->id);
 
             $totalPoints = $tips->sum(function ($tip) use ($winRate) {
                 return $tip->ods * ($winRate / 100);
@@ -216,7 +264,7 @@ class TipRepository
             $allTips = Tip::where('user_id', $user->id)->where('status', 'approved')->orderBy('created_at', 'desc')->get();
             $totalTips = $allTips->count();
             $wintips = $allTips->where('result', 'won')->count();
-            $winRate = $totalTips > 0 ? round(($wintips / $totalTips) * 100, 0) : 0;
+            $winRate = $this->calculateWinRate($user->id);
             $lastFiveResults = $allTips
                 ->reject(fn($tip) => strtolower($tip->result) === 'running') // Skip where result is "running"
                 ->take(5)
