@@ -172,39 +172,45 @@ class TipRepository
         return $groupedTips->values()->flatten(1); // Flatten to avoid nested arrays
     }
     public function getTop3UserIdsOfLastWeek()
-    {
-        $startOfWeek = Carbon::now()->subWeeks(1)->startOfWeek()->format('Y-m-d');
-        $endOfWeek = Carbon::now()->subWeeks(1)->endOfWeek()->format('Y-m-d');
+{
+    // ✅ Use Carbon week range WITHOUT formatting
+    $startOfWeek = Carbon::now()->subWeeks(1)->startOfWeek();
+    $endOfWeek = Carbon::now()->subWeeks(1)->endOfWeek();
 
-        $allUsers = User::all();
-        $rankings = [];
+    $allUsers = User::all();
+    $rankings = [];
 
-        foreach ($allUsers as $user) {
-            // Get all tips (not just wins!)
-            $weeklyTips = Tip::where('user_id', $user->id)
-                ->whereBetween('match_date', [$startOfWeek, $endOfWeek])
-                ->whereIn('status', ['approved', 'rejected']) // or just 'approved'
-                ->get();
+    foreach ($allUsers as $user) {
+        // ✅ Get all tips of the user in the week
+        $weeklyTips = Tip::where('user_id', $user->id)
+            ->whereBetween('match_date', [$startOfWeek, $endOfWeek])
+            ->whereIn('status', ['approved', 'rejected']) // include only valid tips
+            ->get();
 
-            $wonTips = $weeklyTips->where('result', 'won');
+        // ✅ Filter won tips from the same weekly tips
+        $wonTips = $weeklyTips->where('result', 'won');
 
-            $totalTips = $weeklyTips->count();
-            $totalWins = $wonTips->count();
+        $totalTips = $weeklyTips->count();
+        $totalWins = $wonTips->count();
+        $winRate = $totalTips > 0 ? round(($totalWins / $totalTips) * 100, 2) : 0;
 
-            $winRate = $totalTips > 0 ? round(($totalWins / $totalTips) * 100, 2) : 0;
+        // ✅ Calculate points only for won tips
+        $totalPoints = $wonTips->sum(function ($tip) use ($winRate) {
+            return is_numeric($tip->ods) ? $tip->ods * ($winRate / 100) : 0;
+        });
 
-            $totalPoints = $wonTips->sum(function ($tip) use ($winRate) {
-                return is_numeric($tip->ods) ? $tip->ods * ($winRate / 100) : 0;
-            });
-
-            if ($totalPoints > 0) {
-                $rankings[$user->id] = $totalPoints;
-            }
+        if ($totalPoints > 0) {
+            $rankings[$user->id] = $totalPoints;
         }
-
-        arsort($rankings);
-        return array_slice(array_keys($rankings), 0, 3);
     }
+
+    // ✅ Sort by highest points
+    arsort($rankings);
+
+    // ✅ Return top 3 user IDs
+    return array_slice(array_keys($rankings), 0, 3);
+}
+
 
     public function getAllVipTips()
     {
