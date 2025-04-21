@@ -109,7 +109,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/delete', [UserController::class, 'delete']);
         Route::post('/set-fcm-token', [UserController::class, 'setFcmToken']);
     });
-
+    Route::get('/get-tip-count',[TipController::class, 'getTipCountForToday']);
     Route::post('/follow/{userId}', [FollowController::class, 'followUser']);
     Route::delete('/unfollow/{userId}', [FollowController::class, 'unfollowUser']);
     Route::get('/followers/{userId}', [FollowController::class, 'getUserFollowers']);

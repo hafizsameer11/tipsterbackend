@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Helpers\ResponseHelper;
 use App\Http\Requests\TipRequest;
+use App\Models\Tip;
 use App\Services\TipService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -14,6 +15,12 @@ class TipController extends Controller
     public function __construct(TipService $tipService)
     {
         $this->tipService = $tipService;
+    }
+    public function getTipCountForToday(){
+        $user=Auth::user();
+        // $today=
+        $tipCount=Tip::where('user_id',$user->id)->whereDate('created_at',now())->count();
+        return ResponseHelper::success($tipCount, 'Tip count fetched successfully', 200);
     }
     public function create(TipRequest $request)
     {
