@@ -20,7 +20,7 @@ class TipController extends Controller
         $user=Auth::user();
         // $today=
         $tipCount=Tip::where('user_id',$user->id)->whereDate('created_at',now())->count();
-        $tipCount=3;
+        // $tipCount=3;
         return ResponseHelper::success($tipCount, 'Tip count fetched successfully', 200);
     }
     public function create(TipRequest $request)
