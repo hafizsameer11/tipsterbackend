@@ -305,7 +305,7 @@ class TipRepository
             if ($updatedStatus === 'approved') {
                 $body = "Your tip with booking code {$tip->codes} has been approved.";
             } elseif ($updatedStatus === 'rejected') {
-                $body = "Your tip with booking code {$tip->codes} was rejected. Please check for the reason.";
+                $body = "Your tip with booking code {$tip->codes} was rejected. Here is the reason: {$data['rejection_reason']}.";
             } else {
                 $body = "Status of your tip with booking code {$tip->codes} has been updated to {$updatedStatus}.";
             }
