@@ -254,8 +254,8 @@ class RankingRepository
         $now = Carbon::now();
 
         // Calculate the start and end of the selected week
-        $startOfWeek = Carbon::now()->subWeeks($weeksAgo - 1)->startOfWeek()->format('d-m-Y');
-        $endOfWeek = Carbon::now()->subWeeks($weeksAgo - 1)->endOfWeek()->format('d-m-Y');
+        $startOfWeek = Carbon::now()->subWeeks($weeksAgo - 1)->startOfWeek();
+        $endOfWeek = Carbon::now()->subWeeks($weeksAgo - 1)->endOfWeek();
         Log::info("Start of Week: $startOfWeek, End of Week: $endOfWeek");
         // Fetch all users
         $allUsers = User::all();
@@ -282,7 +282,10 @@ class RankingRepository
             //     ->whereBetween('created_at', [$startOfWeek, $endOfWeek])
             //     ->count();
             $weeklyTips = Tip::where('user_id', $user->id)
-                ->whereBetween('match_date', [$startOfWeek, $endOfWeek])
+            ->whereRaw("STR_TO_DATE(match_date, '%d-%m-%Y') BETWEEN ? AND ?", [
+                $startOfWeek->format('Y-m-d'),
+                $endOfWeek->format('Y-m-d')
+            ])
                 ->whereIn('status', ['approved', 'rejected']) // use if applicable
                 ->get();
 
