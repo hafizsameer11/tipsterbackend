@@ -256,7 +256,7 @@ class RankingRepository
         // Calculate the start and end of the selected week
         $startOfWeek = Carbon::now()->subWeeks($weeksAgo - 1)->startOfWeek()->format('d-m-Y');
         $endOfWeek = Carbon::now()->subWeeks($weeksAgo - 1)->endOfWeek()->format('d-m-Y');
-
+        Log::info("Start of Week: $startOfWeek, End of Week: $endOfWeek");
         // Fetch all users
         $allUsers = User::all();
         $rankings = [];
