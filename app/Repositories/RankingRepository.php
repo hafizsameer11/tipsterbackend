@@ -282,25 +282,25 @@ class RankingRepository
             //     ->whereBetween('created_at', [$startOfWeek, $endOfWeek])
             //     ->count();
             $weeklyTips = Tip::where('user_id', $user->id)
-            ->whereBetween('match_date', [$startOfWeek, $endOfWeek])
-            ->whereIn('status', ['approved', 'rejected']) // use if applicable
-            ->get();
+                ->whereBetween('match_date', [$startOfWeek, $endOfWeek])
+                ->whereIn('status', ['approved', 'rejected']) // use if applicable
+                ->get();
 
-        // Only won tips for points calculation
-        $wonTips = $weeklyTips->where('result', 'won');
+            // Only won tips for points calculation
+            $wonTips = $weeklyTips->where('result', 'won');
+            Log::info("User ID: {$user->id}, Total Predictions: {$weeklyTips->count()}, Total Wins: {$wonTips->count()}");
+            $totalTips = $weeklyTips->count();
+            $totalWins = $wonTips->count();
 
-        $totalTips = $weeklyTips->count();
-        $totalWins = $wonTips->count();
-
-        $winRate = $totalTips > 0 ? round(($totalWins / $totalTips) * 100, 2) : 0;
-        $totalPoints = $wonTips->sum(function ($tip) use ($winRate) {
-            return is_numeric($tip->ods) ? $tip->ods * ($winRate / 100) : 0;
-        });
+            $winRate = $totalTips > 0 ? round(($totalWins / $totalTips) * 100, 2) : 0;
+            $totalPoints = $wonTips->sum(function ($tip) use ($winRate) {
+                return is_numeric($tip->ods) ? $tip->ods * ($winRate / 100) : 0;
+            });
 
             if ($totalPoints > 0) {
                 $rankings[$user->id] = [
                     'points' => $totalPoints,
-                    'win_rate' => $winRate, // Store win rate properly
+                    'win_rate' => $winRate,
                 ];
             }
         }
