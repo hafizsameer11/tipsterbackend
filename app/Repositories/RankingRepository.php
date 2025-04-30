@@ -174,9 +174,8 @@ class RankingRepository
     {
         $now = Carbon::now();
 
-        // Calculate the start and end of the selected week
-        $startOfWeek = Carbon::now()->subWeeks($weeksAgo - 1)->startOfWeek()->format('d-m-Y');
-        $endOfWeek = Carbon::now()->subWeeks($weeksAgo - 1)->endOfWeek()->format('d-m-Y');
+        $startOfWeek = Carbon::now()->subWeeks($weeksAgo - 1)->startOfWeek();
+        $endOfWeek = Carbon::now()->subWeeks($weeksAgo - 1)->endOfWeek();
 
         $allUsers = User::all();
         $rankings = [];
@@ -184,7 +183,10 @@ class RankingRepository
         foreach ($allUsers as $user) {
             // Get tips within the selected week (using match_date)
             $tips = Tip::where('user_id', $user->id)
-                ->whereBetween('match_date', [$startOfWeek, $endOfWeek])
+            ->whereRaw("STR_TO_DATE(match_date, '%d-%m-%Y') BETWEEN ? AND ?", [
+                $startOfWeek->format('Y-m-d'),
+                $endOfWeek->format('Y-m-d')
+            ])
                 ->where('result', 'won')
                 ->get();
 
@@ -196,12 +198,18 @@ class RankingRepository
             // Filter tips and wins only for this week
             $totalTips = Tip::where('user_id', $user->id)
                 ->where('status', 'approved')
-                ->whereBetween('match_date', [$startOfWeek, $endOfWeek])
+                ->whereRaw("STR_TO_DATE(match_date, '%d-%m-%Y') BETWEEN ? AND ?", [
+                    $startOfWeek->format('Y-m-d'),
+                    $endOfWeek->format('Y-m-d')
+                ])
                 ->count();
 
             $totalWins = Tip::where('user_id', $user->id)
                 ->where('result', 'won')
-                ->whereBetween('match_date', [$startOfWeek, $endOfWeek])
+                ->whereRaw("STR_TO_DATE(match_date, '%d-%m-%Y') BETWEEN ? AND ?", [
+                    $startOfWeek->format('Y-m-d'),
+                    $endOfWeek->format('Y-m-d')
+                ])
                 ->count();
 
             $winRate = $totalTips > 0 ? round(($totalWins / $totalTips) * 100, 2) : 0;
