@@ -126,51 +126,143 @@ class TipRepository
         }
         return round((($current - $previous) / $previous) * 100, 2);
     }
-    public function getAllRunningTips($weeksAgo = 1)
+    // public function getAllRunningTips($weeksAgo = 1)
+    // {
+    //     $startOfWeek = Carbon::now()->subWeeks($weeksAgo - 1)->startOfWeek()->format('d-m-Y');
+    //     $endOfWeek = Carbon::now()->subWeeks($weeksAgo - 1)->endOfWeek()->format('d-m-Y');
+    //     $topUserIds = $this->getTop3UserIdsOfLastWeek(); // Call helper method
+    //     $tips = Tip::where('status', 'approved')
+    //         ->with(['user', 'bettingCompany'])
+    //         ->whereNotIn('user_id', $topUserIds) // Exclude top user IDs
+    //         ->orderBy('created_at', 'desc')
+    //         ->get();
+
+
+
+    //     $groupedTips = $tips->groupBy('user_id')->map(function ($userTips) use ($startOfWeek, $endOfWeek) {
+    //         $user = $userTips->first()->user;
+
+    //         $allTips = Tip::where(column: 'user_id', operator: $user->id)->where('status', 'approved')->orderBy('created_at', 'desc')->get();
+    //         $totalTips = Tip::where('user_id', $user->id)->where('status', 'approved')->whereBetween('match_date', [$startOfWeek, $endOfWeek])->count();
+    //         $wintips = Tip::where('user_id', $user->id)->where('status', 'approved')->where('result', 'won')->whereBetween('match_date', [$startOfWeek, $endOfWeek])->count();
+    //         $winRate = $totalTips > 0 ? round(($wintips / $totalTips) * 100, 0) : 0;
+    //         $lastFiveResults = $allTips
+    //             ->reject(fn($tip) => strtolower($tip->result) === 'running') // Skip where result is "running"
+    //             ->take(5)
+    //             ->pluck('result')
+    //             ->map(fn($result) => strtoupper(substr($result, 0, 1))) // Extract first letter and convert to uppercase
+    //             ->toArray();
+
+    //         $tipsWithUser = $userTips->map(function ($tip) use ($user, $winRate, $lastFiveResults) {
+    //             return array_merge($tip->toArray(), [
+    //                 'user' => [
+    //                     'id' => $user->id,
+    //                     'username' => $user->username,
+    //                     'profile_picture' => $user->profile_picture ?? null,
+    //                     'win_rate' => $winRate . '%',
+    //                     'last_five' => $lastFiveResults,
+    //                     'role' => $user->role
+    //                 ],
+    //             ]);
+    //         });
+
+    //         return $tipsWithUser;
+    //     });
+
+    //     return $groupedTips->values()->flatten(1); // Flatten to avoid nested arrays
+    // }
+    private function getUserWeeklyStats($userId, $startOfWeek, $endOfWeek)
     {
-        $startOfWeek = Carbon::now()->subWeeks($weeksAgo - 1)->startOfWeek()->format('d-m-Y');
-        $endOfWeek = Carbon::now()->subWeeks($weeksAgo - 1)->endOfWeek()->format('d-m-Y');
-        $topUserIds = $this->getTop3UserIdsOfLastWeek(); // Call helper method
-        $tips = Tip::where('status', 'approved')
-            ->with(['user', 'bettingCompany'])
-            ->whereNotIn('user_id', $topUserIds) // Exclude top user IDs
+        $weeklyTips = Tip::where('user_id', $userId)
+            ->where('status', 'approved')
+            ->whereBetween('match_date', [$startOfWeek, $endOfWeek])
+            ->get();
+
+        $totalTips = $weeklyTips->count();
+        $wonTips = $weeklyTips->where('result', 'won');
+        $totalWinningOdds = $wonTips->sum(function ($tip) {
+            return is_numeric($tip->ods) ? (float)$tip->ods : 0;
+        });
+
+        $points = $totalWinningOdds - $totalTips;
+
+        $successRate = $totalTips > 0
+            ? round((($totalWinningOdds - $totalTips) / $totalTips) * 100, 2)
+            : 0;
+
+        return [
+            'user_id' => $userId,
+            'points' => $points,
+            'success_rate' => $successRate,
+            'total_tips' => $totalTips,
+            'won_tips' => $wonTips->count(),
+            'total_winning_odds' => $totalWinningOdds,
+        ];
+    }
+        public function getAllRunningTips($weeksAgo = 1)
+{
+    $startOfWeek = Carbon::now()->subWeeks($weeksAgo - 1)->startOfWeek()->format('Y-m-d');
+    $endOfWeek = Carbon::now()->subWeeks($weeksAgo - 1)->endOfWeek()->format('Y-m-d');
+
+    $topUserIds = $this->getTop3UserIdsOfLastWeek(); // Exclude top users
+
+    $tips = Tip::where('status', 'approved')
+        ->with(['user', 'bettingCompany'])
+        ->whereNotIn('user_id', $topUserIds)
+        ->orderBy('created_at', 'desc')
+        ->get();
+
+    // 1️⃣ Group tips by user
+    $grouped = $tips->groupBy('user_id');
+
+    // 2️⃣ Calculate points and success rate for all users
+    $rankedUsers = $grouped->map(function ($tips, $userId) use ($startOfWeek, $endOfWeek) {
+        return $this->getUserWeeklyStats($userId, $startOfWeek, $endOfWeek);
+    });
+
+    // 3️⃣ Assign ranking based on points
+    $sortedByPoints = $rankedUsers->sortByDesc('points')->values();
+    $rankMap = $sortedByPoints->mapWithKeys(function ($item, $index) {
+        return [$item['user_id'] => $index + 1];
+    });
+
+    // 4️⃣ Merge rank/successRate back into tip data
+    $final = $grouped->map(function ($userTips) use ($rankMap, $startOfWeek, $endOfWeek) {
+        $user = $userTips->first()->user;
+        $stats = $this->getUserWeeklyStats($user->id, $startOfWeek, $endOfWeek);
+        $rank = $rankMap[$user->id] ?? null;
+
+        $allTips = Tip::where('user_id', $user->id)
+            ->where('status', 'approved')
             ->orderBy('created_at', 'desc')
             ->get();
 
+        $lastFiveResults = $allTips
+            ->reject(fn($tip) => strtolower($tip->result) === 'running')
+            ->take(5)
+            ->pluck('result')
+            ->map(fn($result) => strtoupper(substr($result, 0, 1)))
+            ->toArray();
 
-
-        $groupedTips = $tips->groupBy('user_id')->map(function ($userTips) use ($startOfWeek, $endOfWeek) {
-            $user = $userTips->first()->user;
-
-            $allTips = Tip::where(column: 'user_id', operator: $user->id)->where('status', 'approved')->orderBy('created_at', 'desc')->get();
-            $totalTips = Tip::where('user_id', $user->id)->where('status', 'approved')->whereBetween('match_date', [$startOfWeek, $endOfWeek])->count();
-            $wintips = Tip::where('user_id', $user->id)->where('status', 'approved')->where('result', 'won')->whereBetween('match_date', [$startOfWeek, $endOfWeek])->count();
-            $winRate = $totalTips > 0 ? round(($wintips / $totalTips) * 100, 0) : 0;
-            $lastFiveResults = $allTips
-                ->reject(fn($tip) => strtolower($tip->result) === 'running') // Skip where result is "running"
-                ->take(5)
-                ->pluck('result')
-                ->map(fn($result) => strtoupper(substr($result, 0, 1))) // Extract first letter and convert to uppercase
-                ->toArray();
-
-            $tipsWithUser = $userTips->map(function ($tip) use ($user, $winRate, $lastFiveResults) {
-                return array_merge($tip->toArray(), [
-                    'user' => [
-                        'id' => $user->id,
-                        'username' => $user->username,
-                        'profile_picture' => $user->profile_picture ?? null,
-                        'win_rate' => $winRate . '%',
-                        'last_five' => $lastFiveResults,
-                        'role' => $user->role
-                    ],
-                ]);
-            });
-
-            return $tipsWithUser;
+        return $userTips->map(function ($tip) use ($user, $stats, $rank, $lastFiveResults) {
+            return array_merge($tip->toArray(), [
+                'user' => [
+                    'id' => $user->id,
+                    'username' => $user->username,
+                    'profile_picture' => $user->profile_picture,
+                    'success_rate' => $stats['success_rate'] . '%',
+                    'points' => $stats['points'],
+                    'rank' => $rank,
+                    'last_five' => $lastFiveResults,
+                    'role' => $user->role,
+                ]
+            ]);
         });
+    });
 
-        return $groupedTips->values()->flatten(1); // Flatten to avoid nested arrays
-    }
+    return $final->values()->flatten(1); // Flatten grouped array
+}
+
     public function getTop3UserIdsOfLastWeek($weeksAgo = 2)
     {
         // Use Carbon week range without formatting
