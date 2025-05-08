@@ -71,4 +71,37 @@ class PaymentController extends Controller
             'mode' => 'production'
         ]);
     }
+    public function verifyTransaction(Request $request)
+{
+    $request->validate([
+        'reference' => 'required|string',
+    ]);
+
+    try {
+        $reference = $request->reference;
+        $data = $this->paystack->verifyTransaction($reference);
+
+        if ($data['status'] === 'success') {
+            // ✅ You can now log or store payment success
+            return response()->json([
+                'success' => true,
+                'message' => 'Payment verified successfully',
+                'data' => $data,
+            ]);
+        }
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Payment was not successful',
+            'data' => $data,
+        ], 400);
+    } catch (\Throwable $e) {
+        Log::error('Paystack Verification Error', ['error' => $e->getMessage()]);
+        return response()->json([
+            'success' => false,
+            'message' => 'Unable to verify payment',
+        ], 500);
+    }
+}
+
 }

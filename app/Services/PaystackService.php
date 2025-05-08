@@ -33,4 +33,15 @@ class PaystackService
 
         throw new \Exception('Failed to initialize Paystack payment: ' . $response->body());
     }
+    public function verifyTransaction(string $reference): array
+{
+    $response = Http::withToken($this->secretKey)
+        ->get("{$this->baseUrl}/transaction/verify/{$reference}");
+
+    if ($response->successful() && isset($response['data'])) {
+        return $response['data'];
+    }
+
+    throw new \Exception('Failed to verify Paystack payment: ' . $response->body());
+}
 }
