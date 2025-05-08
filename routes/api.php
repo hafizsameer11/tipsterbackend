@@ -211,3 +211,4 @@ Route::get('/app-version', function () {
     ]);
 });
 Route::get('/callback', [PaymentController::class, 'callback'])->name('paystack.callback');
+Route::post('initiate-payment', [PaymentController::class, 'initiatePayment']);

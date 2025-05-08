@@ -23,6 +23,7 @@ class PaystackService
         $response = Http::withToken($this->secretKey)->post("{$this->baseUrl}/transaction/initialize", [
             'email' => $email,
             'amount' => $amount * 100, // Paystack uses kobo
+            'currency' => 'NGN',
             'callback_url' => $callbackUrl,
         ]);
 
