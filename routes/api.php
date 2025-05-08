@@ -6,6 +6,7 @@ use App\Http\Controllers\ChatController;
 use App\Http\Controllers\DashboardData;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\PostShareController;
 use App\Http\Controllers\PrivacyPageController;
@@ -209,3 +210,4 @@ Route::get('/app-version', function () {
         ]
     ]);
 });
+Route::get('/callback', [PaymentController::class, 'callback'])->name('paystack.callback');
