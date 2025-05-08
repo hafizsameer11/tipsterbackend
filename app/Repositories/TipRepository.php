@@ -188,7 +188,7 @@ class TipRepository
 
         $successRate = $totalTips > 0
             ? round((($totalWinningOdds - $totalTips) / $totalTips) * 100, 2)
-            : 0;
+            : 1;
 
         return [
             'user_id' => $userId,
