@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Package;
 use App\Models\PaymentRefference;
+use App\Models\User;
 use App\Services\PaystackService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -89,6 +90,13 @@ class PaymentController extends Controller
             $data = $this->paystack->verifyTransaction($reference);
 
             if ($data['status'] === 'success') {
+                $paymentRefference = PaymentRefference::where('reference', $reference)->first();
+                $email = $paymentRefference->email;
+                $User=User::where('email', $email)->first();
+                $User->vip_status = 'active';
+                $User->save();
+                $paymentRefference->status = 'completed';
+                $paymentRefference->save();
                 // ✅ You can now log or store payment success
                 return response()->json([
                     'success' => true,
