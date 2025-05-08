@@ -172,42 +172,42 @@ class TipRepository
     //     return $groupedTips->values()->flatten(1); // Flatten to avoid nested arrays
     // }
     private function getUserWeeklyStats($userId, $startOfWeek, $endOfWeek)
-{
-    $weeklyTips = Tip::where('user_id', $userId)
-        ->where('status', 'approved')
-        ->whereBetween('created_at', [$startOfWeek, $endOfWeek]) // Use created_at
-        ->get();
+    {
+        $weeklyTips = Tip::where('user_id', $userId)
+            ->where('status', 'approved')
+            ->whereBetween('created_at', [$startOfWeek, $endOfWeek]) // Use created_at
+            ->get();
 
-    $totalTips = $weeklyTips->count();
-    $wonTips = $weeklyTips->where('result', 'won');
+        $totalTips = $weeklyTips->count();
+        $wonTips = $weeklyTips->where('result', 'won');
 
-    $totalWinningOdds = $wonTips->sum(function ($tip) {
-        return is_numeric($tip->ods) ? (float)$tip->ods : 0;
-    });
+        $totalWinningOdds = $wonTips->sum(function ($tip) {
+            return is_numeric($tip->ods) ? (float)$tip->ods : 0;
+        });
 
-    if ($totalTips === 0) {
+        if ($totalTips === 0) {
+            return [
+                'user_id' => $userId,
+                'points' => 0,
+                'success_rate' => 0,
+                'total_tips' => 0,
+                'won_tips' => 0,
+                'total_winning_odds' => 0,
+            ];
+        }
+
+        $points = $totalWinningOdds - $totalTips;
+        $successRate = round(($points / $totalTips) * 100, 2);
+
         return [
             'user_id' => $userId,
-            'points' => 0,
-            'success_rate' => 0,
-            'total_tips' => 0,
-            'won_tips' => 0,
-            'total_winning_odds' => 0,
+            'points' => $points,
+            'success_rate' => $successRate,
+            'total_tips' => $totalTips,
+            'won_tips' => $wonTips->count(),
+            'total_winning_odds' => $totalWinningOdds,
         ];
     }
-
-    $points = $totalWinningOdds - $totalTips;
-    $successRate = round(($points / $totalTips) * 100, 2);
-
-    return [
-        'user_id' => $userId,
-        'points' => $points,
-        'success_rate' => $successRate,
-        'total_tips' => $totalTips,
-        'won_tips' => $wonTips->count(),
-        'total_winning_odds' => $totalWinningOdds,
-    ];
-}
 
     public function getAllRunningTips($weeksAgo = 1)
     {
@@ -268,9 +268,9 @@ class TipRepository
                     ]
                 ]);
             });
-        })->flatten(1) // 🔁 Flatten tip array here
-        ->sortByDesc(fn($tip) => $tip['user']['points']) // ✅ Sort by points
-        ->values(); // ✅ Re-index;
+        })->flatten(1)
+            ->sortByDesc(fn($tip) => $tip['user']['points'])
+            ->values();
 
         return $final; // Flatten grouped array
     }
