@@ -217,8 +217,8 @@ class RankingRepository
             // Log::info("User ID: {$user->id}, Total Predictions: {$totalTips}, Total Wins: {$totalWins}, Win Rate: {$winRate}");
 
             // Calculate points using (Odds * Win Rate) / 100
-            $totalPoints = $tips->sum(function ($tip) use ($winRate) {
-                return $tip->ods * ($winRate / 100);
+            $totalPoints = $tips->sum(function ($tip) use ($winRate, $winOds,$totalTips) {
+                return $winOds -$totalTips;
             });
 
             if ($totalPoints > 0) {
