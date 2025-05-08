@@ -250,7 +250,7 @@ class TipRepository
                     'id' => $user->id,
                     'username' => $user->username,
                     'profile_picture' => $user->profile_picture,
-                    'success_rate' => $stats['success_rate'] . '%',
+                    'win_rate' => $stats['success_rate'] . '%',
                     'points' => $stats['points'],
                     'rank' => $rank,
                     'last_five' => $lastFiveResults,
