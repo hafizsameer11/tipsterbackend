@@ -268,7 +268,9 @@ class TipRepository
                     ]
                 ]);
             });
-        });
+        })->flatten(1) // 🔁 Flatten tip array here
+        ->sortByDesc(fn($tip) => $tip['user']['points']) // ✅ Sort by points
+        ->values(); // ✅ Re-index;
 
         return $final->values()->flatten(1); // Flatten grouped array
     }
