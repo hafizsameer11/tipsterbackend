@@ -183,10 +183,10 @@ class RankingRepository
         foreach ($allUsers as $user) {
             // Get tips within the selected week (using match_date)
             $tips = Tip::where('user_id', $user->id)
-            ->whereRaw("STR_TO_DATE(match_date, '%d-%m-%Y') BETWEEN ? AND ?", [
-                $startOfWeek->format('Y-m-d'),
-                $endOfWeek->format('Y-m-d')
-            ])
+                ->whereRaw("STR_TO_DATE(match_date, '%d-%m-%Y') BETWEEN ? AND ?", [
+                    $startOfWeek->format('Y-m-d'),
+                    $endOfWeek->format('Y-m-d')
+                ])
                 ->where('result', 'won')
                 ->get();
 
@@ -213,7 +213,7 @@ class RankingRepository
                 ->count();
 
             $winRate = $totalTips > 0 ? round(($totalWins / $totalTips) * 100, 2) : 0;
-
+            $winOds = $tips->where('result', 'won')->sum('ods');
             // Log::info("User ID: {$user->id}, Total Predictions: {$totalTips}, Total Wins: {$totalWins}, Win Rate: {$winRate}");
 
             // Calculate points using (Odds * Win Rate) / 100
@@ -224,7 +224,10 @@ class RankingRepository
             if ($totalPoints > 0) {
                 $rankings[$user->id] = [
                     'points' => $totalPoints,
+                    'ods' => $winOds,
                     'win_rate' => $winRate, // Store win rate properly
+                    'total_tips' => $totalTips,
+                    'total_wins' => $totalWins,
                 ];
             }
         }
@@ -249,6 +252,9 @@ class RankingRepository
                 'points' => round($data['points'], 2),
                 'win_rate' => round($data['win_rate'], 2) . '%', // Now this is correctly assigned
                 'start_of_week' => $startOfWeek,
+                'total_tips' => $data['total_tips'],
+                'total_wins' => $data['total_wins'],
+                'win_odds' => $data['ods'],
                 'end_of_week' => $endOfWeek,
                 'win_amount' => $winAmount ? number_format($winAmount->amount, 0, '.', ',') : 0,
             ];
@@ -290,10 +296,10 @@ class RankingRepository
             //     ->whereBetween('created_at', [$startOfWeek, $endOfWeek])
             //     ->count();
             $weeklyTips = Tip::where('user_id', $user->id)
-            ->whereRaw("STR_TO_DATE(match_date, '%d-%m-%Y') BETWEEN ? AND ?", [
-                $startOfWeek->format('Y-m-d'),
-                $endOfWeek->format('Y-m-d')
-            ])
+                ->whereRaw("STR_TO_DATE(match_date, '%d-%m-%Y') BETWEEN ? AND ?", [
+                    $startOfWeek->format('Y-m-d'),
+                    $endOfWeek->format('Y-m-d')
+                ])
                 ->whereIn('status', ['approved', 'rejected']) // use if applicable
                 ->get();
 
