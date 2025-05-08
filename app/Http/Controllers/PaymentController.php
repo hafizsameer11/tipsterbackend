@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Package;
 use App\Services\PaystackService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -22,14 +23,21 @@ class PaymentController extends Controller
     {
         $request->validate([
             'email' => 'required|email',
-            'amount' => 'required|numeric|min:1',
+            'selected_package_id' => 'required',
         ]);
 
         try {
+            $package=Package::find($request->selected_package_id);
+            if (!$package) {
+                return response()->json([
+                    'error' => 'Package not found'
+                ], 404);
+            }
+            $amount = $package->amount; // Assuming price is in Naira
             $callbackUrl = route('paystack.callback'); // Should be a valid web route
             $paymentData = $this->paystack->initializeTransaction(
                 $request->email,
-                $request->amount,
+                $amount,
                 $callbackUrl
             );
             Log::info('Paystack payment initialized', $paymentData);
