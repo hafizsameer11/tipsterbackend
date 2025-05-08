@@ -272,7 +272,7 @@ class TipRepository
         ->sortByDesc(fn($tip) => $tip['user']['points']) // ✅ Sort by points
         ->values(); // ✅ Re-index;
 
-        return $final->values()->flatten(1); // Flatten grouped array
+        return $final->values(); // Flatten grouped array
     }
 
     public function getTop3UserIdsOfLastWeek($weeksAgo = 2)
