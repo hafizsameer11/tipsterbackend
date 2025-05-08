@@ -57,4 +57,10 @@ class PaymentController extends Controller
         // You can use the reference passed in the request to verify the payment
         // Example: $this->paystack->verifyTransaction($request->reference);
     }
+    public function appMode()
+    {
+        return response()->json([
+            'mode' => 'production'
+        ]);
+    }
 }
