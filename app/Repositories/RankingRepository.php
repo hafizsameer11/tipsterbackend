@@ -174,58 +174,38 @@ class RankingRepository
     {
         $now = Carbon::now();
 
-        $startOfWeek = Carbon::now()->subWeeks($weeksAgo - 1)->startOfWeek();
-        $endOfWeek = Carbon::now()->subWeeks($weeksAgo - 1)->endOfWeek();
+        $startOfWeek = Carbon::now()->subWeeks($weeksAgo - 1)->startOfWeek()->toDateTimeString();
+        $endOfWeek = Carbon::now()->subWeeks($weeksAgo - 1)->endOfWeek()->toDateTimeString();
 
         $allUsers = User::all();
         $rankings = [];
 
         foreach ($allUsers as $user) {
-            // Get tips within the selected week (using match_date)
             $tips = Tip::where('user_id', $user->id)
-                ->whereRaw("STR_TO_DATE(match_date, '%d-%m-%Y') BETWEEN ? AND ?", [
-                    $startOfWeek->format('Y-m-d'),
-                    $endOfWeek->format('Y-m-d')
-                ])
+                ->whereBetween('created_at', [$startOfWeek, $endOfWeek])
+                ->where('status', 'approved')
                 ->where('result', 'won')
                 ->get();
 
-            // Calculate win rate across all-time predictions
             $today = Carbon::today();
-
-            // Calculate Monday (start of the week)
-
-            // Filter tips and wins only for this week
             $totalTips = Tip::where('user_id', $user->id)
                 ->where('status', 'approved')
-                ->whereRaw("STR_TO_DATE(match_date, '%d-%m-%Y') BETWEEN ? AND ?", [
-                    $startOfWeek->format('Y-m-d'),
-                    $endOfWeek->format('Y-m-d')
-                ])
+                ->whereBetween('created_at', [$startOfWeek, $endOfWeek])
                 ->count();
-
             $totalWins = Tip::where('user_id', $user->id)
                 ->where('result', 'won')
-                ->whereRaw("STR_TO_DATE(match_date, '%d-%m-%Y') BETWEEN ? AND ?", [
-                    $startOfWeek->format('Y-m-d'),
-                    $endOfWeek->format('Y-m-d')
-                ])
+                ->whereBetween('created_at', [$startOfWeek, $endOfWeek])
                 ->count();
 
             $winRate = $totalTips > 0 ? round(($totalWins / $totalTips) * 100, 2) : 0;
             $winOds = $tips->where('result', 'won')->sum('ods');
-            // Log::info("User ID: {$user->id}, Total Predictions: {$totalTips}, Total Wins: {$totalWins}, Win Rate: {$winRate}");
-
-            // Calculate points using (Odds * Win Rate) / 100
-            $totalPoints = $tips->sum(function ($tip) use ($winRate, $winOds,$totalTips) {
-                return $winOds -$totalTips;
-            });
+            $totalPoints = $winOds - $totalTips;
 
             if ($totalPoints > 0) {
                 $rankings[$user->id] = [
                     'points' => $totalPoints,
                     'ods' => $winOds,
-                    'win_rate' => $winRate, // Store win rate properly
+                    'win_rate' => $winRate,
                     'total_tips' => $totalTips,
                     'total_wins' => $totalWins,
                 ];
