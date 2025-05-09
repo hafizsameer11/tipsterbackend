@@ -197,7 +197,7 @@ class TipRepository
         }
 
         $points = $totalWinningOdds - $totalTips;
-        $successRate = round(($points / $totalTips) * 100, 2);
+        $successRate = round(($totalWinningOdds / $totalTips) * 100, 2);
 
         return [
             'user_id' => $userId,
@@ -222,10 +222,8 @@ class TipRepository
             ->orderBy('created_at', 'desc')
             ->get();
 
-        // 1️⃣ Group tips by user
         $grouped = $tips->groupBy('user_id');
 
-        // 2️⃣ Calculate points and success rate for all users
         $rankedUsers = $grouped->map(function ($tips, $userId) use ($startOfWeek, $endOfWeek) {
             return $this->getUserWeeklyStats($userId, $startOfWeek, $endOfWeek);
         });
