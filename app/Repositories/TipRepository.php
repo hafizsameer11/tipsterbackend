@@ -265,6 +265,7 @@ class TipRepository
                         'won_tips' => $stats['won_tips'],
                         'rank' => $rank,
                         'last_five' => $lastFiveResults,
+                        'total_winning_odds' => $stats['total_winning_odds'],
                         'role' => $user->role,
                     ]
                 ]);
