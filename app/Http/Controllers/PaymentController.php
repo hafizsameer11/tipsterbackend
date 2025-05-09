@@ -4,8 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\Package;
 use App\Models\PaymentRefference;
+use App\Models\Subscription;
+use App\Models\Transaction;
 use App\Models\User;
 use App\Services\PaystackService;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -90,18 +93,80 @@ class PaymentController extends Controller
             $data = $this->paystack->verifyTransaction($reference);
 
             if ($data['status'] === 'success') {
+                // Get payment record
                 $paymentRefference = PaymentRefference::where('reference', $reference)->first();
+                if (!$paymentRefference) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Payment reference not found.',
+                    ], 404);
+                }
+
                 $email = $paymentRefference->email;
-                $User=User::where('email', $email)->first();
-                $User->vip_status = 'active';
-                $User->save();
+                $user = User::where('email', $email)->first();
+
+                if (!$user) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'User not found.',
+                    ], 404);
+                }
+
+                $user->vip_status = 'active';
+                $user->save();
+
                 $paymentRefference->status = 'completed';
                 $paymentRefference->save();
-                // ✅ You can now log or store payment success
+
+                // 🧠 Retrieve selected package
+                $package = Package::where('amount', $paymentRefference->amount)->first();
+                if (!$package) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Matching package not found.',
+                    ], 404);
+                }
+
+                // ⏳ Calculate expiration
+                $purchaseDate = now();
+                $expiresAt = match ($package->duration) {
+                    "30" => Carbon::parse($purchaseDate)->addMonth(),
+                    "7"  => Carbon::parse($purchaseDate)->addWeek(),
+                    "1"  => Carbon::parse($purchaseDate)->addDay(),
+                    default => now(),
+                };
+
+                // ❌ Expire existing subscriptions
+                Subscription::where('user_id', $user->id)->update(['status' => 'expired']);
+
+                // ✅ Create subscription
+                $subscription = Subscription::create([
+                    'user_id' => $user->id,
+                    'package_id' => $package->id,
+                    'purchase_token' => $reference,
+                    'status' => 'active',
+                    'renewal_date' => $expiresAt,
+                    'amount_usd' => $package->amount,
+                ]);
+
+                // ✅ Create transaction
+                $transaction = Transaction::create([
+                    'user_id' => $user->id,
+                    'subscription_id' => $subscription->id,
+                    'google_product_id' => null, // Not applicable for Paystack
+                    'order_id' => $reference,
+                    'purchase_token' => $reference,
+                    'amount' => $package->amount,
+                    'transaction_date' => now(),
+                    'status' => 'completed',
+                    'response' => json_encode($data),
+                ]);
+
                 return response()->json([
                     'success' => true,
-                    'message' => 'Payment verified successfully',
-                    'data' => $data,
+                    'message' => 'Payment verified and subscription stored successfully',
+                    'subscription' => $subscription,
+                    'transaction' => $transaction,
                 ]);
             }
 
@@ -110,6 +175,7 @@ class PaymentController extends Controller
                 'message' => 'Payment was not successful',
                 'data' => $data,
             ], 400);
+
         } catch (\Throwable $e) {
             Log::error('Paystack Verification Error', ['error' => $e->getMessage()]);
             return response()->json([
@@ -118,4 +184,5 @@ class PaymentController extends Controller
             ], 500);
         }
     }
+
 }
