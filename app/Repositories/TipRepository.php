@@ -261,6 +261,8 @@ class TipRepository
                         'profile_picture' => $user->profile_picture,
                         'win_rate' => $stats['success_rate'] . '%',
                         'points' => $stats['points'],
+                        'total_tips' => $stats['total_tips'],
+                        'won_tips' => $stats['won_tips'],
                         'rank' => $rank,
                         'last_five' => $lastFiveResults,
                         'role' => $user->role,
