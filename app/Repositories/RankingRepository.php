@@ -161,74 +161,81 @@ class RankingRepository
 
 
     public function getTop30Rankings($weeksAgo = 1)
-    {
-        $now = Carbon::now();
-        $startOfWeek = Carbon::now()->subWeeks($weeksAgo - 1)->startOfWeek()->toDateTimeString();
-        $endOfWeek = Carbon::now()->subWeeks($weeksAgo - 1)->endOfWeek()->toDateTimeString();
-        $allUsers = User::all();
-        $rankings = [];
-        foreach ($allUsers as $user) {
-            $tips = Tip::where('user_id', $user->id)
-                ->whereBetween('created_at', [$startOfWeek, $endOfWeek])
-                ->where('status', 'approved')
-                ->where('result', 'won')
-                ->get();
+{
+    $startOfWeek = Carbon::now()->subWeeks($weeksAgo - 1)->startOfWeek()->toDateTimeString();
+    $endOfWeek = Carbon::now()->subWeeks($weeksAgo - 1)->endOfWeek()->toDateTimeString();
 
-            $today = Carbon::today();
-            $totalTips = Tip::where('user_id', $user->id)
-                ->where('status', 'approved')
-                ->whereBetween('created_at', [$startOfWeek, $endOfWeek])
-                ->count();
-            $totalWins = Tip::where('user_id', $user->id)
-                ->where('result', 'won')
-                ->whereBetween('created_at', [$startOfWeek, $endOfWeek])
-                ->count();
+    $allUsers = User::all();
+    $rankings = [];
 
-            $winRate = $totalTips > 0 ? round(($totalWins / $totalTips) * 100, 2) : 0;
-            $winOds = $tips->where('result', 'won')->sum('ods');
-            $totalPoints = $winOds - $totalTips;
+    foreach ($allUsers as $user) {
+        // Fetch all approved tips
+        $tips = Tip::where('user_id', $user->id)
+            ->where('status', 'approved')
+            ->whereBetween('created_at', [$startOfWeek, $endOfWeek])
+            ->get();
 
-            if ($totalPoints > 0) {
-                $rankings[$user->id] = [
-                    'points' => $totalPoints,
-                    'ods' => $winOds,
-                    'win_rate' => $winRate,
-                    'total_tips' => $totalTips,
-                    'total_wins' => $totalWins,
-                ];
-            }
+        $wonTips = $tips->where('result', 'won');
+
+        $totalTips = $tips->count();
+        $totalWins = $wonTips->count();
+
+        // Skip users with 0 tips completely (optional, you can remove this line if needed)
+        if ($totalTips === 0) {
+            continue;
         }
 
-        // Sort rankings in descending order
-        arsort($rankings);
-        $rankedUsers = [];
-        $rank = 1;
+        $winRate = round(($totalWins / $totalTips) * 100, 2);
 
-        $winnerAmounts = WinnersAmount::all()->keyBy('rank');
-        foreach ($rankings as $userId => $data) {
-            $user = User::find($userId);
-            $winAmount = $winnerAmounts[$rank] ?? null;
-            if ($weeksAgo == 1) {
-                $winAmount = 0;
-            }
-            $rankedUsers[] = [
-                'user_id' => $userId,
-                'username' => $user->username,
-                'profile_picture' => $user->profile_picture ?? null,
-                'rank' => $rank++,
-                'points' => round($data['points'], 2),
-                'win_rate' => round($data['win_rate'], 2) . '%', // Now this is correctly assigned
-                'start_of_week' => $startOfWeek,
-                'total_tips' => $data['total_tips'],
-                'total_wins' => $data['total_wins'],
-                'win_odds' => $data['ods'],
-                'end_of_week' => $endOfWeek,
-                'win_amount' => $winAmount ? number_format($winAmount->amount, 0, '.', ',') : 0,
-            ];
-        }
+        // Sum odds properly (handle commas if stored as strings)
+        $winOds = $wonTips->sum(function ($tip) {
+            $ods = str_replace(',', '.', $tip->ods);
+            return is_numeric($ods) ? (float)$ods : 0;
+        });
 
-        return collect(array_slice($rankedUsers, 0, 30));
+        $totalPoints = $winOds - $totalTips;
+
+        $rankings[$user->id] = [
+            'points' => $totalPoints,
+            'ods' => $winOds,
+            'win_rate' => $winRate,
+            'total_tips' => $totalTips,
+            'total_wins' => $totalWins,
+        ];
     }
+
+    // Sort by points DESC
+    uasort($rankings, fn($a, $b) => $b['points'] <=> $a['points']);
+
+    $winnerAmounts = WinnersAmount::all()->keyBy('rank');
+    $rankedUsers = [];
+    $rank = 1;
+
+    foreach ($rankings as $userId => $data) {
+        $user = User::find($userId);
+        if (!$user) continue;
+
+        $winAmount = $weeksAgo == 1 ? 0 : ($winnerAmounts[$rank]->amount ?? 0);
+
+        $rankedUsers[] = [
+            'user_id' => $userId,
+            'username' => $user->username,
+            'profile_picture' => $user->profile_picture ?? null,
+            'rank' => $rank++,
+            'points' => round($data['points'], 2),
+            'win_rate' => round($data['win_rate'], 2) . '%',
+            'start_of_week' => $startOfWeek,
+            'total_tips' => $data['total_tips'],
+            'total_wins' => $data['total_wins'],
+            'win_odds' => round($data['ods'], 2),
+            'end_of_week' => $endOfWeek,
+            'win_amount' => number_format($winAmount, 0, '.', ','),
+        ];
+    }
+
+    return collect(array_slice($rankedUsers, 0, 30));
+}
+
 
     public function getTop10Rankings($weeksAgo = 1)
     {
