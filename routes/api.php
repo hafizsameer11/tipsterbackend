@@ -200,8 +200,8 @@ Route::get('/test-notification', [AuthController::class, 'testFcmNotification'])
 
 Route::get('/app-version', function () {
     return response()->json([
-        'old_version' => '1.2.0',
-        'new_version' => '1.2.0',
+        'old_version' => '1.3.0',
+        'new_version' => '1.3.0',
         'force_update' => true,
         'message' => 'You must update the app to continue using it.',
         'store_link' => [

@@ -78,8 +78,9 @@ class PaymentController extends Controller
     }
     public function appMode()
     {
+        // production mode
         return response()->json([
-            'mode' => 'production'
+            'mode' => 'google'
         ]);
     }
     public function verifyTransaction(Request $request)
