@@ -88,6 +88,7 @@ class RankingRepository
             $wonTips = $tips->where('result', 'won');
             $totalTips = $tips->count();
             $totalWins = $wonTips->count();
+
             $totalOds = $wonTips->sum(function ($tip) {
                 $ods = str_replace(',', '.', $tip->ods);
                 return is_numeric($ods) ? (float)$ods : 0;
@@ -99,29 +100,32 @@ class RankingRepository
             if ($totalPoints > 0) {
                 $rankings[$user->id] = [
                     'points' => $totalPoints,
+                    'ods' => $totalOds,
                     'win_rate' => $winRate,
                     'total_tips' => $totalTips,
                     'total_wins' => $totalWins,
-                    'ods' => $totalOds,
                 ];
             }
         }
 
         arsort($rankings);
 
+        $user = User::find($userId);
+
         if (!array_key_exists($userId, $rankings)) {
-            $user = User::find($userId);
             return [
                 'user_id' => $userId,
-                'rank' => 0,
-                'points' => 0,
-                'week_start' => $startOfWeek,
-                'week_end' => $endOfWeek,
-                'status' => 'live',
                 'username' => $user ? $user->username : 'Unknown',
                 'profile_picture' => $user ? $user->profile_picture : null,
+                'rank' => 0,
+                'points' => 0,
                 'win_rate' => '0%',
-                'win_amount' => 0
+                'start_of_week' => $startOfWeek,
+                'total_tips' => 0,
+                'total_wins' => 0,
+                'win_odds' => 0,
+                'end_of_week' => $endOfWeek,
+                'win_amount' => 0,
             ];
         }
 
@@ -131,22 +135,22 @@ class RankingRepository
         foreach ($rankings as $id => $data) {
             $winAmount = $winnerAmounts[$rank] ?? null;
             if ($weeksAgo == 1) {
-                $winAmount = null;
+                $winAmount = 0;
             }
             if ($id == $userId) {
-                $user = User::find($userId);
-
                 return [
                     'user_id' => $userId,
+                    'username' => $user->username,
+                    'profile_picture' => $user->profile_picture ?? null,
                     'rank' => $rank,
                     'points' => round($data['points'], 2),
-                    'week_start' => $startOfWeek,
-                    'week_end' => $endOfWeek,
-                    'status' => 'live',
-                    'username' => $user->username,
-                    'profile_picture' => $user->profile_picture,
                     'win_rate' => round($data['win_rate'], 2) . '%',
-                    'win_amount' => $winAmount ? number_format($winAmount->amount, 0, '.', ',') : null
+                    'start_of_week' => $startOfWeek,
+                    'total_tips' => $data['total_tips'],
+                    'total_wins' => $data['total_wins'],
+                    'win_odds' => round($data['ods'], 2),
+                    'end_of_week' => $endOfWeek,
+                    'win_amount' => $winAmount ? number_format($winAmount->amount, 0, '.', ',') : 0,
                 ];
             }
             $rank++;
