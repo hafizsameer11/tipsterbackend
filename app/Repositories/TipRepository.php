@@ -173,6 +173,7 @@ class TipRepository
     // }
     private function getUserWeeklyStats($userId, $startOfWeek, $endOfWeek)
     {
+
         $weeklyTips = Tip::where('user_id', $userId)
             ->where('status', 'approved')
             ->whereBetween('created_at', [$startOfWeek, $endOfWeek]) // Use created_at
@@ -214,6 +215,7 @@ class TipRepository
     {
         $startOfWeek = Carbon::now()->subWeeks($weeksAgo - 1)->startOfWeek()->toDateTimeString();
         $endOfWeek = Carbon::now()->subWeeks($weeksAgo - 1)->endOfWeek()->toDateTimeString();
+        Log::info("start of week $startOfWeek and $endOfWeek");
 
         $topUserIds = $this->getTop3UserIdsOfLastWeek(); // Exclude top users
 
