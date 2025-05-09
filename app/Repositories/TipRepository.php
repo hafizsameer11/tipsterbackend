@@ -197,6 +197,7 @@ class TipRepository
         }
 
         $points = $totalWinningOdds - $totalTips;
+        Log::info("Total tips: $totalTips and won tips: {$wonTips->count()}  for user $userId");
         $successRate = round(($totalWinningOdds / $totalTips) * 100, 2);
 
         return [
