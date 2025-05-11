@@ -80,7 +80,7 @@ class PaymentController extends Controller
     {
         // production mode
         return response()->json([
-            'mode' => 'google'
+            'mode' => 'production'
         ]);
     }
     public function verifyTransaction(Request $request)
