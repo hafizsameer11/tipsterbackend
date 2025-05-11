@@ -176,7 +176,6 @@ class PaymentController extends Controller
                 'message' => 'Payment was not successful',
                 'data' => $data,
             ], 400);
-
         } catch (\Throwable $e) {
             Log::error('Paystack Verification Error', ['error' => $e->getMessage()]);
             return response()->json([
@@ -185,5 +184,4 @@ class PaymentController extends Controller
             ], 500);
         }
     }
-
 }
