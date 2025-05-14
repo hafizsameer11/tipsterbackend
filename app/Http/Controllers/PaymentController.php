@@ -94,7 +94,6 @@ class PaymentController extends Controller
             $data = $this->paystack->verifyTransaction($reference);
 
             if ($data['status'] === 'success') {
-                // Get payment record
                 $paymentRefference = PaymentRefference::where('reference', $reference)->first();
                 if (!$paymentRefference) {
                     return response()->json([

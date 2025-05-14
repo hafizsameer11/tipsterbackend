@@ -4,8 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Helpers\ResponseHelper;
 use App\Models\Notification;
+use App\Models\Subscription;
+use App\Models\User;
 use App\Models\UserActivity;
 use App\Services\NotificationService;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -35,12 +38,37 @@ class NotificationController extends Controller
     public function getUnreadNotificationCount()
     {
         $user = Auth::user();
+        $user = User::where('id', $user->id)->first();
         $userId = $user->id;
-        $vipStatu = $user->vip_status;
-        $count = Notification::where('user_id', $userId)->where('is_read', false)->count();
 
-        return ResponseHelper::success(['count' => $count, 'vipStatus' => $vipStatu], 'Unread notification count retrieved successfully');
+        // 🔍 Check for latest active subscription
+        $subscription = Subscription::where('user_id', $userId)
+            ->where('status', 'active')
+            ->latest('renewal_date')
+            ->first();
+
+        if ($subscription && Carbon::parse($subscription->renewal_date)->isPast()) {
+            // ⌛ Subscription has expired
+            $subscription->status = 'expired';
+            $subscription->save();
+
+            $user->vip_status = 'inactive';
+            $user->save();
+        }
+
+        $count = Notification::where('user_id', $userId)
+            ->where('is_read', false)
+            ->count();
+
+        return ResponseHelper::success(
+            [
+                'count' => $count,
+                'vipStatus' => $user->vip_status
+            ],
+            'Unread notification count retrieved successfully'
+        );
     }
+
     // Mark a notification as read
     public function markAsRead($notificationId)
     {
